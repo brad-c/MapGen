@@ -21,6 +21,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.vecmath.Matrix4d;
@@ -61,11 +62,14 @@ public class TerrainGui {
   private DoublePanel roughPan;
   private DoublePanel scalePan;
   private DoublePanel heightScalePan;
-  private DoublePanel waterPan;
   private DoublePanel erodePan;
   
   private JSlider sunSlider;
   private JSlider sunSlider2;
+  
+  private JSlider waterLevelSlider;
+  private JButton updateB;
+  private JButton seedB;
 
   public TerrainGui() {
 
@@ -73,21 +77,70 @@ public class TerrainGui {
 
   private void createGui() {
 
+    initComponenets();
+
+    addListeners();
+
+    JPanel genParamsPan = new JPanel(new FlowLayout());
+    genParamsPan.setBorder(new TitledBorder("Terrain Params"));
+    genParamsPan.add(samplePan);
+    genParamsPan.add(octPan);
+    genParamsPan.add(roughPan);
+    genParamsPan.add(scalePan);
+    genParamsPan.add(heightScalePan);
+    genParamsPan.add(erodePan);
+    genParamsPan.add(seedB);
+    genParamsPan.add(updateB);
+    
+    
+    JPanel sunPan = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    sunPan.setBorder(new TitledBorder("Visuals"));
+    sunPan.add(new JLabel("Sun"));
+    sunPan.add(sunSlider);
+    sunPan.add(sunSlider2);
+    sunPan.add(new JLabel("Water"));
+    sunPan.add(waterLevelSlider);
+    
+    
+    
+    JPanel southPan = new JPanel(new GridLayout(2, 1));
+    southPan.add(genParamsPan);
+    southPan.add(sunPan);
+    
+    JPanel mainPan = new JPanel(new BorderLayout());
+    mainPan.add(canvas, BorderLayout.CENTER);
+    mainPan.add(southPan, BorderLayout.SOUTH);
+
+    
+    updateSunPos();
+    updateWaterLevel();
+    updateTerrain();
+    
+    
+    frame.getContentPane().add(mainPan);
+    frame.pack();
+  }
+
+  private void initComponenets() {
     samplePan = new IntPanel("Samps", 4, 256);
     octPan = new IntPanel("Oct", 3, 7);
-    roughPan = new DoublePanel("Rgh", 4, 0.5);
+    roughPan = new DoublePanel("Rgh", 4, 0.6);
     scalePan = new DoublePanel("Scale", 5, 0.005);
-    waterPan = new DoublePanel("Water", 3, 0.5);
     heightScalePan = new DoublePanel("Elv Scale", 3, app.getHeightScale());
-    JButton updateB = new JButton("Update");
-    JButton seedB = new JButton("Seed");
+    updateB = new JButton("Update");
+    seedB = new JButton("Seed");
     
     sunSlider = new JSlider(0,100,30);
     sunSlider2 = new JSlider(0,100,30);
+    waterLevelSlider = new JSlider(0,100,50);
     
-    erodePan = new DoublePanel("Erode", 3, 0.5);
-    JButton erodeB = new JButton("Erode");
+    erodePan = new DoublePanel("Erode", 3, 0);
+    
+    frame = new JFrame("Test");
+    frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+  }
 
+  private void addListeners() {
     updateB.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent arg0) {
@@ -95,8 +148,7 @@ public class TerrainGui {
         app.enqueue(new Runnable() {
           @Override
           public void run() {
-            app.setHeightScale((float)heightScalePan.getVal());
-            app.updateTerrain(samplePan.getVal(), octPan.getVal(), roughPan.getVal(), scalePan.getVal());
+            updateTerrain();
           }
         });
       }
@@ -111,20 +163,6 @@ public class TerrainGui {
           public void run() {
             Random r = new Random();
             app.updateTerrain(r.nextLong());
-          }
-        });
-
-      }
-    });
-    
-    erodeB.addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent arg0) {
-
-        app.enqueue(new Runnable() {
-          @Override
-          public void run() {
-            app.erodeTerrain((float)erodePan.getVal());
           }
         });
 
@@ -147,45 +185,30 @@ public class TerrainGui {
     
     sunSlider.addChangeListener(sunListener);
     sunSlider2.addChangeListener(sunListener);
-
-    JPanel genParamsPan = new JPanel(new FlowLayout());
-    genParamsPan.add(samplePan);
-    genParamsPan.add(octPan);
-    genParamsPan.add(roughPan);
-    genParamsPan.add(scalePan);
-    genParamsPan.add(waterPan);
-    genParamsPan.add(heightScalePan);
     
-    genParamsPan.add(seedB);
-    genParamsPan.add(updateB);
-    
-    
-    JPanel sunPan = new JPanel(new FlowLayout(FlowLayout.LEFT));
-    sunPan.add(new JLabel("Sun"));
-    sunPan.add(sunSlider);
-    sunPan.add(sunSlider2);
-    
-    sunPan.add(erodePan);
-    sunPan.add(erodeB);
-    
-    JPanel southPan = new JPanel(new GridLayout(2, 1));
-    southPan.add(genParamsPan);
-    southPan.add(sunPan);
-    
-    JPanel mainPan = new JPanel(new BorderLayout());
-    mainPan.add(canvas, BorderLayout.CENTER);
-    mainPan.add(southPan, BorderLayout.SOUTH);
-
-    frame = new JFrame("Test");
-    frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     frame.addWindowListener(new WindowAdapter() {
       @Override
       public void windowClosed(WindowEvent e) {
         app.stop();
       }
     });
-    frame.getContentPane().add(mainPan);
-    frame.pack();
+    
+    waterLevelSlider.addChangeListener(new ChangeListener() {
+      
+      @Override
+      public void stateChanged(ChangeEvent e) {
+        app.enqueue(new Runnable() {
+          @Override
+          public void run() {
+            updateWaterLevel();
+          }
+          
+        });
+        
+      }
+    });
+    
+    
   }
 
   public void createApp() {
@@ -238,11 +261,22 @@ public class TerrainGui {
     m.setIdentity();
     m.rotY(rotAngle);
 
-    Vector3f vec = new Vector3f(x, -y, z);
+    Vector3f vec = new Vector3f(x, y, z);
     m.transform(vec);
     vec.normalize();
     
     app.setSunDirection(new com.jme3.math.Vector3f(vec.x, vec.y, vec.z));
+  }
+  
+  private void updateWaterLevel() {
+    int val = waterLevelSlider.getValue();
+    float ratio = val / 100f;
+    app.setWaterLevel(ratio);
+  }
+  
+  private void updateTerrain() {
+    app.setHeightScale((float)heightScalePan.getVal());
+    app.updateTerrain(samplePan.getVal(), octPan.getVal(), roughPan.getVal(), scalePan.getVal(), (float)erodePan.getVal());
   }
 
   private class NumPanel extends JPanel {

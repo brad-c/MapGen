@@ -18,11 +18,11 @@ public class TerrainApp extends SimpleApplication {
 
   private Material terrainMat;
   private TerrainQuad terrain;
-  private TerrainGen terrainGen;
+  private TerrainGen terrainGen = new TerrainGen();
   private int size = 256;
   private float heightScale = 50;
-  
-  //private DirectionalLight sun;
+  private float waterLevel = 0.5f;
+  private Vector3f sunDir = new Vector3f(1, -1, 0).normalizeLocal();
 
   public TerrainApp() {
     // super((AppState[])null);
@@ -37,26 +37,22 @@ public class TerrainApp extends SimpleApplication {
   }
 
   public void initMyTerrain() {
-    
-    // ------ Camera
+        
     flyCam.setMoveSpeed(850);
 
+    Vector3f camPos = new Vector3f(0, 550, -size * 1.5f);
+    cam.setLocation(camPos);
+    
+    Vector3f dir = new Vector3f(camPos);
+    dir.multLocal(-1);
+    dir.normalizeLocal();
+    
     Quaternion q = new Quaternion();
     // left, up, dir
-    q.fromAxes(new Vector3f(-1, 0, 0), new Vector3f(0, 1, 0), new Vector3f(0, -1, 0));
+    q.fromAxes(new Vector3f(-1, 0, 0), new Vector3f(0, 1, 0), dir);
     q.normalizeLocal();
     cam.setAxes(q);
-    cam.setLocation(new Vector3f(0, 750, 0));
 
-//    // ------ Light
-//    sun = new DirectionalLight();
-//    sun.setDirection(new Vector3f(1, -1, 0).normalizeLocal());
-//    sun.setColor(ColorRGBA.White);
-//    rootNode.addLight(sun);
-
-    // ------ Gen heightmap
-    terrainGen = new TerrainGen();
-    generateTerrain();
   }
 
   
@@ -74,10 +70,10 @@ public class TerrainApp extends SimpleApplication {
 
     terrainMat = new Material(assetManager, "materials/terrain.j3md");
     terrainMat.setTexture("ColorMap", isoTex);
-    terrainMat.setFloat("WaterLevel", heightScale * 0.5f);
+    terrainMat.setFloat("WaterLevel", heightScale * waterLevel);
     terrainMat.setFloat("MaxHeight", heightScale);
     terrainMat.setVector4("WaterColor", new Vector4f(0,0,0.5f,1));
-    //terrainMat.setVector3("SunDir", new Vector3f(1, -1, 0).normalizeLocal());
+    terrainMat.setVector3("SunDir", sunDir);
     
     // ------ Create Terrain
     //int patchSize = 65;
@@ -118,22 +114,22 @@ public class TerrainApp extends SimpleApplication {
     updateTerrain();
   }
 
-  public void updateTerrain(int size, int octaves, double roughness, double scale) {
+  public void updateTerrain(int size, int octaves, double roughness, double scale, float erode) {
     this.size = size;
     terrainGen.setOctaves(octaves);
     terrainGen.setRoughness(roughness);
     terrainGen.setScale(scale);
-    updateTerrain();
-    
-  }
-  
-  public void erodeTerrain(float amount) {
-    terrain.removeFromParent();
-    generateTerrain(amount);
+    if(terrain != null) {
+      terrain.removeFromParent();
+    }
+    generateTerrain(erode);
   }
 
   public void setSunDirection(Vector3f dir) {
-    terrainMat.setVector3("SunDir", dir.normalizeLocal());
+    sunDir.set(dir);
+    if(terrainMat != null) {
+      terrainMat.setVector3("SunDir", dir.normalizeLocal());
+    }
   }
 
   public float getHeightScale() {
@@ -143,7 +139,16 @@ public class TerrainApp extends SimpleApplication {
   public void setHeightScale(float heightScale) {
     this.heightScale = heightScale;
   }
-  
-  
+
+  public float getWaterLevel() {
+    return waterLevel;
+  }
+
+  public void setWaterLevel(float waterLevel) {
+    this.waterLevel = waterLevel;
+    if(terrainMat != null) {
+      terrainMat.setFloat("WaterLevel", heightScale * waterLevel);
+    }
+  }
   
 }
