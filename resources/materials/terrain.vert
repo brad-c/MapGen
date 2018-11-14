@@ -39,6 +39,11 @@ void main(){
         #endif
     #endif     
     
+    
+    
+    //adjustedPos.y = 0.0;
+    
+    
     gl_Position = g_WorldViewProjectionMatrix * vec4(adjustedPos, 1.0);
         
      // transform normal to camera space and normalize it     

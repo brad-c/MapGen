@@ -30,7 +30,7 @@
 	<classpathentry kind="lib" path="D:/Dev/TerrainGen/JMonkeyBinaries/lib/jme3-blender.jar" sourcepath="D:/Dev/TerrainGen/JMonkeyBinaries/sources/jme3-blender-sources.jar"/>
 	<classpathentry kind="lib" path="D:/Dev/TerrainGen/JMonkeyBinaries/lib/jme3-core.jar" sourcepath="D:/Dev/TerrainGen/JMonkeyBinaries/sources/jme3-core-sources.jar"/>
 	<classpathentry kind="lib" path="D:/Dev/TerrainGen/JMonkeyBinaries/lib/jme3-desktop.jar"/>
-	<classpathentry kind="lib" path="D:/Dev/TerrainGen/JMonkeyBinaries/lib/jme3-effects.jar"/>
+	<classpathentry kind="lib" path="D:/Dev/TerrainGen/JMonkeyBinaries/lib/jme3-effects.jar" sourcepath="D:/Dev/TerrainGen/JMonkeyBinaries/sources/jme3-effects-sources.jar"/>
 	<classpathentry kind="lib" path="D:/Dev/TerrainGen/JMonkeyBinaries/lib/jme3-jbullet.jar"/>
 	<classpathentry kind="lib" path="D:/Dev/TerrainGen/JMonkeyBinaries/lib/jme3-jogg.jar"/>
 	<classpathentry kind="lib" path="D:/Dev/TerrainGen/JMonkeyBinaries/lib/jme3-jogl.jar"/>

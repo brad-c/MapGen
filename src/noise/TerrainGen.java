@@ -1,12 +1,10 @@
-package gen;
-
-import noise.SimplexNoiseGenerator;
+package noise;
 
 public class TerrainGen {
 
   private int octaves = 12;
   private double roughness = 0.6;
-  private double scale = 0.005;
+  private double scale = 0.003;
   private long seed = 1;
 
   

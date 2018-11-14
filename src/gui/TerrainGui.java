@@ -1,25 +1,26 @@
-package foo;
+package gui;
 
 import java.awt.BorderLayout;
 import java.awt.Canvas;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.Random;
 import java.util.concurrent.Callable;
 
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JSlider;
-import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
@@ -30,16 +31,29 @@ import javax.vecmath.Vector3f;
 import com.jme3.system.AppSettings;
 import com.jme3.system.JmeCanvasContext;
 
+import render.TerrainApp;
+import render.TerrainApp.WaterType;
+
 public class TerrainGui {
 
   public static void main(String[] args) {
 
     TerrainGui terrainGui = new TerrainGui();
-    terrainGui.createApp();
+    TerrainApp ap = terrainGui.createApp();
     try {
       Thread.sleep(500);
     } catch (InterruptedException ex) {
     }
+
+    // boolean loadSettings = false;
+    // if (ap.getSettings() == null) {
+    // ap.setSettings(new AppSettings(true));
+    // loadSettings = true;
+    // }
+    // if (!JmeSystem.showSettingsDialog(ap.getSettings(), loadSettings)) {
+    // return;
+    // }
+    // ap.setSettings(ap.getSettings());
 
     SwingUtilities.invokeLater(new Runnable() {
       @Override
@@ -63,13 +77,15 @@ public class TerrainGui {
   private DoublePanel scalePan;
   private DoublePanel heightScalePan;
   private DoublePanel erodePan;
-  
+
   private JSlider sunSlider;
   private JSlider sunSlider2;
-  
+
   private JSlider waterLevelSlider;
   private JButton updateB;
   private JButton seedB;
+
+  private JComboBox<WaterType> waterTypeCB;
 
   public TerrainGui() {
 
@@ -91,51 +107,62 @@ public class TerrainGui {
     genParamsPan.add(erodePan);
     genParamsPan.add(seedB);
     genParamsPan.add(updateB);
-    
-    
+
     JPanel sunPan = new JPanel(new FlowLayout(FlowLayout.LEFT));
-    sunPan.setBorder(new TitledBorder("Visuals"));
+    sunPan.setBorder(new TitledBorder("Sun"));
     sunPan.add(new JLabel("Sun"));
     sunPan.add(sunSlider);
     sunPan.add(sunSlider2);
-    sunPan.add(new JLabel("Water"));
-    sunPan.add(waterLevelSlider);
-    
-    
-    
-    JPanel southPan = new JPanel(new GridLayout(2, 1));
+
+    JPanel waterPan = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    waterPan.setBorder(new TitledBorder("Water"));
+    waterPan.add(new JLabel("Level"));
+    waterPan.add(waterLevelSlider);
+    waterPan.add(new JLabel("Type"));
+    waterPan.add(waterTypeCB);
+
+    // JPanel southPan = new JPanel(new GridLayout(3, 1));
+    JPanel southPan = new JPanel();
+    southPan.setLayout(new BoxLayout(southPan, BoxLayout.Y_AXIS));
+
     southPan.add(genParamsPan);
     southPan.add(sunPan);
-    
+    southPan.add(waterPan);
+
     JPanel mainPan = new JPanel(new BorderLayout());
     mainPan.add(canvas, BorderLayout.CENTER);
     mainPan.add(southPan, BorderLayout.SOUTH);
 
-    
     updateSunPos();
     updateWaterLevel();
-    updateTerrain();
-    
-    
+
     frame.getContentPane().add(mainPan);
     frame.pack();
   }
 
   private void initComponenets() {
-    samplePan = new IntPanel("Samps", 4, 256);
-    octPan = new IntPanel("Oct", 3, 7);
-    roughPan = new DoublePanel("Rgh", 4, 0.6);
-    scalePan = new DoublePanel("Scale", 5, 0.005);
+    samplePan = new IntPanel("Samps", 4, app.getTerainSize());
+    octPan = new IntPanel("Oct", 3, app.getTerrainGen().getOctaves());
+    roughPan = new DoublePanel("Rgh", 4, app.getTerrainGen().getRoughness());
+    scalePan = new DoublePanel("Scale", 5, app.getTerrainGen().getScale());
     heightScalePan = new DoublePanel("Elv Scale", 3, app.getHeightScale());
     updateB = new JButton("Update");
     seedB = new JButton("Seed");
+
+    sunSlider = new JSlider(0, 100, 30);
+    sunSlider2 = new JSlider(0, 100, 30);
+    waterLevelSlider = new JSlider(0, 100, (int)(app.getWaterLevel() * 100));
     
-    sunSlider = new JSlider(0,100,30);
-    sunSlider2 = new JSlider(0,100,30);
-    waterLevelSlider = new JSlider(0,100,50);
-    
+    Dimension sliderSize = new Dimension(100, waterLevelSlider.getPreferredSize().height);
+    waterLevelSlider.setPreferredSize(sliderSize);
+    sunSlider.setPreferredSize(sliderSize);
+    sunSlider2.setPreferredSize(sliderSize);
+
     erodePan = new DoublePanel("Erode", 3, 0);
-    
+
+    waterTypeCB = new JComboBox<>(WaterType.values());
+    waterTypeCB.setSelectedItem(app.getWaterType());
+
     frame = new JFrame("Test");
     frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
   }
@@ -168,9 +195,23 @@ public class TerrainGui {
 
       }
     });
-    
+
+    waterTypeCB.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent arg0) {
+
+        app.enqueue(new Runnable() {
+          @Override
+          public void run() {
+            app.setWaterType(waterTypeCB.getItemAt(waterTypeCB.getSelectedIndex()));
+          }
+        });
+
+      }
+    });
+
     ChangeListener sunListener = (new ChangeListener() {
-      
+
       @Override
       public void stateChanged(ChangeEvent e) {
         app.enqueue(new Runnable() {
@@ -179,22 +220,22 @@ public class TerrainGui {
             updateSunPos();
           }
         });
-        
+
       }
     });
-    
+
     sunSlider.addChangeListener(sunListener);
     sunSlider2.addChangeListener(sunListener);
-    
+
     frame.addWindowListener(new WindowAdapter() {
       @Override
       public void windowClosed(WindowEvent e) {
         app.stop();
       }
     });
-    
+
     waterLevelSlider.addChangeListener(new ChangeListener() {
-      
+
       @Override
       public void stateChanged(ChangeEvent e) {
         app.enqueue(new Runnable() {
@@ -202,16 +243,29 @@ public class TerrainGui {
           public void run() {
             updateWaterLevel();
           }
-          
+
         });
-        
+
       }
     });
     
-    
+    canvas.addComponentListener(new ComponentAdapter() {
+
+      @Override
+      public void componentResized(ComponentEvent e) {
+        app.enqueue(new Runnable() {
+          @Override
+          public void run() {
+            app.canvasResized();
+          }
+        });
+      }
+
+    });
+
   }
 
-  public void createApp() {
+  public TerrainApp createApp() {
     AppSettings settings = new AppSettings(true);
     settings.setWidth(640);
     settings.setHeight(480);
@@ -226,6 +280,8 @@ public class TerrainGui {
     JmeCanvasContext context = (JmeCanvasContext) app.getContext();
     canvas = context.getCanvas();
     canvas.setSize(settings.getWidth(), settings.getHeight());
+
+    return app;
   }
 
   private void startApp() {
@@ -240,23 +296,23 @@ public class TerrainGui {
   }
 
   private void show() {
+    updateTerrain();
     frame.setLocationRelativeTo(null);
     frame.setVisible(true);
   }
-  
+
   private void updateSunPos() {
     int val = sunSlider.getValue();
     float ratio = val / 100f;
     double elevationAngle = Math.toRadians(ratio * 180);
-    float x = (float)Math.cos(elevationAngle);
-    float y = (float)Math.sin(elevationAngle);
+    float x = (float) Math.cos(elevationAngle);
+    float y = (float) Math.sin(elevationAngle);
     float z = 0;
-    
-    
+
     val = sunSlider2.getValue();
     ratio = val / 100f;
     double rotAngle = Math.toRadians(ratio * 360);
-    
+
     Matrix4d m = new Matrix4d();
     m.setIdentity();
     m.rotY(rotAngle);
@@ -264,76 +320,19 @@ public class TerrainGui {
     Vector3f vec = new Vector3f(x, y, z);
     m.transform(vec);
     vec.normalize();
-    
+
     app.setSunDirection(new com.jme3.math.Vector3f(vec.x, vec.y, vec.z));
   }
-  
+
   private void updateWaterLevel() {
     int val = waterLevelSlider.getValue();
     float ratio = val / 100f;
     app.setWaterLevel(ratio);
   }
-  
+
   private void updateTerrain() {
-    app.setHeightScale((float)heightScalePan.getVal());
-    app.updateTerrain(samplePan.getVal(), octPan.getVal(), roughPan.getVal(), scalePan.getVal(), (float)erodePan.getVal());
-  }
-
-  private class NumPanel extends JPanel {
-
-    JTextField tf;
-
-    public NumPanel(String label, int size) {
-      setLayout(new FlowLayout());
-      add(new JLabel(label + ":"));
-      tf = new JTextField(size);
-      add(tf);
-    }
-
-  }
-
-  private class IntPanel extends NumPanel {
-
-    private int defVal;
-
-    public IntPanel(String label, int size, int defVal) {
-      super(label, size);
-      this.defVal = defVal;
-      tf.setText(defVal + "");
-    }
-
-    public int getVal() {
-      try {
-        return Integer.parseInt(tf.getText());
-      } catch (Exception e) {
-        tf.setText(defVal + "");
-        return defVal;
-      }
-    }
-
-  }
-
-  private class DoublePanel extends NumPanel {
-
-    private double defVal;
-    // private NumberFormat formatter = new DecimalFormat("#0.00000");
-    private NumberFormat formatter = new DecimalFormat();
-
-    public DoublePanel(String label, int size, double defVal) {
-      super(label, size);
-      this.defVal = defVal;
-      tf.setText(formatter.format(defVal));
-    }
-
-    public double getVal() {
-      try {
-        return Double.parseDouble(tf.getText());
-      } catch (Exception e) {
-        tf.setText(formatter.format(defVal));
-        return defVal;
-      }
-    }
-
+    app.setHeightScale((float) heightScalePan.getVal());
+    app.updateTerrain(samplePan.getVal(), octPan.getVal(), roughPan.getVal(), scalePan.getVal(), (float) erodePan.getVal());
   }
 
 }

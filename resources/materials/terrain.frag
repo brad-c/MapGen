@@ -14,17 +14,19 @@ void main(){
         color *= texture2D(m_ColorMap, texCoord1);     
     #endif
 
-    if(isWater > 0.9) {
+    //if(isWater > 0.9) {
       #ifdef HAS_WATER_COLOR
         vec4 wcol = m_WaterColor; 
       #else
         vec4 wcol = vec4(0.0,0.0,0.7,1.0);
       #endif
       color = mix(wcol, color, 1.0 - isWater) ;
-    }
+    //} 
     
+    //if(isWater <= 0.999) {
     //lighting
     color *= intensity;
+    //}
 
     gl_FragColor = color;
 }
