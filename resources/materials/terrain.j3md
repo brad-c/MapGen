@@ -1,0 +1,34 @@
+MaterialDef Terrain {
+
+    MaterialParameters {
+        Vector4 WaterColor
+        Texture2D ColorMap
+        Float WaterLevel
+        Float MaxHeight
+        Vector3 SunDir
+        
+    }
+    
+    Technique {
+
+        VertexShader GLSL100:   materials/terrain.vert
+        FragmentShader GLSL100: materials/terrain.frag
+
+        WorldParameters {
+            WorldViewProjectionMatrix
+            NormalMatrix
+            LightDirection
+            LightPosition
+        }
+        
+         Defines {
+            HAS_COLORMAP : ColorMap    
+            HAS_WATER_LEVEL : WaterLevel  
+            HAS_MAX_HEIGHT : MaxHeight 
+            HAS_WATER_COLOR : WaterColor
+            HAS_SUN_DIR : SunDir     
+        }
+        
+    }
+    
+}
