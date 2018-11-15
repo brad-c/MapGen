@@ -53,7 +53,7 @@ public class ResourceFinder {
     return filenames;
   }
 
-  private InputStream getResourceAsStream( String resource ) {
+  public InputStream getResourceAsStream( String resource ) {
     final InputStream in
       = getContextClassLoader().getResourceAsStream( resource );
 

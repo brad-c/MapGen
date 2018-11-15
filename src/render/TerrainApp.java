@@ -23,6 +23,7 @@ import com.jme3.texture.Texture;
 import com.jme3.texture.Texture2D;
 import com.jme3.water.WaterFilter;
 
+import crap.ImageHeightmapLoader;
 import noise.TerrainGen;
 
 public class TerrainApp extends SimpleApplication {
@@ -249,18 +250,15 @@ public class TerrainApp extends SimpleApplication {
   }
   
   private void createTerrainMaterial() {
-    // ------ Setup material
+
     terrainMat = new Material(assetManager, "materials/terrain.j3md");
-    
-    setHipsoTexture(hipsoTex);
-    setBathTexture(bathTex);
-    
-    
-    
     terrainMat.setFloat("WaterLevel", getWaterHeight());
     terrainMat.setFloat("MaxHeight", heightScale);
     terrainMat.setVector4("WaterColor", waterColor);
     terrainMat.setVector3("SunDir", sunDir);
+    setHipsoTexture(hipsoTex);
+    setBathTexture(bathTex);
+    
   }
 
   private void createWaterFilter() {
@@ -290,10 +288,7 @@ public class TerrainApp extends SimpleApplication {
     
 //    waterFilter.setWaveScale(0.001f);
     waterFilter.setWaveScale(0.0f);
-    
-//    waterPostProcessor = new FilterPostProcessor(assetManager);
-//    waterPostProcessor.addFilter(waterFilter);
-    
+
   }
   
   private void createWaterPlane() {
@@ -319,12 +314,25 @@ public class TerrainApp extends SimpleApplication {
 
   private void generateTerrain(float erodeFilter) {
 
-    float[] heightData = terrainGen.generateHeightmap(size, size, heightScale);
+//    float[] heightData = terrainGen.generateHeightmap(size, size, heightScale);
+    float[] heightData = ImageHeightmapLoader.loadGrayScaleData("textures/circleGradLarge.png", heightScale);
+    
+    float[] randData = terrainGen.generateHeightmap(size, size, heightScale);
+    
+    for(int i=0;i<randData.length;i++) {
+      heightData[i] += randData[i];
+      heightData[i] /= 2;
+    }
+    
 
     // ------ Create Terrain
-    // int patchSize = 65;
-    int patchSize = size + 1;
-    AbstractHeightMap heightmap = new RawHeightMap(heightData);
+     
+    AbstractHeightMap heightmap;
+    heightmap = new RawHeightMap(heightData);
+    
+//    Texture heightMapImage = assetManager.loadTexture(
+//        "textures/circleGradLarge.png");
+//    heightmap = new ImageBasedHeightMap(heightMapImage.getImage(), 100);
 
     if (erodeFilter >= 0 && erodeFilter <= 1) {
       try {
@@ -336,6 +344,7 @@ public class TerrainApp extends SimpleApplication {
 
     }
 
+    int patchSize = 65;
     terrain = new TerrainQuad("my terrain", patchSize, size + 1, heightmap.getHeightMap());
 
     /** 4. We give the terrain its material, position & scale it, and attach it. */
