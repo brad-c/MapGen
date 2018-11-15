@@ -52,6 +52,9 @@ public class TerrainApp extends SimpleApplication {
   private WaterType waterType = WaterType.PURDY;
   private String hipsoTex = "textures/hipso_one.png";
   private String bathTex = "textures/bath_dark.png";
+  
+  private String baseHeightMapSource = "textures/circleGradLarge.png";
+  private float noiseRatio = 1;
 
   public TerrainApp() {
 //     super((AppState[])null);
@@ -84,10 +87,28 @@ public class TerrainApp extends SimpleApplication {
     createTerrainMaterial();
    
     setWaterType(waterType);
+    
+//    addBaseWaterPlane();
   }
   
   public void canvasResized() {
     setWaterType(getWaterType());
+  }
+
+  public String getBaseHeightMapSource() {
+    return baseHeightMapSource;
+  }
+
+  public void setBaseHeightMapSource(String baseHeightMapSource) {
+    this.baseHeightMapSource = baseHeightMapSource;
+  }
+
+  public float getNoiseRatio() {
+    return noiseRatio;
+  }
+
+  public void setNoiseRatio(float noiseRatio) {
+    this.noiseRatio = noiseRatio;
   }
 
   public int getTerainSize() {
@@ -292,21 +313,28 @@ public class TerrainApp extends SimpleApplication {
 
   }
   
+  private void addBaseWaterPlane() {
+    rootNode.attachChild(createWaterPlaneGeometry(5000));
+  }
+
   private void createWaterPlane() {
     // creating a quad to render water to
-    Geometry water = new Geometry("water", new Quad(size * 2, size * 2));
+    waterRoot = new Node();
+    waterRoot.attachChild(createWaterPlaneGeometry(size));
+    waterRoot.setLocalTranslation(new Vector3f(0, getWaterHeight(), 0));
+  }
+  
+  private Geometry createWaterPlaneGeometry(float planeSize) {
+    Geometry water = new Geometry("water", new Quad(planeSize * 2, planeSize * 2));
     water.setQueueBucket(Bucket.Transparent);
-    water.setLocalTranslation(-size, 0, size);
+    water.setLocalTranslation(-planeSize, 0, planeSize);
     water.setLocalRotation(new Quaternion().fromAngleAxis(-FastMath.HALF_PI, Vector3f.UNIT_X));
 
     Material waterMat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
     waterMat.setColor("Color", new ColorRGBA(waterColor.x, waterColor.y, waterColor.z, 1f));
     waterMat.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
     water.setMaterial(waterMat);
-
-    waterRoot = new Node();
-    waterRoot.attachChild(water);
-    waterRoot.setLocalTranslation(new Vector3f(0, getWaterHeight(), 0));
+    return water;
   }
 
   private void generateTerrain() {
@@ -317,17 +345,12 @@ public class TerrainApp extends SimpleApplication {
 
 //    float[] heightData = terrainGen.generateHeightmap(size, size, heightScale);
 
-    float[] heightData = ImageHeightmapLoader.loadGrayScaleData("textures/circleGradLarge.png", 1, true);
-//    float[] heightData = ImageHeightmapLoader.loadGrayScaleData("D:\\Dev\\TerrainGen\\MapGen\\resources\\textures\\circleGradLarge.png", 1);
-//    float[] heightData = ImageHeightmapLoader.loadGrayScaleData("D:\\Dev\\TerrainGen\\MapGen\\resources\\textures\\gradTest.png", 1, true);
     
-    float[] randData = terrainGen.generateSimplexHeightmap(size, size, 1);
-    
-    float mixRatio = 1f;
-    
-    for(int i=0;i<randData.length;i++) {
-      heightData[i] += (randData[i] * mixRatio);
-      //heightData[i] /= 2;
+//    baseHeightMapSource = "D:\\Dev\\TerrainGen\\MapGen\\resources\\textures\\gradTest.png";
+    float[] heightData = ImageHeightmapLoader.loadGrayScaleData(baseHeightMapSource, size, 1, true);
+    float[] noiseData = terrainGen.generateSimplexHeightmap(size, size, 1);
+    for(int i=0;i<noiseData.length;i++) {
+      heightData[i] += (noiseData[i] * noiseRatio);
     }
     HeightMapUtil.normalise(heightData);
     HeightMapUtil.scale(heightData, heightScale);

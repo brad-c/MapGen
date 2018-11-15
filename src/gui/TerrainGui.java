@@ -62,12 +62,15 @@ public class TerrainGui {
   private Canvas canvas;
   private JFrame frame;
 
-  private IntPanel samplePan;
+  //private IntPanel samplePan;
+  private JComboBox<Integer> sampleCB;
   private IntPanel octPan;
   private DoublePanel roughPan;
   private DoublePanel scalePan;
   private DoublePanel heightScalePan;
   private DoublePanel erodePan;
+  private DoublePanel noiseMixPan;
+  private LongPanel seedPan;
 
   private JSlider sunSlider;
   private JSlider sunSlider2;
@@ -91,16 +94,36 @@ public class TerrainGui {
 
     addListeners();
 
-    JPanel genParamsPan = new JPanel(new FlowLayout());
+    JPanel genParamsPan1 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    
+    genParamsPan1.add(new JLabel("Size"));
+    genParamsPan1.add(sampleCB);
+    genParamsPan1.add(octPan);
+    genParamsPan1.add(roughPan);
+    genParamsPan1.add(scalePan);
+    genParamsPan1.add(heightScalePan);
+    genParamsPan1.add(erodePan);
+    
+    JPanel genParamsPan2 = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+    genParamsPan2.add(updateB);
+    
+    JPanel genParamsPan3 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    genParamsPan3.add(seedPan);
+    genParamsPan3.add(seedB);
+    genParamsPan3.add(noiseMixPan);
+    
+    JPanel ugPan = new JPanel();
+    ugPan.setLayout(new BoxLayout(ugPan, BoxLayout.X_AXIS));
+    ugPan.add(genParamsPan3);
+    ugPan.add(genParamsPan2);
+    
+    
+    JPanel genParamsPan = new JPanel();
     genParamsPan.setBorder(new TitledBorder("Terrain Params"));
-    genParamsPan.add(samplePan);
-    genParamsPan.add(octPan);
-    genParamsPan.add(roughPan);
-    genParamsPan.add(scalePan);
-    genParamsPan.add(heightScalePan);
-    genParamsPan.add(erodePan);
-    genParamsPan.add(seedB);
-    genParamsPan.add(updateB);
+    genParamsPan.setLayout(new BoxLayout(genParamsPan, BoxLayout.Y_AXIS));
+    genParamsPan.add(genParamsPan1);
+    genParamsPan.add(ugPan);
+        
 
     JPanel sunPan = new JPanel(new FlowLayout(FlowLayout.LEFT));
     sunPan.setBorder(new TitledBorder("Visuals"));
@@ -139,13 +162,21 @@ public class TerrainGui {
   }
 
   private void initComponenets() {
-    samplePan = new IntPanel("Samps", 4, app.getTerainSize());
-    octPan = new IntPanel("Oct", 3, app.getTerrainGen().getOctaves());
-    roughPan = new DoublePanel("Rgh", 4, app.getTerrainGen().getRoughness());
-    scalePan = new DoublePanel("Scale", 5, app.getTerrainGen().getScale());
+    
+    sampleCB = new JComboBox<>(new Integer[] {256,512,1024,2048});
+    sampleCB.setSelectedItem(app.getTerainSize());
+    
+    octPan = new IntPanel("Oct", 2, app.getTerrainGen().getOctaves());
+    roughPan = new DoublePanel("Rgh", 3, app.getTerrainGen().getRoughness());
+    scalePan = new DoublePanel("Scale", 4, app.getTerrainGen().getScale());
     heightScalePan = new DoublePanel("Elv Scale", 3, app.getHeightScale());
+    
+    seedPan = new LongPanel("Seed", 15, app.getTerrainGen().getSeed());
+    
+    noiseMixPan = new DoublePanel("Noise Ratio", 3, app.getNoiseRatio());
+    
     updateB = new JButton("Update");
-    seedB = new JButton("Seed");
+    seedB = new JButton("Roll");
 
     sunSlider = new JSlider(0, 100, 30);
     sunSlider2 = new JSlider(0, 100, 30);
@@ -156,7 +187,7 @@ public class TerrainGui {
     sunSlider.setPreferredSize(sliderSize);
     sunSlider2.setPreferredSize(sliderSize);
 
-    erodePan = new DoublePanel("Erode", 3, 0);
+    erodePan = new DoublePanel("Erode", 2, 0);
 
     waterTypeCB = new JComboBox<>(WaterType.values());
     waterTypeCB.setSelectedItem(app.getWaterType());
@@ -211,7 +242,9 @@ public class TerrainGui {
           @Override
           public void run() {
             Random r = new Random();
-            app.updateTerrain(r.nextLong());
+            app.getTerrainGen().setSeed(r.nextLong());
+            seedPan.tf.setText(app.getTerrainGen().getSeed() + "");
+            updateTerrain();
           }
         });
 
@@ -383,8 +416,12 @@ public class TerrainGui {
   }
 
   private void updateTerrain() {
+    if(seedPan.getVal() != 0) {
+      app.getTerrainGen().setSeed(seedPan.getVal());
+    }
     app.setHeightScale((float) heightScalePan.getVal());
-    app.updateTerrain(samplePan.getVal(), octPan.getVal(), roughPan.getVal(), scalePan.getVal(), (float) erodePan.getVal());
+    app.setNoiseRatio((float)noiseMixPan.getVal());
+    app.updateTerrain(sampleCB.getItemAt(sampleCB.getSelectedIndex()), octPan.getVal(), roughPan.getVal(), scalePan.getVal(), (float) erodePan.getVal());
   }
 
 }

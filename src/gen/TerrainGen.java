@@ -7,7 +7,7 @@ public class TerrainGen {
   private int octaves = 12;
   private double roughness = 0.6;
   private double scale = 0.003;
-  private long seed = 1;
+  private long seed = 8092038379555713298l;
 
   
   public float[] generateSimplexHeightmap(int width, int height, float heightScale) {
