@@ -10,6 +10,7 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Callable;
 
@@ -31,6 +32,7 @@ import javax.vecmath.Vector3f;
 import com.jme3.system.AppSettings;
 import com.jme3.system.JmeCanvasContext;
 
+import gui.ResourceFinder.ResourceEntry;
 import render.TerrainApp;
 import render.TerrainApp.WaterType;
 
@@ -39,22 +41,11 @@ public class TerrainGui {
   public static void main(String[] args) {
 
     TerrainGui terrainGui = new TerrainGui();
-    TerrainApp ap = terrainGui.createApp();
+    terrainGui.createApp();
     try {
       Thread.sleep(500);
     } catch (InterruptedException ex) {
     }
-
-    // boolean loadSettings = false;
-    // if (ap.getSettings() == null) {
-    // ap.setSettings(new AppSettings(true));
-    // loadSettings = true;
-    // }
-    // if (!JmeSystem.showSettingsDialog(ap.getSettings(), loadSettings)) {
-    // return;
-    // }
-    // ap.setSettings(ap.getSettings());
-
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
@@ -84,11 +75,14 @@ public class TerrainGui {
   private JSlider waterLevelSlider;
   private JButton updateB;
   private JButton seedB;
+  
+  private JComboBox<ResourceFinder.ResourceEntry> hipsoCB;
+  private JComboBox<ResourceFinder.ResourceEntry> bathCB;
 
   private JComboBox<WaterType> waterTypeCB;
 
   public TerrainGui() {
-
+      
   }
 
   private void createGui() {
@@ -109,11 +103,15 @@ public class TerrainGui {
     genParamsPan.add(updateB);
 
     JPanel sunPan = new JPanel(new FlowLayout(FlowLayout.LEFT));
-    sunPan.setBorder(new TitledBorder("Sun"));
+    sunPan.setBorder(new TitledBorder("Visuals"));
     sunPan.add(new JLabel("Sun"));
     sunPan.add(sunSlider);
     sunPan.add(sunSlider2);
-
+    sunPan.add(new JLabel("Terrain Shading"));
+    sunPan.add(hipsoCB);
+    sunPan.add(new JLabel(" Water Shading"));
+    sunPan.add(bathCB);
+    
     JPanel waterPan = new JPanel(new FlowLayout(FlowLayout.LEFT));
     waterPan.setBorder(new TitledBorder("Water"));
     waterPan.add(new JLabel("Level"));
@@ -165,6 +163,30 @@ public class TerrainGui {
 
     frame = new JFrame("Test");
     frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+    
+    List<ResourceEntry> hipTex = ResourceFinder.INST.findTextures("hipso_");
+    hipsoCB = new JComboBox<>(hipTex.toArray(new ResourceEntry[hipTex.size()]));
+    ResourceEntry sel = find(hipTex, app.getHipsoTex());
+    if(sel != null) {
+      hipsoCB.setSelectedItem(sel);
+    }
+    
+    List<ResourceEntry> bathTex = ResourceFinder.INST.findTextures("bath_");
+    bathCB = new JComboBox<>(bathTex.toArray(new ResourceEntry[bathTex.size()]));
+    sel = find(bathTex, app.getBathTexture());
+    if(sel != null) {
+      bathCB.setSelectedItem(sel);
+    }
+    
+  }
+
+  private ResourceEntry find(List<ResourceEntry> ents, String res) {
+    for(ResourceEntry e : ents) {
+      if(e.resource.equals(res)) {
+        return e;
+      }
+    }
+    return null;
   }
 
   private void addListeners() {
@@ -204,6 +226,36 @@ public class TerrainGui {
           @Override
           public void run() {
             app.setWaterType(waterTypeCB.getItemAt(waterTypeCB.getSelectedIndex()));
+          }
+        });
+
+      }
+    });
+    
+    hipsoCB.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent arg0) {
+
+        app.enqueue(new Runnable() {
+          @Override
+          public void run() {
+            ResourceEntry sel = hipsoCB.getItemAt(hipsoCB.getSelectedIndex());
+            app.setHipsoTexture(sel.resource);
+          }
+        });
+
+      }
+    });
+    
+    bathCB.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent arg0) {
+
+        app.enqueue(new Runnable() {
+          @Override
+          public void run() {
+            ResourceEntry sel = bathCB.getItemAt(bathCB.getSelectedIndex());
+            app.setBathTexture(sel.resource);
           }
         });
 

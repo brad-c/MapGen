@@ -17,22 +17,26 @@ varying float intensity;
 varying float isWater;
 
 void main(){
-    vec3 adjustedPos = inPosition;
+    vec3 pos = inPosition;
     isWater = 0.0;
     
     #ifdef HAS_WATER_LEVEL
-      if(adjustedPos.y < m_WaterLevel) {
-        //adjustedPos.y = m_WaterLevel; 
+      if(pos.y < m_WaterLevel) {       
         isWater = 1.0;
+        #ifdef HAS_WATERCOLORMAP
+          texCoord1 = vec2(0, pos.y / m_WaterLevel);
+        #endif
       }
     #endif
     
     #ifdef HAS_COLORMAP
         #ifdef HAS_MAX_HEIGHT
           #ifdef HAS_WATER_LEVEL
-              texCoord1 = vec2(0, (inPosition.y - m_WaterLevel)  / (m_MaxHeight - m_WaterLevel));
+              if(pos.y >= m_WaterLevel) {
+                texCoord1 = vec2(0, (pos.y - m_WaterLevel)  / (m_MaxHeight - m_WaterLevel));
+              }
           #else
-              texCoord1 = vec2(0, inPosition.y / m_MaxHeight);
+              texCoord1 = vec2(0, pos.y / m_MaxHeight);
           #endif
         #else
           texCoord1 = inTexCoord;
@@ -40,11 +44,10 @@ void main(){
     #endif     
     
     
-    
     //adjustedPos.y = 0.0;
     
     
-    gl_Position = g_WorldViewProjectionMatrix * vec4(adjustedPos, 1.0);
+    gl_Position = g_WorldViewProjectionMatrix * vec4(pos, 1.0);
         
      // transform normal to camera space and normalize it     
     //vec3 n = normalize(TransformNormal(inNormal)); //normalize(g_NormalMatrix * modelSpaceNorm);

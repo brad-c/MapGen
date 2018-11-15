@@ -17,8 +17,7 @@ public class TerrainGen {
   }
   
   public float[] generateHeightmap(int width, int height) {
-
-    System.out.println("TerrainGen.genSimplex: oct=" + octaves + " rgh=" + roughness + " scale=" + scale);
+    
     SimplexNoiseGenerator gen = new SimplexNoiseGenerator(octaves, roughness, scale, seed);
     float[] hm = gen.generateOctavedSimplexNoise(width, height);
 
