@@ -24,7 +24,8 @@ import com.jme3.texture.Texture2D;
 import com.jme3.water.WaterFilter;
 
 import crap.ImageHeightmapLoader;
-import noise.TerrainGen;
+import gen.HeightMapUtil;
+import gen.TerrainGen;
 
 public class TerrainApp extends SimpleApplication {
 
@@ -315,14 +316,21 @@ public class TerrainApp extends SimpleApplication {
   private void generateTerrain(float erodeFilter) {
 
 //    float[] heightData = terrainGen.generateHeightmap(size, size, heightScale);
-    float[] heightData = ImageHeightmapLoader.loadGrayScaleData("textures/circleGradLarge.png", heightScale);
+
+    float[] heightData = ImageHeightmapLoader.loadGrayScaleData("textures/circleGradLarge.png", 1, true);
+//    float[] heightData = ImageHeightmapLoader.loadGrayScaleData("D:\\Dev\\TerrainGen\\MapGen\\resources\\textures\\circleGradLarge.png", 1);
+//    float[] heightData = ImageHeightmapLoader.loadGrayScaleData("D:\\Dev\\TerrainGen\\MapGen\\resources\\textures\\gradTest.png", 1, true);
     
-    float[] randData = terrainGen.generateHeightmap(size, size, heightScale);
+    float[] randData = terrainGen.generateSimplexHeightmap(size, size, 1);
+    
+    float mixRatio = 1f;
     
     for(int i=0;i<randData.length;i++) {
-      heightData[i] += randData[i];
-      heightData[i] /= 2;
+      heightData[i] += (randData[i] * mixRatio);
+      //heightData[i] /= 2;
     }
+    HeightMapUtil.normalise(heightData);
+    HeightMapUtil.scale(heightData, heightScale);
     
 
     // ------ Create Terrain
@@ -330,10 +338,6 @@ public class TerrainApp extends SimpleApplication {
     AbstractHeightMap heightmap;
     heightmap = new RawHeightMap(heightData);
     
-//    Texture heightMapImage = assetManager.loadTexture(
-//        "textures/circleGradLarge.png");
-//    heightmap = new ImageBasedHeightMap(heightMapImage.getImage(), 100);
-
     if (erodeFilter >= 0 && erodeFilter <= 1) {
       try {
         heightmap.setMagnificationFilter(erodeFilter);

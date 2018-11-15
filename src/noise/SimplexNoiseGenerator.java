@@ -20,7 +20,6 @@ public class SimplexNoiseGenerator {
     float[] totalNoise = new float[width * height];
     double layerFrequency = scale;
     double layerWeight = 1;
-    double weightSum = 0;
     
     SimplexNoise.setSeed(seed);
 
@@ -39,9 +38,7 @@ public class SimplexNoiseGenerator {
 
       // Increase variables with each incrementing octave
       layerFrequency *= 2;
-      weightSum += layerWeight;
       layerWeight *= roughness;
-
       index = 0;
       
     }

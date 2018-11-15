@@ -1,6 +1,9 @@
 package gui;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -54,10 +57,19 @@ public class ResourceFinder {
   }
 
   public InputStream getResourceAsStream( String resource ) {
-    final InputStream in
-      = getContextClassLoader().getResourceAsStream( resource );
-
-    return in == null ? getClass().getResourceAsStream( resource ) : in;
+    InputStream in = getContextClassLoader().getResourceAsStream( resource );
+    if(in == null) {
+      in = getClass().getResourceAsStream( resource );
+    }
+    File f = new File(resource);
+    if(f.exists() && f.isFile()) {
+      try {
+        return new FileInputStream(f);
+      } catch (FileNotFoundException e) {
+        e.printStackTrace();
+      }
+    }
+    return in;
   }
 
   private ClassLoader getContextClassLoader() {
