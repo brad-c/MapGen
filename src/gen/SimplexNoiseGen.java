@@ -6,7 +6,7 @@ public class SimplexNoiseGen {
 
   private int octaves = 12;
   private double roughness = 0.6;
-  private double scale = 0.003;
+  private double scale = 0.0005;
   private long seed = 8092038379555713298l;
   
   private int width = 512;

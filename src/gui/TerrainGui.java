@@ -34,9 +34,9 @@ import com.jme3.system.JmeCanvasContext;
 
 import gen.SimplexNoiseGen;
 import gui.ResourceFinder.ResourceEntry;
+import render.TerrainGenerator;
 import render.TerrainRenderer;
 import render.TerrainRenderer.WaterType;
-import render.TerrainGenerator;
 
 public class TerrainGui {
 
@@ -65,7 +65,7 @@ public class TerrainGui {
   private JFrame frame;
 
   //private IntPanel samplePan;
-  private JComboBox<Integer> sampleCB;
+  private JComboBox<Integer> resolutionCB;
   private IntPanel octPan;
   private DoublePanel roughPan;
   private DoublePanel scalePan;
@@ -98,8 +98,8 @@ public class TerrainGui {
 
     JPanel genParamsPan1 = new JPanel(new FlowLayout(FlowLayout.LEFT));
     
-    genParamsPan1.add(new JLabel("Size"));
-    genParamsPan1.add(sampleCB);
+    genParamsPan1.add(new JLabel("Resolution"));
+    genParamsPan1.add(resolutionCB);
     genParamsPan1.add(octPan);
     genParamsPan1.add(roughPan);
     genParamsPan1.add(scalePan);
@@ -168,8 +168,8 @@ public class TerrainGui {
     TerrainGenerator tGen = app.getTerrainGenerator();
     SimplexNoiseGen nGen = tGen.getNoiseGenerator();
     
-    sampleCB = new JComboBox<>(new Integer[] {256,512,1024,2048});
-    sampleCB.setSelectedItem(tGen.getSize());
+    resolutionCB = new JComboBox<>(new Integer[] {256,512,1024,2048});
+    resolutionCB.setSelectedItem(tGen.getSize());
     
     octPan = new IntPanel("Oct", 2, nGen.getOctaves());
     roughPan = new DoublePanel("Rgh", 3, nGen.getRoughness());
@@ -425,7 +425,7 @@ public class TerrainGui {
     
     TerrainGenerator tGen = app.getTerrainGenerator();
     
-    tGen.setSize(sampleCB.getItemAt(sampleCB.getSelectedIndex()));
+    tGen.setSize(resolutionCB.getItemAt(resolutionCB.getSelectedIndex()));
     
     tGen.setHeightScale((float) heightScalePan.getVal());
     

@@ -17,7 +17,7 @@ public class TerrainGenerator {
 
   private Material terrainMat;
   private TerrainQuad terrain;
-  private SimplexNoiseGen terrainGen = new SimplexNoiseGen();
+  private SimplexNoiseGen noiseGen = new SimplexNoiseGen();
 
   private int size = 512;
   private float heightScale = 40;
@@ -51,7 +51,7 @@ public class TerrainGenerator {
     logTime("GS Image: ", t1);
 
     t1 = System.currentTimeMillis();
-    float[] noiseData = terrainGen.getOrUpdateHeightMap();
+    float[] noiseData = noiseGen.getOrUpdateHeightMap();
     logTime("Noise Gen: ", t1);
 
     t1 = System.currentTimeMillis();
@@ -176,11 +176,14 @@ public class TerrainGenerator {
 
   public void setSize(int size) {
     this.size = size;
-    terrainGen.setSize(size);
+    noiseGen.setSize(size);
+    
+    double spacing = 2048d/size;
+    noiseGen.setSampleSpacing(spacing);
   }
 
   public SimplexNoiseGen getNoiseGenerator() {
-    return terrainGen;
+    return noiseGen;
   }
 
   public void setHipsoTexture(String tex) {
