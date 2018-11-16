@@ -15,6 +15,7 @@ import java.util.Random;
 import java.util.concurrent.Callable;
 
 import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
@@ -22,6 +23,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JSlider;
+import javax.swing.JToggleButton;
 import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
@@ -36,6 +38,7 @@ import gen.SimplexNoiseGen;
 import gui.ResourceFinder.ResourceEntry;
 import render.TerrainGenerator;
 import render.TerrainRenderer;
+import render.TerrainRenderer.ViewType;
 import render.TerrainRenderer.WaterType;
 
 public class TerrainGui {
@@ -85,6 +88,9 @@ public class TerrainGui {
   private JComboBox<ResourceFinder.ResourceEntry> bathCB;
 
   private JComboBox<WaterType> waterTypeCB;
+  
+  private JToggleButton view3dB;
+  private JToggleButton view2dB;
 
   public TerrainGui() {
       
@@ -151,8 +157,13 @@ public class TerrainGui {
     southPan.add(genParamsPan);
     southPan.add(sunPan);
     southPan.add(waterPan);
+    
+    JPanel northPan = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    northPan.add(view3dB);
+    northPan.add(view2dB);
 
     JPanel mainPan = new JPanel(new BorderLayout());
+    mainPan.add(northPan, BorderLayout.NORTH);
     mainPan.add(canvas, BorderLayout.CENTER);
     mainPan.add(southPan, BorderLayout.SOUTH);
 
@@ -213,6 +224,17 @@ public class TerrainGui {
     if(sel != null) {
       bathCB.setSelectedItem(sel);
     }
+    
+    
+    view3dB = new JToggleButton("3D");
+    view2dB = new JToggleButton("2D");
+    boolean is3d = app.getViewType() == ViewType.THREE_D;
+    view3dB.setSelected(is3d);
+    view2dB.setSelected(!is3d);
+        
+    ButtonGroup bg = new ButtonGroup();
+    bg.add(view2dB);
+    bg.add(view3dB);
     
   }
 
@@ -352,6 +374,34 @@ public class TerrainGui {
         });
       }
 
+    });
+    
+    view2dB.addActionListener(new ActionListener() {
+      
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        app.enqueue(new Runnable() {
+          @Override
+          public void run() {
+            app.setViewType(ViewType.TWO_D);
+          }
+        });
+        
+      }
+    });
+    
+    view3dB.addActionListener(new ActionListener() {
+      
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        app.enqueue(new Runnable() {
+          @Override
+          public void run() {
+            app.setViewType(ViewType.THREE_D);
+          }
+        });
+        
+      }
     });
 
   }

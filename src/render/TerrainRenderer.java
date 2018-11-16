@@ -19,99 +19,157 @@ import com.jme3.terrain.geomipmap.TerrainQuad;
 import com.jme3.texture.Texture2D;
 import com.jme3.water.WaterFilter;
 
+import render.CameraStateIO.CameraState;
+
 public class TerrainRenderer extends SimpleApplication {
 
-    
-  public enum WaterType  {
+  public enum WaterType {
     NONE,
     SIMPLE,
     PURDY
   };
-  
+
   private TerrainGenerator terGen = new TerrainGenerator();
-  
+
   private Node waterRoot;
-  private Vector4f waterColor = new Vector4f(5/255f, 36/255f, 78/255f, 1.0f);
+  private Vector4f waterColor = new Vector4f(5 / 255f, 36 / 255f, 78 / 255f, 1.0f);
   private float waterLevel = 0.7f;
   private WaterFilter waterFilter;
   private FilterPostProcessor waterPostProcessor;
   private WaterType waterType = WaterType.PURDY;
 
+  public enum ViewType {
+    THREE_D,
+    TWO_D,
+  }
+
+  private OrthoCamAppState orthCamState;
+  private OrthoCameraController orthController;
+  private ViewType viewType = ViewType.THREE_D;
+
+  private CameraState prevCamState2d;
+  private CameraState prevCamState3d;
+
   public TerrainRenderer() {
-//     super((AppState[])null);
-    super(new FlyCamAppState());
+    // super((AppState[])null);
+    super(new FlyCamAppState(), new OrthoCamAppState());
+    orthCamState = stateManager.getState(OrthoCamAppState.class);
+
   }
 
   @Override
   public void initialize() {
-    if(settings != null) {
+    if (settings != null) {
       context.getSettings().setAudioRenderer(null);
       context.getSettings().setFrameRate(160);
     }
     super.initialize();
+
   }
-  
+
   @Override
   public void simpleInitApp() {
-   
+
+    orthController = new OrthoCameraController(this);
+    orthCamState.setController(orthController);
+    orthCamState.setEnabled(false);
+
     setCameraToDefault();
 
-    //Add AA
+    setViewType(getViewType(), true);
+
+    // Add AA
     FilterPostProcessor fpp = new FilterPostProcessor(assetManager);
     fpp.addFilter(new FXAAFilter());
     int numSamples = getContext().getSettings().getSamples();
     if (numSamples > 0) {
-        fpp.setNumSamples(numSamples);
+      fpp.setNumSamples(numSamples);
     }
     viewPort.addProcessor(fpp);
- 
+
     terGen.init(this);
-   
+
     setWaterType(waterType);
     addBaseWaterPlane();
   }
-  
-  public void canvasResized() {
-    setWaterType(getWaterType());
+
+  public void setViewType(ViewType type) {
+    setViewType(type, false);
   }
 
-  
+  public void setViewType(ViewType type, boolean force) {
+    if (viewType == type && !force) {
+      return;
+    }
+    ViewType oldType = viewType;
+    this.viewType = type;
+
+    // save current state
+    if (oldType == ViewType.THREE_D) {
+      prevCamState3d = CameraStateIO.saveState(cam);
+    } else {
+      prevCamState2d = CameraStateIO.saveState(cam);
+    }
+
+    if (viewType == ViewType.THREE_D) {
+      stateManager.getState(FlyCamAppState.class).setEnabled(true);
+      orthCamState.setEnabled(false);
+      CameraStateIO.applyState(cam, prevCamState3d);
+    } else {
+      stateManager.getState(FlyCamAppState.class).setEnabled(false);
+      orthCamState.setEnabled(true);
+      CameraStateIO.applyState(cam, prevCamState2d);
+    }
+  }
+
+  public ViewType getViewType() {
+    return viewType;
+  }
+
+  public void canvasResized() {
+    // These are all hacks for odd behaviour
+    setWaterType(getWaterType());
+    if (viewType == ViewType.TWO_D && orthCamState.isEnabled()) {
+      orthCamState.getController().updateFrustrum();
+    }
+  }
+
   public void updateTerrain() {
     TerrainQuad terrain = terGen.getTerrain();
-    if(terrain != null) {
+    if (terrain != null) {
       terrain.removeFromParent();
     }
-    //for recalc of water height
+    // for recalc of water height
     setWaterLevel(getWaterLevel());
     terrain = terGen.generateTerrain();
     rootNode.attachChild(terrain);
   }
-  
+
   public void setSunDirection(Vector3f dir) {
     terGen.setSunDirection(dir);
-    //force water update to reflect lighting
+    // force water update to reflect lighting
     setWaterType(getWaterType());
   }
-  
+
   public TerrainGenerator getTerrainGenerator() {
     return terGen;
   }
-   
+
   public float getWaterLevel() {
     return waterLevel;
   }
-  
+
   public float getWaterHeight() {
-    return terGen.getHeightScale()  * waterLevel;
+    return terGen.getHeightScale() * waterLevel;
   }
 
   public void setWaterLevel(float waterLevel) {
     this.waterLevel = waterLevel;
     terGen.setWaterHeight(terGen.getHeightScale() * waterLevel);
-    if(waterRoot != null) {
+    if (waterRoot != null) {
       waterRoot.setLocalTranslation(new Vector3f(0, getWaterHeight(), 0));
     }
-    if(waterFilter != null) {
+    if (waterFilter != null) {
       waterFilter.setWaterHeight(getWaterHeight());
     }
   }
@@ -122,31 +180,31 @@ public class TerrainRenderer extends SimpleApplication {
 
   public void setWaterType(WaterType waterType) {
     this.waterType = waterType;
-    //clear current water
+    // clear current water
     removeWaterPlane();
     removeWaterFilter();
-    if(waterType == WaterType.SIMPLE) {
+    if (waterType == WaterType.SIMPLE) {
       addWaterPlane();
-    } else if(waterType == WaterType.PURDY) {
+    } else if (waterType == WaterType.PURDY) {
       addWaterFilter();
     }
   }
-  
+
   private void addWaterPlane() {
-    if(waterRoot == null) {
+    if (waterRoot == null) {
       createWaterPlane();
     }
     rootNode.attachChild(waterRoot);
   }
-  
+
   private void removeWaterPlane() {
-    if(waterRoot != null) {
+    if (waterRoot != null) {
       waterRoot.removeFromParent();
     }
   }
-  
+
   private void addWaterFilter() {
-    if(waterFilter == null) {
+    if (waterFilter == null) {
       createWaterFilter();
     }
     waterPostProcessor = new FilterPostProcessor(assetManager);
@@ -155,7 +213,7 @@ public class TerrainRenderer extends SimpleApplication {
   }
 
   private void removeWaterFilter() {
-    if(waterPostProcessor != null) {
+    if (waterPostProcessor != null) {
       viewPort.removeProcessor(waterPostProcessor);
     }
     waterPostProcessor = null;
@@ -163,7 +221,7 @@ public class TerrainRenderer extends SimpleApplication {
   }
 
   private void setCameraToDefault() {
-    if(flyCam != null) {
+    if (flyCam != null) {
       flyCam.setMoveSpeed(850);
     }
 
@@ -179,16 +237,14 @@ public class TerrainRenderer extends SimpleApplication {
     q.fromAxes(new Vector3f(-1, 0, 0), new Vector3f(0, 1, 0), dir);
     q.normalizeLocal();
     cam.setAxes(q);
-    
+
     cam.setFrustumFar(4000);
   }
 
   private void createWaterFilter() {
 
-    System.out.println("TerrainRenderer.createWaterFilter: ");
-    
     waterFilter = new WaterFilter(rootNode, terGen.getSunDirection());
-    
+
     waterFilter.setWaterColor(new ColorRGBA().setAsSrgb(0.0078f, 0.3176f, 0.5f, 1.0f));
     waterFilter.setDeepWaterColor(new ColorRGBA().setAsSrgb(0.0039f, 0.00196f, 0.145f, 1.0f));
     waterFilter.setUnderWaterFogDistance(80);
@@ -205,16 +261,16 @@ public class TerrainRenderer extends SimpleApplication {
     waterFilter.setFoamTexture((Texture2D) assetManager.loadTexture("Common/MatDefs/Water/Textures/foam2.jpg"));
     waterFilter.setRefractionStrength(0.2f);
     waterFilter.setWaterHeight(getWaterHeight());
-    
+
     waterFilter.setFoamIntensity(0.2f);
-//    waterFilter.setFoamExistence(new Vector3f(0.8f, 8f, 1f));
+    // waterFilter.setFoamExistence(new Vector3f(0.8f, 8f, 1f));
     waterFilter.setFoamExistence(new Vector3f(0.6f, 6f, 0.1f));
-    
-//    waterFilter.setWaveScale(0.001f);
+
+    // waterFilter.setWaveScale(0.001f);
     waterFilter.setWaveScale(0.0f);
 
   }
-  
+
   private void addBaseWaterPlane() {
     rootNode.attachChild(createWaterPlaneGeometry(5000));
   }
@@ -225,7 +281,7 @@ public class TerrainRenderer extends SimpleApplication {
     waterRoot.attachChild(createWaterPlaneGeometry(terGen.getSize()));
     waterRoot.setLocalTranslation(new Vector3f(0, getWaterHeight(), 0));
   }
-  
+
   private Geometry createWaterPlaneGeometry(float planeSize) {
     Geometry water = new Geometry("water", new Quad(planeSize * 2, planeSize * 2));
     water.setQueueBucket(Bucket.Transparent);
@@ -238,6 +294,5 @@ public class TerrainRenderer extends SimpleApplication {
     water.setMaterial(waterMat);
     return water;
   }
-
 
 }
