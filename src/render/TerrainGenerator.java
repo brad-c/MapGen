@@ -20,7 +20,7 @@ public class TerrainGenerator {
   private SimplexNoiseGen noiseGen = new SimplexNoiseGen();
 
   private int size = 512;
-  private float heightScale = 40;
+  private float heightScale = 160;
   private String baseHeightMapSource = "textures/circleGradLarge.png";
   private float noiseRatio = 1;
   private float erodeFilter = 0;
@@ -34,6 +34,11 @@ public class TerrainGenerator {
 
   private TerrainRenderer renderer;
   private float waterHeight = 20;
+  
+  //The reference heightmap resolution used to determine the appropriate
+  //horizontol spacing for noise sampling and vertical scale for rendered heights
+  //to ensure the appearance of te terrain is constant at different size
+  private static final int BASE_RESOLUTION = 2048;
 
   public void init(TerrainRenderer app) {
     this.renderer = app;
@@ -58,8 +63,9 @@ public class TerrainGenerator {
     for (int i = 0; i < noiseData.length; i++) {
       heightData[i] += (noiseData[i] * noiseRatio);
     }
+                        
     HeightMapUtil.normalise(heightData);
-    HeightMapUtil.scale(heightData, heightScale);
+    HeightMapUtil.scale(heightData, getRenderedHeightScale());
     logTime("Mix: ", t1);
 
     // ------ Create Terrain
@@ -100,10 +106,18 @@ public class TerrainGenerator {
 
   }
 
-  private void logTime(String string, long t1) {
-    System.out.println("TerrainApp.logTime: " + string + ": " + (System.currentTimeMillis() - t1));
+  public float getRenderScale() {
+    return (float)size/BASE_RESOLUTION;
   }
-
+  
+  public float getRenderedHeightScale() {
+    return getRenderScale()* heightScale;
+  }
+  
+  public Float getRenderedWaterHeight() {
+    return  getRenderScale() * waterHeight;
+  }
+  
   private void createTerrainMaterial() {
 
     terrainMat = new Material(renderer.getAssetManager(), "materials/terrain.j3md");
@@ -119,11 +133,11 @@ public class TerrainGenerator {
   public void setWaterHeight(float waterHeight) {
     this.waterHeight  = waterHeight;
     if(terrainMat != null) {
-      terrainMat.setFloat("WaterLevel", waterHeight);
+      terrainMat.setFloat("WaterLevel", getRenderedWaterHeight());
     }
     
   }
-  
+
   public void setSunDirection(Vector3f dir) {
     sunDir.set(dir);
     if (terrainMat != null) {
@@ -138,7 +152,7 @@ public class TerrainGenerator {
   public void setHeightScale(float heightScale) {
     this.heightScale = heightScale;
     if(terrainMat != null) {
-      terrainMat.setFloat("MaxHeight", heightScale);
+      terrainMat.setFloat("MaxHeight", getRenderedHeightScale());
     }
   }
   
@@ -178,8 +192,10 @@ public class TerrainGenerator {
     this.size = size;
     noiseGen.setSize(size);
     
-    double spacing = 2048d/size;
+    double spacing = BASE_RESOLUTION/size;
     noiseGen.setSampleSpacing(spacing);
+    //for rescaling of height values
+    setHeightScale(heightScale);
   }
 
   public SimplexNoiseGen getNoiseGenerator() {
@@ -215,7 +231,10 @@ public class TerrainGenerator {
   }
   
   
-  
+  private void logTime(String string, long t1) {
+//    System.out.println("TerrainApp.logTime: " + string + ": " + (System.currentTimeMillis() - t1));
+  }
+
   
 
 }

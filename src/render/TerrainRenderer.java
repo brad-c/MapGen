@@ -160,7 +160,7 @@ public class TerrainRenderer extends SimpleApplication {
   }
 
   public float getWaterHeight() {
-    return terGen.getHeightScale() * waterLevel;
+    return terGen.getRenderedHeightScale() * waterLevel;
   }
 
   public void setWaterLevel(float waterLevel) {
@@ -171,6 +171,8 @@ public class TerrainRenderer extends SimpleApplication {
     }
     if (waterFilter != null) {
       waterFilter.setWaterHeight(getWaterHeight());
+      float rs = terGen.getRenderScale();
+      waterFilter.setFoamExistence(new Vector3f(0.6f * rs, 6f * rs, 1f));
     }
   }
 

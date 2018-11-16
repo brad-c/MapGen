@@ -104,21 +104,24 @@ public class TerrainGui {
 
     JPanel genParamsPan1 = new JPanel(new FlowLayout(FlowLayout.LEFT));
     
-    genParamsPan1.add(new JLabel("Resolution"));
-    genParamsPan1.add(resolutionCB);
+    genParamsPan1.setBorder(new TitledBorder("Noise"));
+    genParamsPan1.add(seedPan);
+    genParamsPan1.add(seedB);
     genParamsPan1.add(octPan);
     genParamsPan1.add(roughPan);
     genParamsPan1.add(scalePan);
-    genParamsPan1.add(heightScalePan);
-    genParamsPan1.add(erodePan);
     
     JPanel genParamsPan2 = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+    
+    genParamsPan2.add(new JLabel("Resolution"));
+    genParamsPan2.add(resolutionCB);
+    genParamsPan2.add(heightScalePan);
+    genParamsPan2.add(erodePan);
+    genParamsPan2.add(noiseMixPan);
+    
     genParamsPan2.add(updateB);
     
     JPanel genParamsPan3 = new JPanel(new FlowLayout(FlowLayout.LEFT));
-    genParamsPan3.add(seedPan);
-    genParamsPan3.add(seedB);
-    genParamsPan3.add(noiseMixPan);
     
     JPanel ugPan = new JPanel();
     ugPan.setLayout(new BoxLayout(ugPan, BoxLayout.X_AXIS));
@@ -127,7 +130,7 @@ public class TerrainGui {
     
     
     JPanel genParamsPan = new JPanel();
-    genParamsPan.setBorder(new TitledBorder("Terrain Params"));
+    genParamsPan.setBorder(new TitledBorder("Terrain"));
     genParamsPan.setLayout(new BoxLayout(genParamsPan, BoxLayout.Y_AXIS));
     genParamsPan.add(genParamsPan1);
     genParamsPan.add(ugPan);
