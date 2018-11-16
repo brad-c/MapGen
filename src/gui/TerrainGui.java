@@ -32,10 +32,11 @@ import javax.vecmath.Vector3f;
 import com.jme3.system.AppSettings;
 import com.jme3.system.JmeCanvasContext;
 
-import gen.SimpleNoiseGen;
+import gen.SimplexNoiseGen;
 import gui.ResourceFinder.ResourceEntry;
-import render.TerrainApp;
-import render.TerrainApp.WaterType;
+import render.TerrainRenderer;
+import render.TerrainRenderer.WaterType;
+import render.TerrainGenerator;
 
 public class TerrainGui {
 
@@ -59,7 +60,7 @@ public class TerrainGui {
     });
   }
 
-  private TerrainApp app;
+  private TerrainRenderer app;
   private Canvas canvas;
   private JFrame frame;
 
@@ -164,17 +165,20 @@ public class TerrainGui {
 
   private void initComponenets() {
     
+    TerrainGenerator tGen = app.getTerrainGenerator();
+    SimplexNoiseGen nGen = tGen.getNoiseGenerator();
+    
     sampleCB = new JComboBox<>(new Integer[] {256,512,1024,2048});
-    sampleCB.setSelectedItem(app.getTerainSize());
+    sampleCB.setSelectedItem(tGen.getSize());
     
-    octPan = new IntPanel("Oct", 2, app.getTerrainGen().getOctaves());
-    roughPan = new DoublePanel("Rgh", 3, app.getTerrainGen().getRoughness());
-    scalePan = new DoublePanel("Scale", 4, app.getTerrainGen().getScale());
-    heightScalePan = new DoublePanel("Elv Scale", 3, app.getHeightScale());
+    octPan = new IntPanel("Oct", 2, nGen.getOctaves());
+    roughPan = new DoublePanel("Rgh", 3, nGen.getRoughness());
+    scalePan = new DoublePanel("Scale", 4, nGen.getScale());
+    heightScalePan = new DoublePanel("Elv Scale", 3, tGen.getHeightScale());
     
-    seedPan = new LongPanel("Seed", 15, app.getTerrainGen().getSeed());
+    seedPan = new LongPanel("Seed", 15, nGen.getSeed());
     
-    noiseMixPan = new DoublePanel("Noise Ratio", 3, app.getNoiseRatio());
+    noiseMixPan = new DoublePanel("Noise Ratio", 3, tGen.getNoiseRatio());
     
     updateB = new JButton("Update");
     seedB = new JButton("Roll");
@@ -198,14 +202,14 @@ public class TerrainGui {
     
     List<ResourceEntry> hipTex = ResourceFinder.INST.findTextures("hipso_");
     hipsoCB = new JComboBox<>(hipTex.toArray(new ResourceEntry[hipTex.size()]));
-    ResourceEntry sel = find(hipTex, app.getHipsoTex());
+    ResourceEntry sel = find(hipTex, tGen.getHipsoTex());
     if(sel != null) {
       hipsoCB.setSelectedItem(sel);
     }
     
     List<ResourceEntry> bathTex = ResourceFinder.INST.findTextures("bath_");
     bathCB = new JComboBox<>(bathTex.toArray(new ResourceEntry[bathTex.size()]));
-    sel = find(bathTex, app.getBathTexture());
+    sel = find(bathTex, tGen.getBathTexture());
     if(sel != null) {
       bathCB.setSelectedItem(sel);
     }
@@ -242,9 +246,10 @@ public class TerrainGui {
         app.enqueue(new Runnable() {
           @Override
           public void run() {
+            SimplexNoiseGen nGen = app.getTerrainGenerator().getNoiseGenerator();
             Random r = new Random();
-            app.getTerrainGen().setSeed(r.nextLong());
-            seedPan.tf.setText(app.getTerrainGen().getSeed() + "");
+            nGen.setSeed(r.nextLong());
+            seedPan.tf.setText(nGen.getSeed() + "");
             updateTerrain();
           }
         });
@@ -274,7 +279,7 @@ public class TerrainGui {
           @Override
           public void run() {
             ResourceEntry sel = hipsoCB.getItemAt(hipsoCB.getSelectedIndex());
-            app.setHipsoTexture(sel.resource);
+            app.getTerrainGenerator().setHipsoTexture(sel.resource);
           }
         });
 
@@ -289,7 +294,7 @@ public class TerrainGui {
           @Override
           public void run() {
             ResourceEntry sel = bathCB.getItemAt(bathCB.getSelectedIndex());
-            app.setBathTexture(sel.resource);
+            app.getTerrainGenerator().setBathTexture(sel.resource);
           }
         });
 
@@ -351,12 +356,12 @@ public class TerrainGui {
 
   }
 
-  public TerrainApp createApp() {
+  public TerrainRenderer createApp() {
     AppSettings settings = new AppSettings(true);
     settings.setWidth(640);
     settings.setHeight(480);
 
-    app = new TerrainApp();
+    app = new TerrainRenderer();
 
     app.setPauseOnLostFocus(false);
     app.setSettings(settings);
@@ -418,12 +423,16 @@ public class TerrainGui {
 
   private void updateTerrain() {
     
-    app.setSize(sampleCB.getItemAt(sampleCB.getSelectedIndex()));
-    app.setHeightScale((float) heightScalePan.getVal());
-    app.setErodeFilter((float) erodePan.getVal());
-    app.setNoiseRatio((float)noiseMixPan.getVal());
+    TerrainGenerator tGen = app.getTerrainGenerator();
     
-    SimpleNoiseGen gen = app.getTerrainGen();
+    tGen.setSize(sampleCB.getItemAt(sampleCB.getSelectedIndex()));
+    
+    tGen.setHeightScale((float) heightScalePan.getVal());
+    
+    tGen.setErodeFilter((float) erodePan.getVal());
+    tGen.setNoiseRatio((float)noiseMixPan.getVal());
+    
+    SimplexNoiseGen gen = tGen.getNoiseGenerator();
     if(seedPan.getVal() != 0) {
       gen.setSeed(seedPan.getVal());
     }

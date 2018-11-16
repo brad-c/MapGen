@@ -2,7 +2,7 @@ package gen;
 
 import noise.SimplexNoise;
 
-public class SimpleNoiseGen {
+public class SimplexNoiseGen {
 
   private int octaves = 12;
   private double roughness = 0.6;
@@ -18,7 +18,7 @@ public class SimpleNoiseGen {
   private transient float[] heightMap = null;
   private transient int genHash = -1;
   
-  public SimpleNoiseGen() {
+  public SimplexNoiseGen() {
   }
   
   public float[] getOrUpdateHeightMap() {
@@ -162,7 +162,7 @@ public class SimpleNoiseGen {
       return false;
     if (getClass() != obj.getClass())
       return false;
-    SimpleNoiseGen other = (SimpleNoiseGen) obj;
+    SimplexNoiseGen other = (SimplexNoiseGen) obj;
     if (height != other.height)
       return false;
     if (Float.floatToIntBits(heightScale) != Float.floatToIntBits(other.heightScale))
