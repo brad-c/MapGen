@@ -32,6 +32,7 @@ import javax.vecmath.Vector3f;
 import com.jme3.system.AppSettings;
 import com.jme3.system.JmeCanvasContext;
 
+import gen.SimpleNoiseGen;
 import gui.ResourceFinder.ResourceEntry;
 import render.TerrainApp;
 import render.TerrainApp.WaterType;
@@ -416,12 +417,21 @@ public class TerrainGui {
   }
 
   private void updateTerrain() {
-    if(seedPan.getVal() != 0) {
-      app.getTerrainGen().setSeed(seedPan.getVal());
-    }
+    
+    app.setSize(sampleCB.getItemAt(sampleCB.getSelectedIndex()));
     app.setHeightScale((float) heightScalePan.getVal());
+    app.setErodeFilter((float) erodePan.getVal());
     app.setNoiseRatio((float)noiseMixPan.getVal());
-    app.updateTerrain(sampleCB.getItemAt(sampleCB.getSelectedIndex()), octPan.getVal(), roughPan.getVal(), scalePan.getVal(), (float) erodePan.getVal());
+    
+    SimpleNoiseGen gen = app.getTerrainGen();
+    if(seedPan.getVal() != 0) {
+      gen.setSeed(seedPan.getVal());
+    }
+    gen.setOctaves(octPan.getVal());
+    gen.setRoughness(roughPan.getVal());
+    gen.setScale(scalePan.getVal());
+        
+    app.updateTerrain();
   }
 
 }

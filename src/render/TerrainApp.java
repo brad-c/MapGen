@@ -25,19 +25,20 @@ import com.jme3.water.WaterFilter;
 
 import crap.ImageHeightmapLoader;
 import gen.HeightMapUtil;
-import gen.TerrainGen;
+import gen.SimpleNoiseGen;
 
 public class TerrainApp extends SimpleApplication {
 
   private Material terrainMat;
   private TerrainQuad terrain;
-  private TerrainGen terrainGen = new TerrainGen();
+  private SimpleNoiseGen terrainGen = new SimpleNoiseGen();
   private Node waterRoot;
 
   private int size = 512;
   private float heightScale = 40;
-  private float waterLevel = 0.7f;
-  private Vector3f sunDir = new Vector3f(1, -1, 0).normalizeLocal();
+  private String baseHeightMapSource = "textures/circleGradLarge.png";
+  private float noiseRatio = 1;
+  private float erodeFilter = 0;
   
   public enum WaterType  {
     NONE,
@@ -46,15 +47,17 @@ public class TerrainApp extends SimpleApplication {
   };
   
   private Vector4f waterColor = new Vector4f(5/255f, 36/255f, 78/255f, 1.0f);
-
+  private float waterLevel = 0.7f;
   private WaterFilter waterFilter;
   private FilterPostProcessor waterPostProcessor;
   private WaterType waterType = WaterType.PURDY;
+  
   private String hipsoTex = "textures/hipso_one.png";
   private String bathTex = "textures/bath_dark.png";
   
-  private String baseHeightMapSource = "textures/circleGradLarge.png";
-  private float noiseRatio = 1;
+  private Vector3f sunDir = new Vector3f(1, -1, 0).normalizeLocal();
+  
+  
 
   public TerrainApp() {
 //     super((AppState[])null);
@@ -88,7 +91,7 @@ public class TerrainApp extends SimpleApplication {
    
     setWaterType(waterType);
     
-//    addBaseWaterPlane();
+    addBaseWaterPlane();
   }
   
   public void canvasResized() {
@@ -115,30 +118,32 @@ public class TerrainApp extends SimpleApplication {
     return size;
   }
   
-  public TerrainGen getTerrainGen() {
+  public float getErodeFilter() {
+    return erodeFilter;
+  }
+
+  public void setErodeFilter(float erodeFilter) {
+    this.erodeFilter = erodeFilter;
+  }
+
+  public int getSize() {
+    return size;
+  }
+
+  public void setSize(int size) {
+    this.size = size;
+    terrainGen.setSize(size);
+  }
+
+  public SimpleNoiseGen getTerrainGen() {
     return terrainGen;
   }
 
   public void updateTerrain() {
-    terrain.removeFromParent();
-    generateTerrain();
-  }
-
-  public void updateTerrain(long seed) {
-    terrainGen.setSeed(seed);
-    updateTerrain();
-  }
-
-  public void updateTerrain(int size, int octaves, double roughness, double scale, float erode) {
-    this.size = size;
-    terrainGen.setOctaves(octaves);
-    terrainGen.setRoughness(roughness);
-    terrainGen.setScale(scale);
-    if (terrain != null) {
+    if(terrain != null) {
       terrain.removeFromParent();
     }
-    generateTerrain(erode);
-
+    generateTerrain();
   }
   
   public void setHipsoTexture(String tex) {
@@ -337,41 +342,51 @@ public class TerrainApp extends SimpleApplication {
     return water;
   }
 
-  private void generateTerrain() {
-    generateTerrain(-1);
-  }
 
-  private void generateTerrain(float erodeFilter) {
+  private void generateTerrain() {
 
 //    float[] heightData = terrainGen.generateHeightmap(size, size, heightScale);
 
     
 //    baseHeightMapSource = "D:\\Dev\\TerrainGen\\MapGen\\resources\\textures\\gradTest.png";
+    long t1 = System.currentTimeMillis();
     float[] heightData = ImageHeightmapLoader.loadGrayScaleData(baseHeightMapSource, size, 1, true);
-    float[] noiseData = terrainGen.generateSimplexHeightmap(size, size, 1);
+    logTime("GS Image: " , t1);
+    
+    
+    t1 = System.currentTimeMillis();
+    float[] noiseData = terrainGen.getOrUpdateHeightMap();
+    logTime("Noise Gen: " , t1);
+    
+    t1 = System.currentTimeMillis();
     for(int i=0;i<noiseData.length;i++) {
       heightData[i] += (noiseData[i] * noiseRatio);
     }
     HeightMapUtil.normalise(heightData);
     HeightMapUtil.scale(heightData, heightScale);
+    logTime("Mix: " , t1);
     
 
     // ------ Create Terrain
-     
     AbstractHeightMap heightmap;
     heightmap = new RawHeightMap(heightData);
     
-    if (erodeFilter >= 0 && erodeFilter <= 1) {
+    
+    if (erodeFilter > 0 && erodeFilter <= 1) {
+      t1 = System.currentTimeMillis();
       try {
         heightmap.setMagnificationFilter(erodeFilter);
         heightmap.erodeTerrain();
       } catch (Exception e) {
         e.printStackTrace();
       }
-
+      logTime("Errode: " , t1);
     }
 
-    int patchSize = 65;
+    t1 = System.currentTimeMillis();
+    
+    //int patchSize = 65;
+    int patchSize = size + 1;
     terrain = new TerrainQuad("my terrain", patchSize, size + 1, heightmap.getHeightMap());
 
     /** 4. We give the terrain its material, position & scale it, and attach it. */
@@ -384,7 +399,13 @@ public class TerrainApp extends SimpleApplication {
     TerrainLodControl control = new TerrainLodControl(terrain, getCamera());
     control.getLodCalculator().turnOffLod();
     terrain.addControl(control);
+    
+    logTime("Terrain Construction", t1);
 
+  }
+
+  private void logTime(String string, long t1) {
+    System.out.println("TerrainApp.logTime: " + string + ": " + (System.currentTimeMillis() - t1));
   }
 
   
