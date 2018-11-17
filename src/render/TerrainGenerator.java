@@ -35,6 +35,9 @@ public class TerrainGenerator {
   private TerrainRenderer renderer;
   private float waterHeight = 20;
   
+  private boolean renderCoastline = true;
+  private float coastlineThickness = 0.8f;
+  
   //The reference heightmap resolution used to determine the appropriate
   //horizontol spacing for noise sampling and vertical scale for rendered heights
   //to ensure the appearance of te terrain is constant at different size
@@ -121,13 +124,40 @@ public class TerrainGenerator {
   private void createTerrainMaterial() {
 
     terrainMat = new Material(renderer.getAssetManager(), "materials/terrain.j3md");
-    terrainMat.setFloat("WaterLevel", waterHeight);
-    terrainMat.setFloat("MaxHeight", heightScale);
-    terrainMat.setVector4("WaterColor", waterColor);
-    terrainMat.setVector3("SunDir", sunDir);
-    setHipsoTexture(hipsoTex);
-    setBathTexture(bathTex);
+    
+    //apply defaults
+    setWaterHeight(getWaterHeight());
+    setHeightScale(getHeightScale());
+    setWaterHeight(getWaterHeight());
+    setSunDirection(getSunDirection());
+    setHipsoTexture(getHipsoTex());
+    setBathTexture(getBathTexture());
+    setCoastlineThickness(getCoastlineThickness());
+    setRenderCoastline(isRenderCoastline());
 
+  }
+  
+  
+  public boolean isRenderCoastline() {
+    return renderCoastline;
+  }
+
+  public void setRenderCoastline(boolean renderCoastline) {
+    this.renderCoastline = renderCoastline;
+    if(terrainMat != null) {
+      terrainMat.setBoolean("RenderCoastline", renderCoastline);
+    }
+  }
+
+  public float getCoastlineThickness() {
+    return coastlineThickness;
+  }
+
+  public void setCoastlineThickness(float coastlineThickness) {
+    this.coastlineThickness = coastlineThickness;
+    if(terrainMat != null)  {
+      terrainMat.setFloat("CoastlineThickness", coastlineThickness);
+    }
   }
   
   public void setWaterHeight(float waterHeight) {
@@ -135,8 +165,24 @@ public class TerrainGenerator {
     if(terrainMat != null) {
       terrainMat.setFloat("WaterLevel", getRenderedWaterHeight());
     }
-    
   }
+
+  public float getWaterHeight() {
+    return waterHeight;
+  }
+  
+  public Vector4f getWaterColor() {
+    return waterColor;
+  }
+
+  public void setWaterColor(Vector4f waterColor) {
+    this.waterColor = waterColor;
+    if(terrainMat != null) {
+      terrainMat.setVector4("WaterColor", waterColor);
+    }
+  }
+
+  
 
   public void setSunDirection(Vector3f dir) {
     sunDir.set(dir);

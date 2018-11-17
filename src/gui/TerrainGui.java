@@ -17,6 +17,7 @@ import java.util.concurrent.Callable;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -67,16 +68,20 @@ public class TerrainGui {
   private Canvas canvas;
   private JFrame frame;
 
-  //private IntPanel samplePan;
-  private JComboBox<Integer> resolutionCB;
   private IntPanel octPan;
   private DoublePanel roughPan;
   private DoublePanel scalePan;
-  private DoublePanel heightScalePan;
   private DoublePanel erodePan;
-  private DoublePanel noiseMixPan;
+  
   private LongPanel seedPan;
+  
+  private JComboBox<Integer> resolutionCB;
+  private DoublePanel noiseMixPan;
+  private DoublePanel heightScalePan;
 
+  private JCheckBox coastlineCB;
+  private JSlider coastlineThicknessSlider;
+  
   private JSlider sunSlider;
   private JSlider sunSlider2;
 
@@ -103,7 +108,6 @@ public class TerrainGui {
     addListeners();
 
     JPanel genParamsPan1 = new JPanel(new FlowLayout(FlowLayout.LEFT));
-    
     genParamsPan1.setBorder(new TitledBorder("Noise"));
     genParamsPan1.add(seedPan);
     genParamsPan1.add(seedB);
@@ -112,32 +116,22 @@ public class TerrainGui {
     genParamsPan1.add(scalePan);
     
     JPanel genParamsPan2 = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-    
+    genParamsPan2.setBorder(new TitledBorder("Terrain"));
     genParamsPan2.add(new JLabel("Resolution"));
     genParamsPan2.add(resolutionCB);
     genParamsPan2.add(heightScalePan);
     genParamsPan2.add(erodePan);
     genParamsPan2.add(noiseMixPan);
-    
     genParamsPan2.add(updateB);
     
-    JPanel genParamsPan3 = new JPanel(new FlowLayout(FlowLayout.LEFT));
-    
-    JPanel ugPan = new JPanel();
-    ugPan.setLayout(new BoxLayout(ugPan, BoxLayout.X_AXIS));
-    ugPan.add(genParamsPan3);
-    ugPan.add(genParamsPan2);
-    
-    
     JPanel genParamsPan = new JPanel();
-    genParamsPan.setBorder(new TitledBorder("Terrain"));
+    genParamsPan.setBorder(new TitledBorder("Terrain Definition"));
     genParamsPan.setLayout(new BoxLayout(genParamsPan, BoxLayout.Y_AXIS));
     genParamsPan.add(genParamsPan1);
-    genParamsPan.add(ugPan);
+    genParamsPan.add(genParamsPan2);
         
-
     JPanel sunPan = new JPanel(new FlowLayout(FlowLayout.LEFT));
-    sunPan.setBorder(new TitledBorder("Visuals"));
+    sunPan.setBorder(new TitledBorder("Shading"));
     sunPan.add(new JLabel("Sun"));
     sunPan.add(sunSlider);
     sunPan.add(sunSlider2);
@@ -152,14 +146,24 @@ public class TerrainGui {
     waterPan.add(waterLevelSlider);
     waterPan.add(new JLabel("Type"));
     waterPan.add(waterTypeCB);
+    
+    JPanel coastPan = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    coastPan.setBorder(new TitledBorder("Coast Outline"));
+    coastPan.add(coastlineCB);
+    coastPan.add(new JLabel("Thickness"));
+    coastPan.add(coastlineThicknessSlider);
+    
+    JPanel fooPan = new JPanel();
+    fooPan.setLayout(new BoxLayout(fooPan, BoxLayout.X_AXIS));
+    fooPan.add(waterPan);
+    fooPan.add(coastPan);
 
     // JPanel southPan = new JPanel(new GridLayout(3, 1));
     JPanel southPan = new JPanel();
     southPan.setLayout(new BoxLayout(southPan, BoxLayout.Y_AXIS));
-
     southPan.add(genParamsPan);
     southPan.add(sunPan);
-    southPan.add(waterPan);
+    southPan.add(fooPan);
     
     JPanel northPan = new JPanel(new FlowLayout(FlowLayout.LEFT));
     northPan.add(view3dB);
@@ -182,37 +186,40 @@ public class TerrainGui {
     TerrainGenerator tGen = app.getTerrainGenerator();
     SimplexNoiseGen nGen = tGen.getNoiseGenerator();
     
-    resolutionCB = new JComboBox<>(new Integer[] {256,512,1024,2048});
-    resolutionCB.setSelectedItem(tGen.getSize());
-    
+    //Noise
     octPan = new IntPanel("Oct", 2, nGen.getOctaves());
     roughPan = new DoublePanel("Rgh", 3, nGen.getRoughness());
     scalePan = new DoublePanel("Scale", 4, nGen.getScale());
     heightScalePan = new DoublePanel("Elv Scale", 3, tGen.getHeightScale());
-    
     seedPan = new LongPanel("Seed", 15, nGen.getSeed());
-    
-    noiseMixPan = new DoublePanel("Noise Ratio", 3, tGen.getNoiseRatio());
-    
-    updateB = new JButton("Update");
     seedB = new JButton("Roll");
+    
+    //Terrain
+    resolutionCB = new JComboBox<>(new Integer[] {256,512,1024,2048});
+    resolutionCB.setSelectedItem(tGen.getSize());
+    noiseMixPan = new DoublePanel("Noise Ratio", 3, tGen.getNoiseRatio());
+    erodePan = new DoublePanel("Erode", 2, 0);
+    updateB = new JButton("Update");
+    
 
+    //Visuals
     sunSlider = new JSlider(0, 100, 30);
     sunSlider2 = new JSlider(0, 100, 30);
     waterLevelSlider = new JSlider(0, 100, (int)(app.getWaterLevel() * 100));
     
-    Dimension sliderSize = new Dimension(100, waterLevelSlider.getPreferredSize().height);
+    Dimension sliderSize = new Dimension(80, waterLevelSlider.getPreferredSize().height);
     waterLevelSlider.setPreferredSize(sliderSize);
     sunSlider.setPreferredSize(sliderSize);
     sunSlider2.setPreferredSize(sliderSize);
 
-    erodePan = new DoublePanel("Erode", 2, 0);
-
     waterTypeCB = new JComboBox<>(WaterType.values());
     waterTypeCB.setSelectedItem(app.getWaterType());
+    
+    coastlineCB = new JCheckBox("Enabled");
+    coastlineCB.setSelected(tGen.isRenderCoastline());
+    coastlineThicknessSlider = new JSlider(60, 100, (int)(tGen.getCoastlineThickness() * 100));
+    coastlineThicknessSlider.setPreferredSize(sliderSize);
 
-    frame = new JFrame("Test");
-    frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     
     List<ResourceEntry> hipTex = ResourceFinder.INST.findTextures("hipso_");
     hipsoCB = new JComboBox<>(hipTex.toArray(new ResourceEntry[hipTex.size()]));
@@ -228,7 +235,7 @@ public class TerrainGui {
       bathCB.setSelectedItem(sel);
     }
     
-    
+    //Camera
     view3dB = new JToggleButton("3D");
     view2dB = new JToggleButton("2D");
     boolean is3d = app.getViewType() == ViewType.THREE_D;
@@ -238,6 +245,10 @@ public class TerrainGui {
     ButtonGroup bg = new ButtonGroup();
     bg.add(view2dB);
     bg.add(view3dB);
+    
+    //Frame
+    frame = new JFrame("Test");
+    frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     
   }
 
@@ -320,6 +331,35 @@ public class TerrainGui {
           public void run() {
             ResourceEntry sel = bathCB.getItemAt(bathCB.getSelectedIndex());
             app.getTerrainGenerator().setBathTexture(sel.resource);
+          }
+        });
+
+      }
+    });
+    
+    coastlineCB.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent arg0) {
+
+        app.enqueue(new Runnable() {
+          @Override
+          public void run() {
+            app.getTerrainGenerator().setRenderCoastline(coastlineCB.isSelected());
+          }
+        });
+
+      }
+    });
+    
+    coastlineThicknessSlider.addChangeListener(new ChangeListener() {
+
+      @Override
+      public void stateChanged(ChangeEvent e) {
+        app.enqueue(new Runnable() {
+          @Override
+          public void run() {
+            float val = coastlineThicknessSlider.getValue() / (float)coastlineThicknessSlider.getMaximum();
+            app.getTerrainGenerator().setCoastlineThickness(val);
           }
         });
 

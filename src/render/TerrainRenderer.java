@@ -38,6 +38,7 @@ public class TerrainRenderer extends SimpleApplication {
   private FilterPostProcessor waterPostProcessor;
   private WaterType waterType = WaterType.PURDY;
 
+  
   public enum ViewType {
     THREE_D,
     TWO_D,
@@ -51,10 +52,8 @@ public class TerrainRenderer extends SimpleApplication {
   private CameraState prevCamState3d;
 
   public TerrainRenderer() {
-    // super((AppState[])null);
     super(new FlyCamAppState(), new OrthoCamAppState());
     orthCamState = stateManager.getState(OrthoCamAppState.class);
-
   }
 
   @Override
@@ -86,11 +85,13 @@ public class TerrainRenderer extends SimpleApplication {
       fpp.setNumSamples(numSamples);
     }
     viewPort.addProcessor(fpp);
+    
+//    viewPort.setBackgroundColor(ColorRGBA.White);
 
     terGen.init(this);
 
     setWaterType(waterType);
-    addBaseWaterPlane();
+//    addBaseWaterPlane();
   }
 
   public void setViewType(ViewType type) {

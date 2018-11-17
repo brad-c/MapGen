@@ -7,6 +7,8 @@ MaterialDef Terrain {
         Float WaterLevel
         Float MaxHeight
         Vector3 SunDir
+        Boolean RenderCoastline
+        Float CoastlineThickness
         
     }
     
@@ -28,7 +30,9 @@ MaterialDef Terrain {
             HAS_WATER_LEVEL : WaterLevel  
             HAS_MAX_HEIGHT : MaxHeight 
             HAS_WATER_COLOR : WaterColor
-            HAS_SUN_DIR : SunDir     
+            HAS_SUN_DIR : SunDir  
+            RENDER_COASTLINE : RenderCoastline   
+            HAS_COASTLINE_THICKNESS : CoastlineThickness
         }
         
     }
