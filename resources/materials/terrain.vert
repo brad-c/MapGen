@@ -2,8 +2,6 @@
 #import "Common/ShaderLib/Instancing.glsllib"
   
 
-uniform vec4 g_LightDirection;
-uniform vec4 g_LightPosition;
 uniform float m_MaxHeight;
 uniform float m_WaterLevel;
 uniform vec3 m_SunDir;

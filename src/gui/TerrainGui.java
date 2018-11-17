@@ -37,6 +37,7 @@ import com.jme3.system.JmeCanvasContext;
 
 import gen.SimplexNoiseGen;
 import gui.ResourceFinder.ResourceEntry;
+import render.ColorFilter;
 import render.TerrainGenerator;
 import render.TerrainRenderer;
 import render.TerrainRenderer.ViewType;
@@ -68,37 +69,46 @@ public class TerrainGui {
   private Canvas canvas;
   private JFrame frame;
 
+  //View
+  private JToggleButton view3dB;
+  private JToggleButton view2dB;
+  
+  //Noise
   private IntPanel octPan;
   private DoublePanel roughPan;
   private DoublePanel scalePan;
   private DoublePanel erodePan;
-  
   private LongPanel seedPan;
   
+  //Terrain
   private JComboBox<Integer> resolutionCB;
   private DoublePanel noiseMixPan;
   private DoublePanel heightScalePan;
+  private JButton updateB;
+  private JButton seedB;
 
+  //Shading
+  private JSlider sunSlider;
+  private JSlider sunSlider2;
+  private JComboBox<ResourceFinder.ResourceEntry> hipsoCB;
+  private JComboBox<ResourceFinder.ResourceEntry> bathCB;
+  
+  //Coastline
   private JCheckBox coastlineCB;
   private JSlider coastlineThicknessSlider;
   
-  private JSlider sunSlider;
-  private JSlider sunSlider2;
-
-  private JSlider waterLevelSlider;
-  private JButton updateB;
-  private JButton seedB;
-  
-  private JComboBox<ResourceFinder.ResourceEntry> hipsoCB;
-  private JComboBox<ResourceFinder.ResourceEntry> bathCB;
-
+  //Water
   private JComboBox<WaterType> waterTypeCB;
-  
-  private JToggleButton view3dB;
-  private JToggleButton view2dB;
+  private JSlider waterLevelSlider;
+    
+  //Color Filter
+  private JCheckBox colorFilterEnabledCB;
+  private JCheckBox blackAndWhiteEnabledCB;
+  private JCheckBox invertColorsEnabledCB;
+  private JSlider brightnessSlider;
+  private JSlider contrastSlider;
 
   public TerrainGui() {
-      
   }
 
   private void createGui() {
@@ -157,6 +167,18 @@ public class TerrainGui {
     fooPan.setLayout(new BoxLayout(fooPan, BoxLayout.X_AXIS));
     fooPan.add(waterPan);
     fooPan.add(coastPan);
+    
+    JPanel colorPan = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    colorPan.setBorder(new TitledBorder("Color Filter"));
+    colorPan.add(colorFilterEnabledCB);
+    colorPan.add(blackAndWhiteEnabledCB);
+    colorPan.add(invertColorsEnabledCB);
+    colorPan.add(new JLabel("Brightness"));
+    colorPan.add(brightnessSlider);
+    colorPan.add(new JLabel("Contrast"));
+    colorPan.add(contrastSlider);
+    
+    
 
     // JPanel southPan = new JPanel(new GridLayout(3, 1));
     JPanel southPan = new JPanel();
@@ -164,6 +186,7 @@ public class TerrainGui {
     southPan.add(genParamsPan);
     southPan.add(sunPan);
     southPan.add(fooPan);
+    southPan.add(colorPan);
     
     JPanel northPan = new JPanel(new FlowLayout(FlowLayout.LEFT));
     northPan.add(view3dB);
@@ -202,24 +225,13 @@ public class TerrainGui {
     updateB = new JButton("Update");
     
 
-    //Visuals
+    Dimension sliderSize = new Dimension(80, new JSlider().getPreferredSize().height);
+    
+    //Shading
     sunSlider = new JSlider(0, 100, 30);
-    sunSlider2 = new JSlider(0, 100, 30);
-    waterLevelSlider = new JSlider(0, 100, (int)(app.getWaterLevel() * 100));
-    
-    Dimension sliderSize = new Dimension(80, waterLevelSlider.getPreferredSize().height);
-    waterLevelSlider.setPreferredSize(sliderSize);
     sunSlider.setPreferredSize(sliderSize);
+    sunSlider2 = new JSlider(0, 100, 30);
     sunSlider2.setPreferredSize(sliderSize);
-
-    waterTypeCB = new JComboBox<>(WaterType.values());
-    waterTypeCB.setSelectedItem(app.getWaterType());
-    
-    coastlineCB = new JCheckBox("Enabled");
-    coastlineCB.setSelected(tGen.isRenderCoastline());
-    coastlineThicknessSlider = new JSlider(60, 100, (int)(tGen.getCoastlineThickness() * 100));
-    coastlineThicknessSlider.setPreferredSize(sliderSize);
-
     
     List<ResourceEntry> hipTex = ResourceFinder.INST.findTextures("hipso_");
     hipsoCB = new JComboBox<>(hipTex.toArray(new ResourceEntry[hipTex.size()]));
@@ -234,6 +246,35 @@ public class TerrainGui {
     if(sel != null) {
       bathCB.setSelectedItem(sel);
     }
+    
+    
+    //Water
+    waterLevelSlider = new JSlider(0, 100, (int)(app.getWaterLevel() * 100));
+    waterLevelSlider.setPreferredSize(sliderSize);
+    waterTypeCB = new JComboBox<>(WaterType.values());
+    waterTypeCB.setSelectedItem(app.getWaterType());
+    
+    //Coastline
+    coastlineCB = new JCheckBox("Enabled");
+    coastlineCB.setSelected(tGen.isRenderCoastline());
+    coastlineThicknessSlider = new JSlider(60, 100, (int)(tGen.getCoastlineThickness() * 100));
+    coastlineThicknessSlider.setPreferredSize(sliderSize);
+
+    //Color Filter
+    ColorFilter cf = app.getColorFilter();
+    colorFilterEnabledCB = new JCheckBox("Enabled");
+    colorFilterEnabledCB.setSelected(cf.isEnabled());
+    blackAndWhiteEnabledCB = new JCheckBox("Black & White");
+    blackAndWhiteEnabledCB.setSelected(cf.isBlackAndWhite());
+    invertColorsEnabledCB = new JCheckBox("Invert Colors");
+    invertColorsEnabledCB.setSelected(cf.isInvertColors());
+    //map -1 to 1 to 0 to 100
+    int selVal = (int)((cf.getBrightness() + 1)/2 * 100);
+    brightnessSlider = new JSlider(0,100,selVal);
+    brightnessSlider.setPreferredSize(sliderSize);
+    selVal = (int)((cf.getContrast() + 1)/2 * 100);
+    contrastSlider = new JSlider(0,100,selVal);
+    contrastSlider.setPreferredSize(sliderSize);
     
     //Camera
     view3dB = new JToggleButton("3D");
@@ -365,6 +406,81 @@ public class TerrainGui {
 
       }
     });
+    
+    colorFilterEnabledCB.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent arg0) {
+
+        app.enqueue(new Runnable() {
+          @Override
+          public void run() {
+            app.getColorFilter().setEnabled(colorFilterEnabledCB.isSelected());
+          }
+        });
+
+      }
+    });
+    
+    blackAndWhiteEnabledCB.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent arg0) {
+
+        app.enqueue(new Runnable() {
+          @Override
+          public void run() {
+            app.getColorFilter().setBlackAndWhite(blackAndWhiteEnabledCB.isSelected());
+          }
+        });
+
+      }
+    });
+    
+    invertColorsEnabledCB.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent arg0) {
+
+        app.enqueue(new Runnable() {
+          @Override
+          public void run() {
+            app.getColorFilter().setInvertColors(invertColorsEnabledCB.isSelected());
+          }
+        });
+
+      }
+    });
+    
+    contrastSlider.addChangeListener(new ChangeListener() {
+
+      @Override
+      public void stateChanged(ChangeEvent e) {
+        app.enqueue(new Runnable() {
+          @Override
+          public void run() {
+            int selVal = contrastSlider.getValue();
+            float val = (selVal/100f * 2) - 1;
+            app.getColorFilter().setContrast(val);
+          }
+        });
+
+      }
+    });
+    
+    brightnessSlider.addChangeListener(new ChangeListener() {
+
+      @Override
+      public void stateChanged(ChangeEvent e) {
+        app.enqueue(new Runnable() {
+          @Override
+          public void run() {
+            int selVal = brightnessSlider.getValue();
+            float val = (selVal/100f * 2) - 1;
+            app.getColorFilter().setBrightness(val);
+          }
+        });
+
+      }
+    });
+    
 
     ChangeListener sunListener = (new ChangeListener() {
 
@@ -399,7 +515,6 @@ public class TerrainGui {
           public void run() {
             updateWaterLevel();
           }
-
         });
 
       }

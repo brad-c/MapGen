@@ -1,0 +1,29 @@
+MaterialDef ColorFilter {
+
+    MaterialParameters {       
+      Texture2D Texture   
+      Int NumSamples 
+      Boolean IsBlackAndWhite    
+      Boolean IsInvertColors
+      Float Brightness
+      Float Contrast
+    }
+    
+    Technique {
+
+        VertexShader GLSL100:   materials/colorFilter.vert
+        FragmentShader GLSL100: materials/colorFilter.frag
+
+        WorldParameters {            
+        }
+        
+        Defines {         
+          BLACK_AND_WHITE : IsBlackAndWhite
+          INVERT_COLORS : IsInvertColors
+          BRIGHTNESS : Brightness
+          CONTRAST : Contrast
+        }
+        
+    }
+    
+}

@@ -19,9 +19,6 @@ MaterialDef Terrain {
 
         WorldParameters {
             WorldViewProjectionMatrix
-            NormalMatrix
-            LightDirection
-            LightPosition
         }
         
          Defines {
