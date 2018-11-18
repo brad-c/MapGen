@@ -1,4 +1,4 @@
-package gui;
+package gui.widget;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -35,7 +35,7 @@ public class ColorButton extends JButton {
   public ColorButton(Color color) {
     this.color = color;
     setIcon(new ColorIcon());
-    int m = 2;
+    int m = 1;
     setMargin(new Insets(m, m, m, m));
     
     addActionListener(new ActionListener() {
@@ -49,10 +49,6 @@ public class ColorButton extends JButton {
 
   public Color getColor() {
     return color;
-  }
-  
-  public Vector3f getColor3f() {
-    return new Vector3f(color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f);
   }
 
   public void setColor(Color color) {

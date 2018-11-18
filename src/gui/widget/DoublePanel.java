@@ -1,10 +1,12 @@
-package gui;
+package gui.widget;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
 public class DoublePanel extends NumPanel {
 
+  private static final long serialVersionUID = 1L;
+  
   private double defVal;
   // private NumberFormat formatter = new DecimalFormat("#0.00000");
   private NumberFormat formatter = new DecimalFormat();

@@ -1,7 +1,9 @@
-package gui;
+package gui.widget;
 
 public class LongPanel extends NumPanel {
 
+  private static final long serialVersionUID = 1L;
+  
   private long defVal;
 
   public LongPanel(String label, int size, long defVal) {
@@ -17,5 +19,9 @@ public class LongPanel extends NumPanel {
       tf.setText(defVal + "");
       return defVal;
     }
+  }
+  
+  public void setVal(long val) {
+    tf.setText(val + "");
   }
 }

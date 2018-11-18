@@ -1,7 +1,9 @@
-package gui;
+package gui.widget;
 
 public class IntPanel extends NumPanel {
 
+  private static final long serialVersionUID = 1L;
+  
   private int defVal;
 
   public IntPanel(String label, int size, int defVal) {

@@ -16,6 +16,10 @@
   #endif
 #endif
 
+#ifdef HAS_DISCARD_WATER
+  uniform bool m_DiscardWater;  
+#endif
+
 uniform float m_AmbientLight;
 
 varying vec2 texCoord1;
@@ -64,10 +68,11 @@ void main(){
       }    
     #endif
     
-    //float gs = (color.r + color.g + color.b)/3.0;
-    //color = vec4(gs,gs,gs,1.0);
-    //color = vec4(1.0 - gs,1.0 - gs,1.0 - gs,1.0);
-    
+    #ifdef HAS_DISCARD_WATER    
+      if(m_DiscardWater && isWater >= 0.99) {
+        discard; 
+      }    
+    #endif
     
     color.w = 1.0;
 

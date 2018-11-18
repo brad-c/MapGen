@@ -26,9 +26,10 @@ public class TerrainGenerator {
   private float erodeFilter = 0;
 
   private String hipsoTex = "textures/hipso_one.png";
-
-  private Vector4f waterColor = new Vector4f(5 / 255f, 36 / 255f, 78 / 255f, 1.0f);
   private String bathTex = "textures/bath_dark.png";
+  private Vector4f waterColor = new Vector4f(5 / 255f, 36 / 255f, 78 / 255f, 1.0f);
+  
+  private boolean discardWater;
 
   private Vector3f sunDir = new Vector3f(1, -1, 0).normalizeLocal();
   private float ambientLight = 0;
@@ -38,6 +39,7 @@ public class TerrainGenerator {
   
   private boolean renderCoastline = true;
   private float coastlineThickness = 0.8f;
+  //TODO: Make support alpha
   private Vector3f coastlineColor = new Vector3f(0,0,0);
   
   //The reference heightmap resolution used to determine the appropriate
@@ -138,9 +140,21 @@ public class TerrainGenerator {
     setRenderCoastline(isRenderCoastline());
     setCoastlineColor(getCoastlineColor());
     setAmbientLight(getAmbientLight());
+    setDiscardWater(isDiscardWater());
   }
   
   
+  public boolean isDiscardWater() {
+    return discardWater;
+  }
+
+  public void setDiscardWater(boolean discardWater) {
+    this.discardWater = discardWater;
+    if(terrainMat != null) {
+      terrainMat.setBoolean("DiscardWater", discardWater);
+    }
+  }
+
   public boolean isRenderCoastline() {
     return renderCoastline;
   }

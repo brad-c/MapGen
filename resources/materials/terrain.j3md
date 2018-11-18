@@ -10,7 +10,8 @@ MaterialDef Terrain {
         Boolean RenderCoastline
         Float CoastlineThickness
         Vector3 CoastlineColor
-        Float AmbientLight        
+        Float AmbientLight
+        Boolean DiscardWater        
     }
     
     Technique {
@@ -31,6 +32,7 @@ MaterialDef Terrain {
             HAS_SUN_DIR : SunDir  
             RENDER_COASTLINE : RenderCoastline   
             HAS_COASTLINE_THICKNESS : CoastlineThickness
+            HAS_DISCARD_WATER : DiscardWater
         }
         
     }

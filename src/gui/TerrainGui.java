@@ -37,13 +37,18 @@ import com.jme3.system.AppSettings;
 import com.jme3.system.JmeCanvasContext;
 
 import gen.SimplexNoiseGen;
-import gui.ColorButton.ColorChangeListener;
 import gui.ResourceFinder.ResourceEntry;
+import gui.widget.ColorButton;
+import gui.widget.ColorButton.ColorChangeListener;
+import gui.widget.DoublePanel;
+import gui.widget.IntPanel;
+import gui.widget.LongPanel;
 import render.ColorFilter;
 import render.TerrainGenerator;
 import render.TerrainRenderer;
 import render.TerrainRenderer.ViewType;
 import render.TerrainRenderer.WaterType;
+import util.TypeUtil;
 
 public class TerrainGui {
 
@@ -111,6 +116,10 @@ public class TerrainGui {
   private JCheckBox invertColorsEnabledCB;
   private JSlider brightnessSlider;
   private JSlider contrastSlider;
+  
+  //layout
+  private JPanel rootPan;
+  private JPanel waterDetailsPan;
 
   public TerrainGui() {
   }
@@ -118,9 +127,18 @@ public class TerrainGui {
   private void createGui() {
 
     initComponenets();
-
+    addComponents();
     addListeners();
 
+    //We are pushing these values atm
+    updateSunPos();
+    updateWaterLevel();
+
+    frame.getContentPane().add(rootPan);
+    frame.pack();
+  }
+
+  private void addComponents() {
     JPanel genParamsPan1 = new JPanel(new FlowLayout(FlowLayout.LEFT));
     genParamsPan1.setBorder(new TitledBorder("Noise"));
     genParamsPan1.add(seedPan);
@@ -156,12 +174,16 @@ public class TerrainGui {
     sunPan.add(new JLabel(" Water Shading"));
     sunPan.add(bathCB);
     
+    waterDetailsPan = new JPanel(new BorderLayout(0,0));
     JPanel waterPan = new JPanel(new FlowLayout(FlowLayout.LEFT));
     waterPan.setBorder(new TitledBorder("Water"));
     waterPan.add(new JLabel("Level"));
     waterPan.add(waterLevelSlider);
     waterPan.add(new JLabel("Type"));
     waterPan.add(waterTypeCB);
+    waterPan.add(waterDetailsPan);
+    
+    updateWaterUI(); //set the correct details pan
     
     JPanel coastPan = new JPanel(new FlowLayout(FlowLayout.LEFT));
     coastPan.setBorder(new TitledBorder("Coast Outline"));
@@ -184,9 +206,7 @@ public class TerrainGui {
     colorPan.add(brightnessSlider);
     colorPan.add(new JLabel("Contrast"));
     colorPan.add(contrastSlider);
-    
-    
-
+        
     // JPanel southPan = new JPanel(new GridLayout(3, 1));
     JPanel southPan = new JPanel();
     southPan.setLayout(new BoxLayout(southPan, BoxLayout.Y_AXIS));
@@ -199,18 +219,24 @@ public class TerrainGui {
     northPan.add(view3dB);
     northPan.add(view2dB);
 
-    JPanel mainPan = new JPanel(new BorderLayout());
-    mainPan.add(northPan, BorderLayout.NORTH);
-    mainPan.add(canvas, BorderLayout.CENTER);
-    mainPan.add(southPan, BorderLayout.SOUTH);
-
-    updateSunPos();
-    updateWaterLevel();
-
-    frame.getContentPane().add(mainPan);
-    frame.pack();
+    rootPan = new JPanel(new BorderLayout());
+    rootPan.add(northPan, BorderLayout.NORTH);
+    rootPan.add(canvas, BorderLayout.CENTER);
+    rootPan.add(southPan, BorderLayout.SOUTH);
   }
 
+  private void updateWaterUI() {
+    Object type = waterTypeCB.getSelectedItem();
+    waterDetailsPan.removeAll();
+    if(type == WaterType.SIMPLE) {
+      waterDetailsPan.add(new SimpleWaterPanel(app), BorderLayout.CENTER);
+    } else if(type == WaterType.PURDY) {
+      waterDetailsPan.add(new PurdyWaterPanel(app), BorderLayout.CENTER);
+    }
+    waterDetailsPan.revalidate();
+    waterDetailsPan.repaint();
+  }
+  
   private void initComponenets() {
     
     TerrainGenerator tGen = app.getTerrainGenerator();
@@ -338,7 +364,7 @@ public class TerrainGui {
             SimplexNoiseGen nGen = app.getTerrainGenerator().getNoiseGenerator();
             Random r = new Random();
             nGen.setSeed(r.nextLong());
-            seedPan.tf.setText(nGen.getSeed() + "");
+            seedPan.setVal(nGen.getSeed());
             updateTerrain();
           }
         });
@@ -349,15 +375,16 @@ public class TerrainGui {
     waterTypeCB.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent arg0) {
-
         app.enqueue(new Runnable() {
           @Override
           public void run() {
             app.setWaterType(waterTypeCB.getItemAt(waterTypeCB.getSelectedIndex()));
           }
         });
+        updateWaterUI();
 
       }
+      
     });
     
     hipsoCB.addActionListener(new ActionListener() {
@@ -426,7 +453,7 @@ public class TerrainGui {
         app.enqueue(new Runnable() {
           @Override
           public void run() {
-            app.getTerrainGenerator().setCoastlineColor(coastlineColorB.getColor3f());
+            app.getTerrainGenerator().setCoastlineColor(TypeUtil.getColor3f(coastlineColorB.getColor()));
           }
         });
         
