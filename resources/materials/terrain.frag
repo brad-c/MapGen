@@ -16,6 +16,8 @@
   #endif
 #endif
 
+uniform float m_AmbientLight;
+
 varying vec2 texCoord1;
 varying float intensity;
 varying float isWater;
@@ -43,7 +45,9 @@ void main(){
     #endif
 
     color = mix(wcol, color, 1.0 - isWater);
-    color *= intensity;
+    //color *= intensity;
+    color *= m_AmbientLight + (intensity * (1.0 - m_AmbientLight));
+    
         
     #ifdef RENDER_COASTLINE        
       if(m_RenderCoastline) {                  

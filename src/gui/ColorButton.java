@@ -16,7 +16,9 @@ import javax.swing.JColorChooser;
 import com.jme3.math.Vector3f;
 
 public class ColorButton extends JButton {
-
+  
+  private static final long serialVersionUID = 1L;
+  
   private Color color;
   private int size = 16;
 
@@ -24,9 +26,12 @@ public class ColorButton extends JButton {
   
   public ColorButton() {
     this(Color.WHITE);
-    
   }
-
+  
+  public ColorButton(Vector3f colf) {
+    this(new Color(colf.x, colf.y, colf.z));
+  }
+  
   public ColorButton(Color color) {
     this.color = color;
     setIcon(new ColorIcon());
@@ -67,7 +72,6 @@ public class ColorButton extends JButton {
   }
 
   private void onPress() {
-    System.out.println("ColorButton.onPress: ");
     Color val = JColorChooser.showDialog(this, "Select Color", color);
     if (val != null) {
       setColor(val);

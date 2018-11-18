@@ -31,6 +31,7 @@ public class TerrainGenerator {
   private String bathTex = "textures/bath_dark.png";
 
   private Vector3f sunDir = new Vector3f(1, -1, 0).normalizeLocal();
+  private float ambientLight = 0;
 
   private TerrainRenderer renderer;
   private float waterHeight = 20;
@@ -136,7 +137,7 @@ public class TerrainGenerator {
     setCoastlineThickness(getCoastlineThickness());
     setRenderCoastline(isRenderCoastline());
     setCoastlineColor(getCoastlineColor());
-
+    setAmbientLight(getAmbientLight());
   }
   
   
@@ -195,7 +196,16 @@ public class TerrainGenerator {
     }
   }
 
-  
+  public float getAmbientLight() {
+    return ambientLight;
+  }
+
+  public void setAmbientLight(float ambientLight) {
+    this.ambientLight = ambientLight;
+    if(terrainMat != null) {
+      terrainMat.setFloat("AmbientLight", getAmbientLight());
+    }
+  }
 
   public void setSunDirection(Vector3f dir) {
     sunDir.set(dir);

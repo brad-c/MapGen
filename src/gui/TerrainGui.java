@@ -92,6 +92,7 @@ public class TerrainGui {
   //Shading
   private JSlider sunSlider;
   private JSlider sunSlider2;
+  private JSlider ambientSlider;
   private JComboBox<ResourceFinder.ResourceEntry> hipsoCB;
   private JComboBox<ResourceFinder.ResourceEntry> bathCB;
   
@@ -148,6 +149,8 @@ public class TerrainGui {
     sunPan.add(new JLabel("Sun"));
     sunPan.add(sunSlider);
     sunPan.add(sunSlider2);
+    sunPan.add(new JLabel("Ambient"));
+    sunPan.add(ambientSlider);
     sunPan.add(new JLabel("Terrain Shading"));
     sunPan.add(hipsoCB);
     sunPan.add(new JLabel(" Water Shading"));
@@ -236,6 +239,8 @@ public class TerrainGui {
     sunSlider.setPreferredSize(sliderSize);
     sunSlider2 = new JSlider(0, 100, 30);
     sunSlider2.setPreferredSize(sliderSize);
+    ambientSlider = new JSlider(0, 100, (int)(tGen.getAmbientLight() * 100));
+    ambientSlider.setPreferredSize(sliderSize);
     
     List<ResourceEntry> hipTex = ResourceFinder.INST.findTextures("hipso_");
     hipsoCB = new JComboBox<>(hipTex.toArray(new ResourceEntry[hipTex.size()]));
@@ -520,6 +525,21 @@ public class TerrainGui {
     sunSlider.addChangeListener(sunListener);
     sunSlider2.addChangeListener(sunListener);
 
+    
+    ambientSlider.addChangeListener(new ChangeListener() {
+
+      @Override
+      public void stateChanged(ChangeEvent e) {
+        app.enqueue(new Runnable() {
+          @Override
+          public void run() {
+            app.getTerrainGenerator().setAmbientLight(ambientSlider.getValue() / 100f);
+          }
+        });
+
+      }
+    });
+    
     frame.addWindowListener(new WindowAdapter() {
       @Override
       public void windowClosed(WindowEvent e) {

@@ -10,7 +10,7 @@ MaterialDef Terrain {
         Boolean RenderCoastline
         Float CoastlineThickness
         Vector3 CoastlineColor
-        
+        Float AmbientLight        
     }
     
     Technique {
