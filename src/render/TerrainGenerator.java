@@ -37,6 +37,7 @@ public class TerrainGenerator {
   
   private boolean renderCoastline = true;
   private float coastlineThickness = 0.8f;
+  private Vector3f coastlineColor = new Vector3f(0,0,0);
   
   //The reference heightmap resolution used to determine the appropriate
   //horizontol spacing for noise sampling and vertical scale for rendered heights
@@ -134,6 +135,7 @@ public class TerrainGenerator {
     setBathTexture(getBathTexture());
     setCoastlineThickness(getCoastlineThickness());
     setRenderCoastline(isRenderCoastline());
+    setCoastlineColor(getCoastlineColor());
 
   }
   
@@ -157,6 +159,17 @@ public class TerrainGenerator {
     this.coastlineThickness = coastlineThickness;
     if(terrainMat != null)  {
       terrainMat.setFloat("CoastlineThickness", coastlineThickness);
+    }
+  }
+  
+  public Vector3f getCoastlineColor() {
+    return coastlineColor;
+  }
+  
+  public void setCoastlineColor(Vector3f col) {
+    coastlineColor = col;
+    if(terrainMat != null)  {
+      terrainMat.setVector3("CoastlineColor", coastlineColor);
     }
   }
   
@@ -280,6 +293,8 @@ public class TerrainGenerator {
   private void logTime(String string, long t1) {
 //    System.out.println("TerrainApp.logTime: " + string + ": " + (System.currentTimeMillis() - t1));
   }
+
+  
 
   
 

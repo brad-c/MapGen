@@ -1,5 +1,7 @@
 package render;
 
+import java.awt.Canvas;
+
 import com.jme3.app.FlyCamAppState;
 import com.jme3.app.SimpleApplication;
 import com.jme3.material.Material;
@@ -96,6 +98,8 @@ public class TerrainRenderer extends SimpleApplication {
     postProcessor.addFilter(new FXAAFilter());
         
     setWaterType(getWaterType());
+    setWaterLevel(waterLevel);
+    
   }
 
   public void setViewType(ViewType type) {
@@ -131,12 +135,8 @@ public class TerrainRenderer extends SimpleApplication {
     return viewType;
   }
 
-  public void canvasResized() {
-    // These are all hacks for odd behaviour
-    setWaterType(getWaterType());
-    if (viewType == ViewType.TWO_D && orthCamState.isEnabled()) {
-      orthCamState.getController().updateFrustrum();
-    }
+  public void canvasResized(Canvas canvas) {
+    cam.resize(canvas.getWidth(), canvas.getHeight(), true);
   }
 
   public void updateTerrain() {
@@ -179,10 +179,16 @@ public class TerrainRenderer extends SimpleApplication {
       waterRoot.setLocalTranslation(new Vector3f(0, getWaterHeight(), 0));
     }
     if (waterFilter != null) {
-      waterFilter.setWaterHeight(getWaterHeight());
-      float rs = terGen.getRenderScale();
-      waterFilter.setFoamExistence(new Vector3f(0.6f * rs, 6f * rs, 1f));
+      updateWaterFilter();
     }
+  }
+
+  private void updateWaterFilter() {
+    waterFilter.setWaterHeight(getWaterHeight());
+    float rs = terGen.getRenderScale();
+    float startFade = Math.max(0.3f, 0.6f * rs);
+    float endFade = 6f * rs;
+    waterFilter.setFoamExistence(new Vector3f(startFade, endFade, 1f));
   }
 
   public WaterType getWaterType() {
@@ -255,25 +261,22 @@ public class TerrainRenderer extends SimpleApplication {
     waterFilter.setDeepWaterColor(new ColorRGBA().setAsSrgb(0.0039f, 0.00196f, 0.145f, 1.0f));
     waterFilter.setUnderWaterFogDistance(80);
     waterFilter.setWaterTransparency(0.12f);
-    waterFilter.setFoamIntensity(0.4f);
     waterFilter.setFoamHardness(0.3f);
-    waterFilter.setFoamExistence(new Vector3f(0.8f, 8f, 1f));
     waterFilter.setReflectionDisplace(50);
     waterFilter.setRefractionConstant(0.25f);
     waterFilter.setColorExtinction(new Vector3f(30, 50, 70));
     waterFilter.setCausticsIntensity(0.4f);
     waterFilter.setWaveScale(0.003f);
-    waterFilter.setMaxAmplitude(2f);
+//    waterFilter.setMaxAmplitude(2f);
+    waterFilter.setMaxAmplitude(0f);
     waterFilter.setFoamTexture((Texture2D) assetManager.loadTexture("Common/MatDefs/Water/Textures/foam2.jpg"));
     waterFilter.setRefractionStrength(0.2f);
-    waterFilter.setWaterHeight(getWaterHeight());
-
-    waterFilter.setFoamIntensity(0.2f);
-    // waterFilter.setFoamExistence(new Vector3f(0.8f, 8f, 1f));
-    waterFilter.setFoamExistence(new Vector3f(0.6f, 6f, 0.1f));
-
-    // waterFilter.setWaveScale(0.001f);
+ // waterFilter.setWaveScale(0.001f);
+    
     waterFilter.setWaveScale(0.0f);
+    waterFilter.setFoamIntensity(0.2f);
+    
+    updateWaterFilter();
     
     return waterFilter;
   }

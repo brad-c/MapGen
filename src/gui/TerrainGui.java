@@ -2,6 +2,7 @@ package gui;
 
 import java.awt.BorderLayout;
 import java.awt.Canvas;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
@@ -36,6 +37,7 @@ import com.jme3.system.AppSettings;
 import com.jme3.system.JmeCanvasContext;
 
 import gen.SimplexNoiseGen;
+import gui.ColorButton.ColorChangeListener;
 import gui.ResourceFinder.ResourceEntry;
 import render.ColorFilter;
 import render.TerrainGenerator;
@@ -96,6 +98,7 @@ public class TerrainGui {
   //Coastline
   private JCheckBox coastlineCB;
   private JSlider coastlineThicknessSlider;
+  private ColorButton coastlineColorB;
   
   //Water
   private JComboBox<WaterType> waterTypeCB;
@@ -162,6 +165,7 @@ public class TerrainGui {
     coastPan.add(coastlineCB);
     coastPan.add(new JLabel("Thickness"));
     coastPan.add(coastlineThicknessSlider);
+    coastPan.add(coastlineColorB);
     
     JPanel fooPan = new JPanel();
     fooPan.setLayout(new BoxLayout(fooPan, BoxLayout.X_AXIS));
@@ -259,6 +263,9 @@ public class TerrainGui {
     coastlineCB.setSelected(tGen.isRenderCoastline());
     coastlineThicknessSlider = new JSlider(60, 100, (int)(tGen.getCoastlineThickness() * 100));
     coastlineThicknessSlider.setPreferredSize(sliderSize);
+    com.jme3.math.Vector3f colf = tGen.getCoastlineColor();
+    coastlineColorB = new ColorButton(new Color(colf.x, colf.y, colf.z));
+    
 
     //Color Filter
     ColorFilter cf = app.getColorFilter();
@@ -407,6 +414,20 @@ public class TerrainGui {
       }
     });
     
+    coastlineColorB.addColorListener(new ColorChangeListener() {
+      
+      @Override
+      public void colorChanged(Color newColor) {
+        app.enqueue(new Runnable() {
+          @Override
+          public void run() {
+            app.getTerrainGenerator().setCoastlineColor(coastlineColorB.getColor3f());
+          }
+        });
+        
+      }
+    });
+    
     colorFilterEnabledCB.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent arg0) {
@@ -527,7 +548,7 @@ public class TerrainGui {
         app.enqueue(new Runnable() {
           @Override
           public void run() {
-            app.canvasResized();
+            app.canvasResized(canvas);
           }
         });
       }

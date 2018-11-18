@@ -9,6 +9,7 @@ MaterialDef Terrain {
         Vector3 SunDir
         Boolean RenderCoastline
         Float CoastlineThickness
+        Vector3 CoastlineColor
         
     }
     

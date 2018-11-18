@@ -10,6 +10,7 @@
 #endif
 #ifdef RENDER_COASTLINE
   uniform bool m_RenderCoastline;
+  uniform vec3 m_CoastlineColor;
   #ifdef HAS_COASTLINE_THICKNESS
     uniform float m_CoastlineThickness;
   #endif
@@ -53,7 +54,7 @@ void main(){
          #endif  
          thinness = clamp(thinness, 0.001, 0.999);       
          if(isWater < 1.0 - thinness && isWater > thinness) {
-           color = vec4(0.0,0.0,0.0,1.0);
+           color = vec4(m_CoastlineColor,1.0);
          } 
          //else { discard; }
       }    
