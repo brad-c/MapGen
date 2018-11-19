@@ -10,6 +10,7 @@ import com.jme3.terrain.heightmap.RawHeightMap;
 import com.jme3.texture.Texture;
 
 import crap.ImageHeightmapLoader;
+import gen.DefaultElevationRamp;
 import gen.HeightMapUtil;
 import gen.SimplexNoiseGen;
 
@@ -34,7 +35,7 @@ public class TerrainGenerator {
   private Vector3f sunDir = new Vector3f(1, -1, 0).normalizeLocal();
   private float ambientLight = 0;
 
-  private TerrainRenderer renderer;
+  private WorldRenderer renderer;
   private float waterHeight = 20;
   
   private boolean renderCoastline = true;
@@ -47,14 +48,12 @@ public class TerrainGenerator {
   //to ensure the appearance of te terrain is constant at different size
   private static final int BASE_RESOLUTION = 2048;
 
-  public void init(TerrainRenderer app) {
+  public void init(WorldRenderer app) {
     this.renderer = app;
     createTerrainMaterial();
   }
 
   public TerrainQuad generateTerrain() {
-
-    // float[] heightData = terrainGen.generateHeightmap(size, size, heightScale);
 
     // baseHeightMapSource =
     // "D:\\Dev\\TerrainGen\\MapGen\\resources\\textures\\gradTest.png";
@@ -70,10 +69,23 @@ public class TerrainGenerator {
     for (int i = 0; i < noiseData.length; i++) {
       heightData[i] += (noiseData[i] * noiseRatio);
     }
-                        
     HeightMapUtil.normalise(heightData);
-    HeightMapUtil.scale(heightData, getRenderedHeightScale());
     logTime("Mix: ", t1);
+    
+    t1 = System.currentTimeMillis();
+    DefaultElevationRamp ramp = new DefaultElevationRamp();
+    ramp.setB(20f);
+    float waterRat = getRenderedWaterHeight() / getRenderedHeightScale();
+    heightData = ramp.apply(heightData, waterRat, 1);
+    logTime("Ramp: ", t1);
+    
+    t1 = System.currentTimeMillis();
+    HeightMapUtil.scale(heightData, getRenderedHeightScale());
+    logTime("Scale: ", t1);
+    
+    
+    
+    
 
     // ------ Create Terrain
     AbstractHeightMap heightmap;
@@ -315,7 +327,7 @@ public class TerrainGenerator {
   
   
   private void logTime(String string, long t1) {
-//    System.out.println("TerrainApp.logTime: " + string + ": " + (System.currentTimeMillis() - t1));
+    System.out.println("TerrainApp.logTime: " + string + ": " + (System.currentTimeMillis() - t1));
   }
 
   

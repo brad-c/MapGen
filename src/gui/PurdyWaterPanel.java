@@ -13,7 +13,7 @@ import javax.swing.event.ChangeListener;
 import gui.widget.ColorButton;
 import gui.widget.ColorButton.ColorChangeListener;
 import render.PurdyWater;
-import render.TerrainRenderer;
+import render.WorldRenderer;
 import util.TypeUtil;
 
 public class PurdyWaterPanel extends JPanel {
@@ -24,7 +24,7 @@ public class PurdyWaterPanel extends JPanel {
   private ColorButton deepColorB;
   private JSlider transpSlider;
 
-  public PurdyWaterPanel(final TerrainRenderer ren) {
+  public PurdyWaterPanel(final WorldRenderer ren) {
 
     final PurdyWater water = ren.getPurdyWater();
 
@@ -38,9 +38,9 @@ public class PurdyWaterPanel extends JPanel {
     setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
     add(new JLabel("Shallow:"));
     add(colorB);
-    add(new JLabel("Seep:"));
+    add(new JLabel("Deep: "));
     add(deepColorB);
-    add(new JLabel("Transp:"));
+    add(new JLabel("Transp: "));
     add(transpSlider);
 
     colorB.addColorListener(new ColorChangeListener() {

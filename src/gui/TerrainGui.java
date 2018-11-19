@@ -45,9 +45,9 @@ import gui.widget.IntPanel;
 import gui.widget.LongPanel;
 import render.ColorFilter;
 import render.TerrainGenerator;
-import render.TerrainRenderer;
-import render.TerrainRenderer.ViewType;
-import render.TerrainRenderer.WaterType;
+import render.WorldRenderer;
+import render.WorldRenderer.ViewType;
+import render.WorldRenderer.WaterType;
 import util.TypeUtil;
 
 public class TerrainGui {
@@ -72,7 +72,7 @@ public class TerrainGui {
     });
   }
 
-  private TerrainRenderer app;
+  private WorldRenderer app;
   private Canvas canvas;
   private JFrame frame;
 
@@ -632,12 +632,12 @@ public class TerrainGui {
 
   }
 
-  public TerrainRenderer createApp() {
+  public WorldRenderer createApp() {
     AppSettings settings = new AppSettings(true);
     settings.setWidth(640);
     settings.setHeight(480);
 
-    app = new TerrainRenderer();
+    app = new WorldRenderer();
 
     app.setPauseOnLostFocus(false);
     app.setSettings(settings);

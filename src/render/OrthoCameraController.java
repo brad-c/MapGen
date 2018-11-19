@@ -45,9 +45,9 @@ public class OrthoCameraController implements AnalogListener, ActionListener {
   private Vector2f panOffset = new Vector2f();
   private float zoomScale = 512;
 
-  private TerrainRenderer terrainRenderer;
+  private WorldRenderer terrainRenderer;
 
-  public OrthoCameraController(TerrainRenderer terrainRenderer) {
+  public OrthoCameraController(WorldRenderer terrainRenderer) {
     this.camera = terrainRenderer.getCamera();
     this.terrainRenderer = terrainRenderer;
     zoomScale = terrainRenderer.getTerrainGenerator().getSize();

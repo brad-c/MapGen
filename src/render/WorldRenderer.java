@@ -22,7 +22,7 @@ import com.jme3.terrain.geomipmap.TerrainQuad;
 import render.CameraStateIO.CameraState;
 import util.TypeUtil;
 
-public class TerrainRenderer extends SimpleApplication {
+public class WorldRenderer extends SimpleApplication {
 
   public enum WaterType {
     NONE,
@@ -57,7 +57,7 @@ public class TerrainRenderer extends SimpleApplication {
   private CameraState prevCamState3d;
   
 
-  public TerrainRenderer() {
+  public WorldRenderer() {
     super(new FlyCamAppState(), new OrthoCamAppState());
     orthCamState = stateManager.getState(OrthoCamAppState.class);
     

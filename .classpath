@@ -95,5 +95,6 @@
 	<classpathentry kind="lib" path="D:/Dev/TerrainGen/JMonkeyBinaries/lib/vecmath.jar"/>
 	<classpathentry kind="lib" path="D:/Dev/TerrainGen/JMonkeyBinaries/lib/xpp3.jar"/>
 	<classpathentry kind="lib" path="D:/Dev/TerrainGen/JMonkeyBinaries/jMonkeyEngine3.jar" sourcepath="D:/Dev/TerrainGen/jmonkeyengine/jme3-examples/src"/>
+	<classpathentry kind="lib" path="D:/Dev/TerrainGen/commons-math3-3.6.1/commons-math3-3.6.1.jar" sourcepath="D:/Dev/TerrainGen/commons-math3-3.6.1/commons-math3-3.6.1-sources.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

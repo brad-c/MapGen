@@ -10,7 +10,7 @@ import com.jme3.math.Vector4f;
 
 import gui.widget.ColorButton;
 import gui.widget.ColorButton.ColorChangeListener;
-import render.TerrainRenderer;
+import render.WorldRenderer;
 import util.TypeUtil;
 
 public class SimpleWaterPanel extends JPanel {
@@ -19,7 +19,7 @@ public class SimpleWaterPanel extends JPanel {
 
   private ColorButton cb;
   
-  public SimpleWaterPanel(final TerrainRenderer ren) {
+  public SimpleWaterPanel(final WorldRenderer ren) {
     
     Vector4f c4 = ren.getSimpleWaterColor();
     cb = new ColorButton(new Vector3f(c4.x, c4.y, c4.z));

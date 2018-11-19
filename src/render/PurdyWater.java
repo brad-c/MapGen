@@ -16,13 +16,13 @@ public class PurdyWater {
 
   private float waterTransparency = 0.12f;
   
-  private transient TerrainRenderer renderer;
+  private transient WorldRenderer renderer;
   
   public PurdyWater() {
     
   }
   
-  public void init(TerrainRenderer renderer) {
+  public void init(WorldRenderer renderer) {
     this.renderer = renderer;
   
     waterFilter = new WaterFilter(renderer.getRootNode(), renderer.getTerrainGenerator().getSunDirection());
@@ -91,7 +91,7 @@ public class PurdyWater {
     }
   }
 
-  public TerrainRenderer getRenderer() {
+  public WorldRenderer getRenderer() {
     return renderer;
   }
 

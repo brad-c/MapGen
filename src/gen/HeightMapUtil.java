@@ -2,9 +2,8 @@ package gen;
 
 public class HeightMapUtil {
 
-  
   public static void scale(float[] hm, float heightScale) {
-    for(int i=0;i<hm.length;i++) {
+    for (int i = 0; i < hm.length; i++) {
       hm[i] *= heightScale;
     }
   }
@@ -15,12 +14,19 @@ public class HeightMapUtil {
     // + minMax[1]);
 
     for (int i = 0; i < hm.length; i++) {
-        hm[i] = normalise(hm[i], minMax[0], minMax[1]);
+      hm[i] = normalise(hm[i], minMax[0], minMax[1]);
     }
   }
 
   public static float normalise(float val, float min, float max) {
     float normalised = val + -min;
+    max += -min;
+    normalised /= max;
+    return normalised;
+  }
+
+  public static double normalise(double val, double min, double max) {
+    double normalised = val + -min;
     max += -min;
     normalised /= max;
     return normalised;
@@ -37,5 +43,8 @@ public class HeightMapUtil {
     return res;
   }
 
-  
+  public static double clamp(double val, double min, double max) {
+    return (val < min) ? min : (val > max) ? max : val;
+  }
+
 }
