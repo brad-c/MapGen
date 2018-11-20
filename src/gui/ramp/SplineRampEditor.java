@@ -1,8 +1,11 @@
-package gui;
+package gui.ramp;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
@@ -12,6 +15,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.vecmath.Vector2d;
@@ -34,15 +38,16 @@ public class SplineRampEditor {
   }
   
   private JPanel rootPan;
-  private SplineRenderPanel renPan;
+  private LineRenderPanel renPan;
 
   private List<Vector2d> controlPoints;
+  private JButton removeB;
 
   public SplineRampEditor() {
     
     controlPoints = new ArrayList<>();
     
-    renPan = new SplineRenderPanel();
+    renPan = new LineRenderPanel();
     renPan.setPreferredSize(new Dimension(800, 800));
     renPan.setFocusable(true);
 
@@ -51,10 +56,33 @@ public class SplineRampEditor {
     renPan.addMouseMotionListener(ih);
     renPan.addKeyListener(ih);
 
+    JButton addB = new JButton("Add");
+    removeB = new JButton("Remove");
+    removeB.setEnabled(false);
+    removeB.addActionListener(new ActionListener() {
+      
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        deletedSelectedControlPoint();
+      }
+    });
+    addB.addActionListener(new ActionListener() {
+      
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        addControlPoint();
+      }
+      
+    });
+    
+    JPanel southPan = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+    southPan.add(addB);
+    southPan.add(removeB);
+    
     rootPan = new JPanel(new BorderLayout());
     rootPan.add(renPan, BorderLayout.CENTER);
-    
-    
+    rootPan.add(southPan, BorderLayout.SOUTH);
+        
     controlPoints.add(new Vector2d(0.5,0.5));
     updateLine();
   }
@@ -128,16 +156,63 @@ public class SplineRampEditor {
     if(selIndex < 0) {
       return;
     }
-        
     List<Vector2d> oldCps = new ArrayList<>(controlPoints);
     controlPoints.remove(renPan.getSelectedIndex());
     if(updateLine()) {
-      renPan.setSelectedIndex(-1);
+      setSelectedIndex(-1);
     } else {
       System.out.println("SplineRampEditor.deletedSelectedControlPoint: Failed delete");
       controlPoints = oldCps;
     }
+  }
+  
+  private void addControlPoint() {
     
+    PolynomialSplineFunction func = getInterpFunc();
+    if(func == null) {
+      System.out.println("SplineRampEditor.addControlPoint: Could not add to invalid func");
+      return;
+    }
+
+    double xVal = 0.5;
+    int tries = 0;
+    boolean changed = true;
+    while(changed && tries < 100) {
+      double newVal = checkX(xVal);
+      if(newVal != xVal) {
+        changed = true;
+        xVal = newVal;
+      } else {
+        changed = false;
+      }
+      tries++;
+    }
+    
+    if (!func.isValidPoint(xVal)) {
+      System.out.println("SplineRampEditor.addControlPoint: Invlaid x value: " + xVal);
+      return;
+    }
+    double yVal = func.value(xVal);
+    Vector2d newPoint = new Vector2d(xVal, yVal);
+    controlPoints.add(newPoint);
+    if (!updateLine()) {
+      controlPoints.remove(newPoint);
+    }
+    
+  }
+
+  private double checkX(double xVal) {
+    for(Vector2d cp : controlPoints) {
+      if(Math.abs(cp.x - xVal) < 0.01) {
+        xVal += 0.01;
+      }
+    }
+    return xVal;
+  }
+
+  private void setSelectedIndex(int i) {
+    renPan.setSelectedIndex(i);
+    removeB.setEnabled(i >= 0 && controlPoints.size() > 1);
   }
 
   private class InputHandler extends MouseAdapter implements KeyListener {
@@ -150,6 +225,7 @@ public class SplineRampEditor {
     @Override
     public void mousePressed(MouseEvent evt) {
       isMouseInPanel = true;
+      renPan.requestFocus();
       if (evt.getButton() == 1) {
         int selectedIndex = renPan.getControlPointAt(evt.getX(), evt.getY());
         if (selectedIndex >= 0) {
@@ -157,7 +233,7 @@ public class SplineRampEditor {
           selX = evt.getX();
           selY = evt.getY();
         }
-        renPan.setSelectedIndex(selectedIndex);
+        setSelectedIndex(selectedIndex);
         renPan.revalidate();
         renPan.repaint();
 
@@ -223,7 +299,6 @@ public class SplineRampEditor {
     @Override
     public void keyPressed(KeyEvent e) {
       if(e.getKeyCode() == KeyEvent.VK_DELETE) {
-        System.out.println("SplineRampEditor.InputHandler.keyPressed: delete");
         deletedSelectedControlPoint();
       }
     }

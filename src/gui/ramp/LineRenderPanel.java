@@ -1,14 +1,16 @@
-package gui;
+package gui.ramp;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JPanel;
 import javax.vecmath.Vector2d;
 
-public class SplineRenderPanel extends JPanel {
+public class LineRenderPanel extends JPanel {
 
   private static final long serialVersionUID = 1L;
 
@@ -20,7 +22,7 @@ public class SplineRenderPanel extends JPanel {
 
   private int cpSize = 12;
   
-  public SplineRenderPanel() {
+  public LineRenderPanel() {
   }
 
   public int[] getOffsets() {
@@ -38,6 +40,13 @@ public class SplineRenderPanel extends JPanel {
 
   @Override
   public void paint(Graphics g) {
+    
+    Graphics2D g2 = (Graphics2D)g;
+    RenderingHints rh = new RenderingHints(
+             RenderingHints.KEY_ANTIALIASING,
+             RenderingHints.VALUE_ANTIALIAS_ON);
+    g2.setRenderingHints(rh);
+    
     int w = getWidth();
     int h = getHeight();
     g.setColor(Color.BLACK);

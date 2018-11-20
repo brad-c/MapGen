@@ -13,7 +13,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.vecmath.Vector2d;
 
-import gen.DefaultElevationRamp;
+import gen.ExponentialElevationRamp;
 import gen.HeightMapUtil;
 
 public class RampTest {
@@ -64,7 +64,7 @@ public class RampTest {
       heights[i] = x;
     }
 
-    DefaultElevationRamp ramp = new DefaultElevationRamp();
+    ExponentialElevationRamp ramp = new ExponentialElevationRamp();
     heights = ramp.apply(heights, 0.5f, 1);
 
     for (int i = 0; i < numPoints; i++) {

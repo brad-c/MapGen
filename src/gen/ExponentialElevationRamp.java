@@ -1,11 +1,11 @@
 package gen;
 
-public class DefaultElevationRamp extends ElevationRamp {
+public class ExponentialElevationRamp extends ElevationRamp {
 
   private float b;
   private float maxVal;
   
-  public DefaultElevationRamp() {
+  public ExponentialElevationRamp() {
     //func = y = b^x - 1
     setB(100);
   }
@@ -24,6 +24,10 @@ public class DefaultElevationRamp extends ElevationRamp {
     float res = applyFunc(inVal);
     res = HeightMapUtil.normalise(res, 0, maxVal);
     return res;
+  }
+
+  public float getB() {
+    return b;
   }
 
   

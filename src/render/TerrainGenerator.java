@@ -10,7 +10,7 @@ import com.jme3.terrain.heightmap.RawHeightMap;
 import com.jme3.texture.Texture;
 
 import crap.ImageHeightmapLoader;
-import gen.DefaultElevationRamp;
+import gen.ExponentialElevationRamp;
 import gen.HeightMapUtil;
 import gen.SimplexNoiseGen;
 
@@ -73,7 +73,7 @@ public class TerrainGenerator {
     logTime("Mix: ", t1);
     
     t1 = System.currentTimeMillis();
-    DefaultElevationRamp ramp = new DefaultElevationRamp();
+    ExponentialElevationRamp ramp = new ExponentialElevationRamp();
     ramp.setB(20f);
     float waterRat = getRenderedWaterHeight() / getRenderedHeightScale();
     heightData = ramp.apply(heightData, waterRat, 1);
