@@ -23,11 +23,13 @@ import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 
 import gen.HeightMapUtil;
+import gui.SplineRampEditor;
 
 public class Crap {
 
   public static void main(String[] args) {
-    new CurveTest();
+   // new CurveTest();
+    SplineRampEditor.showTestFrame();
   }
 
   private static class CurveTest {
@@ -46,49 +48,52 @@ public class Crap {
         private int selectedIndex = -1;
         private int selX;
         private int selY;
+        private boolean isDragging;
 
         @Override
         public void mousePressed(MouseEvent evt) {
           if (evt.getButton() == 1) {
             selectedIndex = getControlPointAt(evt.getX(), evt.getY());
             if (selectedIndex >= 0) {
-              System.out.println("Crap: Hit");
+              isDragging = true;
               selX = evt.getX();
               selY = evt.getY();
-            } else {
-              System.out.println("Crap: Miss");
             }
+            pan.setSelectedIndex(selectedIndex);
+            pan.revalidate();
+            pan.repaint();
+
           } else {
-            System.out.println("Crap.CurveTest.CurveTest().new MouseAdapter() {...}.mousePressed: ");
+
             int[] offsets = pan.getOffsets();
             int x = evt.getX() - offsets[0];
             int y = evt.getY() - offsets[1];
-            double dx = (double)x / pan.getRenderSize();
-            double dy = (double)x / pan.getRenderSize();
-            
-            Vector2d newPoint = new Vector2d(dx,dy);
+            double dx = (double) x / pan.getRenderSize();
+            double dy = (double) y / pan.getRenderSize();
+            dy = 1 - dy;
+            Vector2d newPoint = new Vector2d(dx, dy);
             controlPoints.add(newPoint);
-            if(!updateLine()) {
+            if (!updateLine()) {
               controlPoints.remove(newPoint);
             }
-            
+
           }
-          
+
         }
 
         @Override
         public void mouseReleased(MouseEvent e) {
-          selectedIndex = -1;
+          isDragging = false;
         }
 
         @Override
         public void mouseExited(MouseEvent e) {
-          selectedIndex = -1;
+          // selectedIndex = -1;
         }
 
         @Override
         public void mouseDragged(MouseEvent e) {
-          if (selectedIndex < 0) {
+          if (!isDragging) {
             return;
           }
 
@@ -140,21 +145,20 @@ public class Crap {
     }
 
     private int getControlPointAt(int x, int y) {
-      
+
       int[] offsets = pan.getOffsets();
       x = x - offsets[0];
       y = y - offsets[1];
-      
+
       int panSize = pan.getRenderSize();
       // flip y
       y = panSize - y;
-      
+
       // do all calcs in normalised space
       Vector2d click = new Vector2d((double) x / panSize, (double) y / panSize);
       double halfRange = pan.cpSize / (double) panSize / 2;
       int index = 0;
       for (Vector2d cp : controlPoints) {
-        System.out.println("Crap.CurveTest.getControlPointAt: " + cp);
         Vector2d min = new Vector2d(cp.x - halfRange, cp.y - halfRange);
         Vector2d max = new Vector2d(cp.x + halfRange, cp.y + halfRange);
         if (inBounds(click, min, max)) {
@@ -170,7 +174,7 @@ public class Crap {
     }
 
     private boolean updateLine() {
-      
+
       Collections.sort(controlPoints, new Comparator<Vector2d>() {
 
         @Override
@@ -178,7 +182,7 @@ public class Crap {
           return Double.compare(o1.x, o2.x);
         }
       });
-      
+
       List<Vector2d> cps = new ArrayList<>(controlPoints.size() + 2);
       cps.add(new Vector2d(0.0, 0.0));
       // deep copy
@@ -202,10 +206,8 @@ public class Crap {
       try {
         interpa = si.interpolate(cpX, cpY);
       } catch (Exception e) {
-        System.out.println("Crap.CurveTest.calcLine: " + e);
         return false;
       }
-      System.out.println("Crap.CurveTest.updateLine: ");
 
       for (int i = 0; i < numSamples; i++) {
         double rat = (double) i / (numSamples - 1);
@@ -213,14 +215,12 @@ public class Crap {
           res[i] = new Vector2d(rat, interpa.value(rat));
           res[i].y = HeightMapUtil.clamp(res[i].y, 0d, 1d);
         } else {
-          //res[i] = new Vector2d(rat, 0);
-          System.out.println("Crap.CurveTest.updateLine: !!!!!");
           return false;
         }
       }
 
-      pan.controlPoints = cps;
-      pan.points = res;
+      pan.setControlPoints(controlPoints);
+      pan.setPoints(res);
       pan.revalidate();
       pan.repaint();
       return true;
@@ -228,14 +228,16 @@ public class Crap {
 
   }
 
-  private static class GraphaPan extends JPanel {
+  public static class GraphaPan extends JPanel {
 
     private Vector2d[] points;
 
     private List<Vector2d> controlPoints;
 
+    private int selectedIndex = -1;
+
     private int cpSize = 12;
-    
+
     public int[] getOffsets() {
       int w = getWidth();
       int h = getHeight();
@@ -246,7 +248,7 @@ public class Crap {
       } else if (h > w) {
         yOffset = (h - w) / 2;
       }
-      return new int[] {xOffset,yOffset};
+      return new int[] { xOffset, yOffset };
     }
 
     @Override
@@ -258,9 +260,9 @@ public class Crap {
 
       h = Math.min(w, h);
       w = h;
-      
+
       int[] o = getOffsets();
-      g.translate(o[0],o[1]);
+      g.translate(o[0], o[1]);
 
       g.setColor(Color.WHITE);
       g.fillRect(0, 0, w, h);
@@ -268,15 +270,24 @@ public class Crap {
       if (controlPoints != null) {
         g.setColor(Color.BLACK);
         for (int i = 0; i < controlPoints.size(); i++) {
+
           Vector2d loc = controlPoints.get(i);
           int x = (int) (loc.x * w) - cpSize / 2;
           int y = (int) (loc.y * h) + cpSize / 2;
           y = h - y;
+
+          if (i == selectedIndex) {
+            int thick = 3;
+            g.setColor(Color.RED);
+            g.fillRect(x - thick, y - thick, cpSize + thick * 2, cpSize + thick * 2);
+          }
+
           g.setColor(Color.BLACK);
           g.fillRect(x, y, cpSize, cpSize);
-          g.setColor(Color.CYAN);
+          g.setColor(Color.WHITE);
           int indent = 3;
           g.fillRect(x + indent, y + indent, cpSize - indent * 2, cpSize - indent * 2);
+
         }
       }
 
@@ -300,6 +311,30 @@ public class Crap {
 
     public int getRenderSize() {
       return getWidth() > getHeight() ? getHeight() : getWidth();
+    }
+
+    public Vector2d[] getPoints() {
+      return points;
+    }
+
+    public void setPoints(Vector2d[] points) {
+      this.points = points;
+    }
+
+    public List<Vector2d> getControlPoints() {
+      return controlPoints;
+    }
+
+    public void setControlPoints(List<Vector2d> controlPoints) {
+      this.controlPoints = controlPoints;
+    }
+
+    public int getSelectedIndex() {
+      return selectedIndex;
+    }
+
+    public void setSelectedIndex(int selectedIndex) {
+      this.selectedIndex = selectedIndex;
     }
 
   }
