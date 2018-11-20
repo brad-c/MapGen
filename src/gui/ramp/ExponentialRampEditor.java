@@ -3,10 +3,13 @@ package gui.ramp;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -37,8 +40,14 @@ public class ExponentialRampEditor {
   private ExponentialElevationRamp ramp;
   
   private List<ElevationRampListener> listeners = new CopyOnWriteArrayList<>();
+  private JSlider slider;
+  private JCheckBox invertCB;
 
   public ExponentialRampEditor() {
+    this(true);
+  }
+  
+  public ExponentialRampEditor(boolean north) {
 
     ramp = new ExponentialElevationRamp();
 
@@ -47,8 +56,7 @@ public class ExponentialRampEditor {
     renPan.setFocusable(true);
 
     int selVal = (int)(getSliderRatioFromB(ramp.getB()) * 100);
-    JSlider slider = new JSlider(1,100,selVal);
-    //slider.setPreferredSize(new Dimension(600, slider.getPreferredSize().height));
+    slider = new JSlider(1,100,selVal);
     slider.addChangeListener(new ChangeListener() {
       
       @Override
@@ -56,11 +64,23 @@ public class ExponentialRampEditor {
         float rat = slider.getValue()/100f;
         float b = getBFromSliderRatio(rat);
         ramp.setB(b);
-        
+
         for(ElevationRampListener l : listeners) {
           l.elevationRampChanged(ramp);
         }
-        
+        updateLine();
+      }
+    });
+    
+    invertCB = new JCheckBox("Invert", ramp.isInvert());
+    invertCB.addActionListener(new ActionListener() {
+      
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        ramp.setInvert(invertCB.isSelected());
+        for(ElevationRampListener l : listeners) {
+          l.elevationRampChanged(ramp);
+        }
         updateLine();
       }
     });
@@ -70,13 +90,18 @@ public class ExponentialRampEditor {
     sliderPan.setBorder(new EmptyBorder(6, 6, 6, 6));
     sliderPan.add(new JLabel("Slope: "), BorderLayout.WEST);
     sliderPan.add(slider, BorderLayout.CENTER);
+    sliderPan.add(invertCB, BorderLayout.EAST);
     
     JPanel southPan = new JPanel(new BorderLayout());
     southPan.add(sliderPan, BorderLayout.CENTER);
     
     rootPan = new JPanel(new BorderLayout());
     rootPan.add(renPan, BorderLayout.CENTER);
-    rootPan.add(southPan, BorderLayout.SOUTH);
+    if(north) {
+      rootPan.add(southPan, BorderLayout.NORTH);
+    } else {
+      rootPan.add(southPan, BorderLayout.SOUTH);
+    }
 
     updateLine();
   }
@@ -87,6 +112,9 @@ public class ExponentialRampEditor {
   
   public void setRamp(ExponentialElevationRamp ramp) {
     this.ramp = ramp;
+    int selVal = (int)(getSliderRatioFromB(ramp.getB()) * 100);
+    slider.setValue(selVal);
+    invertCB.setSelected(ramp.isInvert());
     updateLine();
   }
   
@@ -114,6 +142,10 @@ public class ExponentialRampEditor {
   public Component getEditor() {
     return rootPan;
   }
+  
+  public LineRenderPanel getGraphRenderer() {
+    return renPan;
+  }
 
   private boolean updateLine() {
 
@@ -131,6 +163,8 @@ public class ExponentialRampEditor {
     renPan.repaint();
     return true;
   }
+
+  
 
   
 

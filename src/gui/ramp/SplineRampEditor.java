@@ -27,7 +27,6 @@ import gen.SplineElevationRamp;
 
 public class SplineRampEditor {
 
-  
   public static void showTestFrame() {
     SplineRampEditor ed = new SplineRampEditor();
     JFrame f = new JFrame();
@@ -36,7 +35,7 @@ public class SplineRampEditor {
     f.pack();
     f.setVisible(true);
   }
-  
+
   private JPanel rootPan;
   private LineRenderPanel renPan;
 
@@ -44,13 +43,17 @@ public class SplineRampEditor {
   private JButton removeB;
 
   private SplineElevationRamp ramp = new SplineElevationRamp();
-  
+
   private List<ElevationRampListener> listeners = new CopyOnWriteArrayList<>();
-  
+
   public SplineRampEditor() {
-    
+    this(true);
+  }
+
+  public SplineRampEditor(boolean north) {
+
     controlPoints = new ArrayList<>();
-    
+
     renPan = new LineRenderPanel();
     renPan.setPreferredSize(new Dimension(400, 400));
     renPan.setFocusable(true);
@@ -64,33 +67,41 @@ public class SplineRampEditor {
     removeB = new JButton("Remove");
     removeB.setEnabled(false);
     removeB.addActionListener(new ActionListener() {
-      
+
       @Override
       public void actionPerformed(ActionEvent e) {
         deletedSelectedControlPoint();
       }
     });
     addB.addActionListener(new ActionListener() {
-      
+
       @Override
       public void actionPerformed(ActionEvent e) {
         addControlPoint();
       }
-      
+
     });
-    
+
     JPanel southPan = new JPanel(new FlowLayout(FlowLayout.RIGHT));
     southPan.add(addB);
     southPan.add(removeB);
-    
+
     rootPan = new JPanel(new BorderLayout());
     rootPan.add(renPan, BorderLayout.CENTER);
-    rootPan.add(southPan, BorderLayout.SOUTH);
-        
-    controlPoints.add(new Vector2d(0.5,0.5));
+    if(north) {
+      rootPan.add(southPan, BorderLayout.NORTH);
+    } else {
+      rootPan.add(southPan, BorderLayout.SOUTH);
+    }
+
+    controlPoints.add(new Vector2d(0.5, 0.5));
     updateLine();
   }
 
+  public LineRenderPanel getGraphRenderer() {
+    return renPan;
+  }
+  
   public Component getEditor() {
     return rootPan;
   }
@@ -98,17 +109,18 @@ public class SplineRampEditor {
   public ElevationRamp getRamp() {
     return ramp;
   }
-  
+
   public void setRamp(SplineElevationRamp ramp) {
     this.ramp = ramp;
     controlPoints = ramp.getControlPoints();
+    updateLine();
   }
 
   private boolean updateRamp() {
     SplineElevationRamp ramp = new SplineElevationRamp();
-    if(ramp.setControlPoints(controlPoints)) {
+    if (ramp.setControlPoints(controlPoints)) {
       this.ramp = ramp;
-      for(ElevationRampListener l : listeners) {
+      for (ElevationRampListener l : listeners) {
         l.elevationRampChanged(ramp);
       }
       return true;
@@ -117,15 +129,15 @@ public class SplineRampEditor {
       return false;
     }
   }
-  
+
   public void addElevationRampListener(ElevationRampListener listener) {
-    if(listener != null) {
+    if (listener != null) {
       listeners.add(listener);
     }
   }
-  
+
   public void removeElevationRampListener(ElevationRampListener listener) {
-    if(listener != null) {
+    if (listener != null) {
       listeners.remove(listener);
     }
   }
@@ -140,11 +152,10 @@ public class SplineRampEditor {
       }
     });
 
-
-    if(!updateRamp()) {
+    if (!updateRamp()) {
       return false;
     }
-    if(ramp == null) {
+    if (ramp == null) {
       return false;
     }
 
@@ -154,7 +165,7 @@ public class SplineRampEditor {
     for (int i = 0; i < numSamples; i++) {
       double rat = (double) i / (numSamples - 1);
       if (ramp.isValidPoint(rat)) {
-        Vector2d point = new Vector2d(rat, ramp.applyRamp((float)rat));
+        Vector2d point = new Vector2d(rat, ramp.applyRamp((float) rat));
         point.y = HeightMapUtil.clamp(point.y, 0d, 1d);
         res.add(point);
       } else {
@@ -168,30 +179,30 @@ public class SplineRampEditor {
     renPan.repaint();
     return true;
   }
-  
+
   private void deletedSelectedControlPoint() {
     int selIndex = renPan.getSelectedIndex();
-    if(selIndex < 0) {
+    if (selIndex < 0) {
       return;
     }
     List<Vector2d> oldCps = new ArrayList<>(controlPoints);
     controlPoints.remove(renPan.getSelectedIndex());
-    if(updateLine()) {
+    if (updateLine()) {
       setSelectedIndex(-1);
     } else {
       System.out.println("SplineRampEditor.deletedSelectedControlPoint: Failed delete");
       controlPoints = oldCps;
     }
   }
-  
+
   private void addControlPoint() {
 
     double xVal = 0.5;
     int tries = 0;
     boolean changed = true;
-    while(changed && tries < 100) {
+    while (changed && tries < 100) {
       double newVal = checkX(xVal);
-      if(newVal != xVal) {
+      if (newVal != xVal) {
         changed = true;
         xVal = newVal;
       } else {
@@ -199,23 +210,23 @@ public class SplineRampEditor {
       }
       tries++;
     }
-    
+
     if (!ramp.isValidPoint(xVal)) {
       System.out.println("SplineRampEditor.addControlPoint: Invlaid x value: " + xVal);
       return;
     }
-    double yVal = ramp.applyRamp((float)xVal);
+    double yVal = ramp.applyRamp((float) xVal);
     Vector2d newPoint = new Vector2d(xVal, yVal);
     controlPoints.add(newPoint);
     if (!updateLine()) {
       controlPoints.remove(newPoint);
     }
-    
+
   }
 
   private double checkX(double xVal) {
-    for(Vector2d cp : controlPoints) {
-      if(Math.abs(cp.x - xVal) < 0.01) {
+    for (Vector2d cp : controlPoints) {
+      if (Math.abs(cp.x - xVal) < 0.01) {
         xVal += 0.01;
       }
     }
@@ -310,7 +321,7 @@ public class SplineRampEditor {
 
     @Override
     public void keyPressed(KeyEvent e) {
-      if(e.getKeyCode() == KeyEvent.VK_DELETE) {
+      if (e.getKeyCode() == KeyEvent.VK_DELETE) {
         deletedSelectedControlPoint();
       }
     }
@@ -320,7 +331,5 @@ public class SplineRampEditor {
     }
 
   }
-
-  
 
 }

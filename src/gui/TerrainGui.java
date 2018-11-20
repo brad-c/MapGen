@@ -38,6 +38,7 @@ import com.jme3.system.JmeCanvasContext;
 
 import gen.SimplexNoiseGen;
 import gui.ResourceFinder.ResourceEntry;
+import gui.ramp.TerrainElevationRampEditor;
 import gui.widget.ColorButton;
 import gui.widget.ColorButton.ColorChangeListener;
 import gui.widget.DoublePanel;
@@ -93,6 +94,7 @@ public class TerrainGui {
   private DoublePanel heightScalePan;
   private JButton updateB;
   private JButton seedB;
+  private JButton landRampB;
 
   //Shading
   private JSlider sunSlider;
@@ -153,6 +155,8 @@ public class TerrainGui {
     genParamsPan2.add(resolutionCB);
     genParamsPan2.add(heightScalePan);
     genParamsPan2.add(erodePan);
+    genParamsPan2.add(new JLabel("Land Ramp"));
+    genParamsPan2.add(landRampB);
     genParamsPan2.add(noiseMixPan);
     genParamsPan2.add(updateB);
     
@@ -256,6 +260,7 @@ public class TerrainGui {
     noiseMixPan = new DoublePanel("Noise Ratio", 3, tGen.getNoiseRatio());
     erodePan = new DoublePanel("Erode", 2, 0);
     updateB = new JButton("Update");
+    landRampB = new JButton("...");
     
 
     Dimension sliderSize = new Dimension(80, new JSlider().getPreferredSize().height);
@@ -341,6 +346,16 @@ public class TerrainGui {
   }
 
   private void addListeners() {
+    
+    landRampB.addActionListener(new ActionListener() {
+      
+      @Override
+      public void actionPerformed(ActionEvent e) {
+//        ElevationRampEditor.showEditorFrame(app);
+        TerrainElevationRampEditor.showEditorFrame(frame, app);
+      }
+    });
+    
     updateB.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent arg0) {

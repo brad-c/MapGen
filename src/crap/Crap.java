@@ -1,6 +1,6 @@
 package crap;
 
-import gui.ramp.ElevationRampEditor;
+import gui.ramp.TerrainElevationRampEditor;
 
 public class Crap {
 
@@ -8,7 +8,8 @@ public class Crap {
    // new CurveTest();
 //    SplineRampEditor.showTestFrame();
 //    ExponentialRampEditor.showTestFrame();
-    ElevationRampEditor.showTestFrame();
+//    ElevationRampEditor.showTestFrame();
+    TerrainElevationRampEditor.showTestFrame();
   }
 
 }

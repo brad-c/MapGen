@@ -21,35 +21,42 @@ public class LineRenderPanel extends JPanel {
   private int selectedIndex = -1;
 
   private int cpSize = 12;
-  
+
+  private double xAlign = 0.5;
+  private double yAlign = 0.5;
+
   public LineRenderPanel() {
+    setBackground(Color.BLACK);
   }
 
+  public void setAlignment(double xAlighn, double yAlighn) {
+    this.xAlign = xAlighn;
+    this.yAlign = yAlighn;
+  }
+  
   public int[] getOffsets() {
     int w = getWidth();
     int h = getHeight();
     int xOffset = 0;
     int yOffset = 0;
     if (w > h) {
-      xOffset = (w - h) / 2;
+      xOffset = (int)((w - h) * xAlign);
     } else if (h > w) {
-      yOffset = (h - w) / 2;
+      yOffset = (int)((w - h) * yAlign);
     }
     return new int[] { xOffset, yOffset };
   }
 
   @Override
   public void paint(Graphics g) {
-    
-    Graphics2D g2 = (Graphics2D)g;
-    RenderingHints rh = new RenderingHints(
-             RenderingHints.KEY_ANTIALIASING,
-             RenderingHints.VALUE_ANTIALIAS_ON);
+
+    Graphics2D g2 = (Graphics2D) g;
+    RenderingHints rh = new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
     g2.setRenderingHints(rh);
-    
+
     int w = getWidth();
     int h = getHeight();
-    g.setColor(Color.BLACK);
+    g.setColor(getBackground());
     g.fillRect(0, 0, w, h);
 
     h = Math.min(w, h);
@@ -105,10 +112,10 @@ public class LineRenderPanel extends JPanel {
 
   public int getControlPointAt(int x, int y) {
 
-    if(controlPoints == null) {
-      return - 1;
+    if (controlPoints == null) {
+      return -1;
     }
-    
+
     int[] offsets = getOffsets();
     x = x - offsets[0];
     y = y - offsets[1];
@@ -131,44 +138,44 @@ public class LineRenderPanel extends JPanel {
     }
     return -1;
   }
-  
+
   private boolean inBounds(Vector2d cp, Vector2d min, Vector2d max) {
     return cp.x >= min.x && cp.x <= max.x && cp.y >= min.y && cp.y <= max.y;
   }
-  
+
   public int getRenderSize() {
     return getWidth() > getHeight() ? getHeight() : getWidth();
   }
 
   public void setPoints(List<Vector2d> newPoints) {
     points = new ArrayList<>(newPoints == null ? 0 : newPoints.size());
-    if(newPoints == null) {
+    if (newPoints == null) {
       return;
     }
-    for(Vector2d p : newPoints) {
+    for (Vector2d p : newPoints) {
       points.add(new Vector2d(p));
     }
   }
 
   public void setControlPoints(List<Vector2d> newPoints) {
     controlPoints = new ArrayList<>(newPoints == null ? 0 : newPoints.size());
-    if(newPoints == null) {
+    if (newPoints == null) {
       return;
     }
-    for(Vector2d p : newPoints) {
+    for (Vector2d p : newPoints) {
       controlPoints.add(new Vector2d(p));
     }
-    
+
   }
 
   public void setSelectedIndex(int selectedIndex) {
     this.selectedIndex = selectedIndex;
   }
-  
+
   public int getSelectedIndex() {
     return selectedIndex;
   }
-  
+
   public int getControlPointSize() {
     return cpSize;
   }
