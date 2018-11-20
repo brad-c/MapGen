@@ -5,14 +5,18 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.vecmath.Vector2d;
 
+import gen.ElevationRamp;
 import gen.ExponentialElevationRamp;
 import gen.HeightMapUtil;
 
@@ -31,17 +35,20 @@ public class ExponentialRampEditor {
   private LineRenderPanel renPan;
 
   private ExponentialElevationRamp ramp;
+  
+  private List<ElevationRampListener> listeners = new CopyOnWriteArrayList<>();
 
   public ExponentialRampEditor() {
 
     ramp = new ExponentialElevationRamp();
 
     renPan = new LineRenderPanel();
-    renPan.setPreferredSize(new Dimension(800, 800));
+    renPan.setPreferredSize(new Dimension(400, 400));
     renPan.setFocusable(true);
 
     int selVal = (int)(getSliderRatioFromB(ramp.getB()) * 100);
     JSlider slider = new JSlider(1,100,selVal);
+    //slider.setPreferredSize(new Dimension(600, slider.getPreferredSize().height));
     slider.addChangeListener(new ChangeListener() {
       
       @Override
@@ -49,25 +56,52 @@ public class ExponentialRampEditor {
         float rat = slider.getValue()/100f;
         float b = getBFromSliderRatio(rat);
         ramp.setB(b);
+        
+        for(ElevationRampListener l : listeners) {
+          l.elevationRampChanged(ramp);
+        }
+        
         updateLine();
       }
     });
-    //slider.setPreferredSize(new Dimension(500, slider.getPreferredSize().height));
     
-    //JPanel southPan = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-//    southPan.add(slider);
+
+    JPanel sliderPan = new JPanel(new BorderLayout());
+    sliderPan.setBorder(new EmptyBorder(6, 6, 6, 6));
+    sliderPan.add(new JLabel("Slope: "), BorderLayout.WEST);
+    sliderPan.add(slider, BorderLayout.CENTER);
+    
     JPanel southPan = new JPanel(new BorderLayout());
-    southPan.add(slider, BorderLayout.CENTER);
+    southPan.add(sliderPan, BorderLayout.CENTER);
     
     rootPan = new JPanel(new BorderLayout());
     rootPan.add(renPan, BorderLayout.CENTER);
     rootPan.add(southPan, BorderLayout.SOUTH);
-    
-    
 
     updateLine();
   }
 
+  public ElevationRamp getRamp() {
+    return ramp;
+  }
+  
+  public void setRamp(ExponentialElevationRamp ramp) {
+    this.ramp = ramp;
+    updateLine();
+  }
+  
+  public void addElevationRampListener(ElevationRampListener listener) {
+    if(listener != null) {
+      listeners.add(listener);
+    }
+  }
+  
+  public void removeElevationRampListener(ElevationRampListener listener) {
+    if(listener != null) {
+      listeners.remove(listener);
+    }
+  }
+  
   private float getBFromSliderRatio(float in) {
     return (float)Math.pow(10000, in);
   }
@@ -97,5 +131,7 @@ public class ExponentialRampEditor {
     renPan.repaint();
     return true;
   }
+
+  
 
 }

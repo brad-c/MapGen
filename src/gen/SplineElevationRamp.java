@@ -1,6 +1,7 @@
 package gen;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -13,9 +14,15 @@ public class SplineElevationRamp extends ElevationRamp {
 
   private PolynomialSplineFunction func;
   
+  private List<Vector2d> cps;
   
   public SplineElevationRamp() {
-    func = getInterpFunc(Collections.singletonList(new Vector2d(0.5,0.5)));
+    //func = getInterpFunc(Collections.singletonList(new Vector2d(0.5,0.5)));
+    setControlPoints(Collections.singletonList(new Vector2d(0.5,0.5)));
+  }
+  
+  public List<Vector2d> getControlPoints() {
+    return cps;
   }
   
   @Override
@@ -28,12 +35,20 @@ public class SplineElevationRamp extends ElevationRamp {
     return inVal;
   }
   
+  public boolean isValidPoint(double rat) {
+     if(func == null) {
+       return false;
+     }
+    return func.isValidPoint(rat);
+  }
+  
   public boolean setControlPoints(List<Vector2d> controlPoints) {
     PolynomialSplineFunction f = getInterpFunc(controlPoints);
     if(f == null) {
       return false;
     }
     func = f;
+    cps = controlPoints;
     return true;
   }
   
@@ -59,5 +74,13 @@ public class SplineElevationRamp extends ElevationRamp {
     }
     return interpa;
   }
+
+  @Override
+  public String toString() {
+    return "SplineElevationRamp [cps=" + Arrays.toString(cps.toArray()) + "]";
+  }
+
+  
+  
 
 }

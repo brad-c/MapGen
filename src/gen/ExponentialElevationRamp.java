@@ -30,6 +30,9 @@ public class ExponentialElevationRamp extends ElevationRamp {
     return b;
   }
 
-  
-  
+  @Override
+  public String toString() {
+    return "ExponentialElevationRamp [b=" + b + "]";
+  }
+
 }

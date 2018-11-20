@@ -14,16 +14,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.vecmath.Vector2d;
 
-import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
-import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
-
+import gen.ElevationRamp;
 import gen.HeightMapUtil;
+import gen.SplineElevationRamp;
 
 public class SplineRampEditor {
 
@@ -43,12 +43,16 @@ public class SplineRampEditor {
   private List<Vector2d> controlPoints;
   private JButton removeB;
 
+  private SplineElevationRamp ramp = new SplineElevationRamp();
+  
+  private List<ElevationRampListener> listeners = new CopyOnWriteArrayList<>();
+  
   public SplineRampEditor() {
     
     controlPoints = new ArrayList<>();
     
     renPan = new LineRenderPanel();
-    renPan.setPreferredSize(new Dimension(800, 800));
+    renPan.setPreferredSize(new Dimension(400, 400));
     renPan.setFocusable(true);
 
     InputHandler ih = new InputHandler();
@@ -91,27 +95,39 @@ public class SplineRampEditor {
     return rootPan;
   }
 
-  private PolynomialSplineFunction getInterpFunc() {
-    List<Vector2d> cps = new ArrayList<>(controlPoints.size() + 2);
-    cps.add(new Vector2d(0.0, 0.0));
-    cps.addAll(controlPoints);
-    cps.add(new Vector2d(1.0, 1.0));
+  public ElevationRamp getRamp() {
+    return ramp;
+  }
+  
+  public void setRamp(SplineElevationRamp ramp) {
+    this.ramp = ramp;
+    controlPoints = ramp.getControlPoints();
+  }
 
-    double[] cpX = new double[cps.size()];
-    double[] cpY = new double[cps.size()];
-    for (int i = 0; i < cps.size(); i++) {
-      Vector2d cp = cps.get(i);
-      cpX[i] = cp.x;
-      cpY[i] = cp.y;
+  private boolean updateRamp() {
+    SplineElevationRamp ramp = new SplineElevationRamp();
+    if(ramp.setControlPoints(controlPoints)) {
+      this.ramp = ramp;
+      for(ElevationRampListener l : listeners) {
+        l.elevationRampChanged(ramp);
+      }
+      return true;
+    } else {
+      System.out.println("SplineRampEditor: Invalid new ramp ");
+      return false;
     }
-    SplineInterpolator si = new SplineInterpolator();
-    PolynomialSplineFunction interpa = null;
-    try {
-      interpa = si.interpolate(cpX, cpY);
-    } catch (Exception e) {
-      // return false;
+  }
+  
+  public void addElevationRampListener(ElevationRampListener listener) {
+    if(listener != null) {
+      listeners.add(listener);
     }
-    return interpa;
+  }
+  
+  public void removeElevationRampListener(ElevationRampListener listener) {
+    if(listener != null) {
+      listeners.remove(listener);
+    }
   }
 
   private boolean updateLine() {
@@ -124,9 +140,11 @@ public class SplineRampEditor {
       }
     });
 
-    PolynomialSplineFunction interpa = getInterpFunc();
-    if (interpa == null) {
-      System.out.println("SplineRampEditor.updateLine: Could not get valid interpa");
+
+    if(!updateRamp()) {
+      return false;
+    }
+    if(ramp == null) {
       return false;
     }
 
@@ -135,8 +153,8 @@ public class SplineRampEditor {
 
     for (int i = 0; i < numSamples; i++) {
       double rat = (double) i / (numSamples - 1);
-      if (interpa.isValidPoint(rat)) {
-        Vector2d point = new Vector2d(rat, interpa.value(rat));
+      if (ramp.isValidPoint(rat)) {
+        Vector2d point = new Vector2d(rat, ramp.applyRamp((float)rat));
         point.y = HeightMapUtil.clamp(point.y, 0d, 1d);
         res.add(point);
       } else {
@@ -167,12 +185,6 @@ public class SplineRampEditor {
   }
   
   private void addControlPoint() {
-    
-    PolynomialSplineFunction func = getInterpFunc();
-    if(func == null) {
-      System.out.println("SplineRampEditor.addControlPoint: Could not add to invalid func");
-      return;
-    }
 
     double xVal = 0.5;
     int tries = 0;
@@ -188,11 +200,11 @@ public class SplineRampEditor {
       tries++;
     }
     
-    if (!func.isValidPoint(xVal)) {
+    if (!ramp.isValidPoint(xVal)) {
       System.out.println("SplineRampEditor.addControlPoint: Invlaid x value: " + xVal);
       return;
     }
-    double yVal = func.value(xVal);
+    double yVal = ramp.applyRamp((float)xVal);
     Vector2d newPoint = new Vector2d(xVal, yVal);
     controlPoints.add(newPoint);
     if (!updateLine()) {
@@ -308,5 +320,7 @@ public class SplineRampEditor {
     }
 
   }
+
+  
 
 }
