@@ -40,11 +40,6 @@ public class TerrainGenerator {
   private Vector3f sunDir = new Vector3f(1, -1, 0).normalizeLocal();
   private float ambientLight = 0.1f;
 
-  
-  
-  
-  //private float waterHeight = 20;
-
   private boolean renderCoastline = false;
   private float coastlineThickness = 0.8f;
   private Vector4f coastlineColor = new Vector4f(0, 0, 0, 1);
@@ -344,7 +339,7 @@ public class TerrainGenerator {
   }
 
   private void logTime(String string, long t1) {
-    System.out.println("TerrainApp.logTime: " + string + ": " + (System.currentTimeMillis() - t1));
+//    System.out.println("TerrainGenerator.logTime: " + string + ": " + (System.currentTimeMillis() - t1));
   }
 
 }

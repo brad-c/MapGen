@@ -19,7 +19,6 @@ import com.jme3.scene.Node;
 import com.jme3.scene.shape.Quad;
 import com.jme3.terrain.geomipmap.TerrainQuad;
 
-import render.CameraStateIO.CameraState;
 import util.TypeUtil;
 
 public class WorldRenderer extends SimpleApplication {
@@ -40,11 +39,11 @@ public class WorldRenderer extends SimpleApplication {
   private FilterPostProcessor postProcessor;
   private ColorFilter colorFilter;
 
-  //private float waterLevel = 0.7f;
   private WaterType waterType = WaterType.PURDY;
   
   private Node simpleWaterRoot;
-  private Vector4f simpleWaterColor = new Vector4f(5 / 255f, 36 / 255f, 78 / 255f, 1.0f);
+  //private Vector4f simpleWaterColor = new Vector4f(5 / 255f, 36 / 255f, 78 / 255f, 1.0f);
+  private Vector4f simpleWaterColor;
   private Material simpleWaterMaterial;
   
   private PurdyWater purdyWater = new PurdyWater();
@@ -120,24 +119,45 @@ public class WorldRenderer extends SimpleApplication {
 
     // save current state
     if (oldType == ViewType.THREE_D) {
-      prevCamState3d = CameraStateIO.saveState(cam);
+      prevCamState3d = CameraState.saveState(cam);
     } else {
-      prevCamState2d = CameraStateIO.saveState(cam);
+      prevCamState2d = CameraState.saveState(cam);
     }
 
     if (viewType == ViewType.THREE_D) {
       stateManager.getState(FlyCamAppState.class).setEnabled(true);
       orthCamState.setEnabled(false);
-      CameraStateIO.applyState(cam, prevCamState3d);
+      CameraState.applyState(cam, prevCamState3d);
     } else {
       stateManager.getState(FlyCamAppState.class).setEnabled(false);
       orthCamState.setEnabled(true);
-      CameraStateIO.applyState(cam, prevCamState2d);
+      CameraState.applyState(cam, prevCamState2d);
     }
   }
 
   public ViewType getViewType() {
     return viewType;
+  }
+  
+  public CameraState getCameraState(ViewType type) {
+    if(type == getViewType()) {
+      return new CameraState(cam);
+    } else if(type == ViewType.THREE_D) {
+      return prevCamState3d;
+    } else if(type == ViewType.TWO_D) {
+      return prevCamState2d;
+    }
+    return null;
+  }
+  
+  public void setCameraState(ViewType type, CameraState state) {
+    if(type == getViewType()) {
+      CameraState.applyState(cam, state);
+    } else if(type == ViewType.THREE_D) {
+      prevCamState3d = state;
+    } else if(type == ViewType.TWO_D) {
+      prevCamState2d = state;
+    }
   }
 
   public void canvasResized(Canvas canvas) {
@@ -158,6 +178,7 @@ public class WorldRenderer extends SimpleApplication {
   public void setSunDirection(Vector3f dir) {
     terGen.setSunDirection(dir);
     // force water update to reflect lighting
+
     setWaterType(getWaterType());
   }
 
@@ -176,10 +197,6 @@ public class WorldRenderer extends SimpleApplication {
   public float getWaterLevel() {
     return terGen.getWaterLevel();
   }
-
-//  public float getWaterHeight() {
-//    return terGen.getRenderedHeightScale() * waterLevel;
-//  }
 
   public void setWaterLevel(float waterLevel) {
     terGen.setWaterLevel(waterLevel);

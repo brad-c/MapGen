@@ -53,6 +53,7 @@ public class TerrainParamatersPanel extends JPanel {
     this.terrainGui = terrainGui;
     this.app = terrainGui.getWorldRenderer();
     initComponenets();
+    updateGUI(app);
     addComponents();
     addListeners();
     
@@ -60,6 +61,21 @@ public class TerrainParamatersPanel extends JPanel {
     updateWaterLevel();
   }
 
+  public void updateGUI(WorldRenderer ren) {
+    TerrainGenerator tGen = app.getTerrainGenerator();
+    SimplexNoiseGen nGen = tGen.getNoiseGenerator();
+    octPan.setValue(nGen.getOctaves());
+    roughPan.setValue(nGen.getRoughness());
+    scalePan.setValue( nGen.getScale());
+    heightScalePan.setValue(tGen.getHeightScale());
+    seedPan.setVal(nGen.getSeed());
+    resolutionCB.setSelectedItem(tGen.getSize());
+    noiseMixPan.setValue(tGen.getNoiseRatio());
+    waterLevelSlider.setValue( (int) (app.getWaterLevel() * 100));
+    //TODO;
+//    erodePan.setValue();
+  }
+  
   private void initComponenets() {
     TerrainGenerator tGen = app.getTerrainGenerator();
     SimplexNoiseGen nGen = tGen.getNoiseGenerator();
@@ -74,16 +90,13 @@ public class TerrainParamatersPanel extends JPanel {
 
     // Terrain
     resolutionCB = new JComboBox<>(new Integer[] { 256, 512, 1024, 2048 });
-    resolutionCB.setSelectedItem(tGen.getSize());
     noiseMixPan = new DoublePanel("Noise Ratio", 3, tGen.getNoiseRatio());
     erodePan = new DoublePanel("Smooth", 2, 0);
     updateB = new JButton("Update");
     landRampB = new JButton("...");
     
-    waterLevelSlider = new JSlider(0, 100, (int) (app.getWaterLevel() * 100));
+    waterLevelSlider = new JSlider(0, 100);
     waterLevelSlider.setPreferredSize(new Dimension(120, new JSlider().getPreferredSize().height));
-        
-
   }
 
   private void addComponents() {
@@ -253,5 +266,7 @@ public class TerrainParamatersPanel extends JPanel {
 
     app.updateTerrain();
   }
+
+ 
 
 }

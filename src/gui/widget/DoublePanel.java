@@ -26,4 +26,8 @@ public class DoublePanel extends NumPanel {
     }
   }
 
+  public void setValue(double roughness) {
+    tf.setText(formatter.format(roughness));
+  }
+
 }

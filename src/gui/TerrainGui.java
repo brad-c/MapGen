@@ -27,7 +27,7 @@ import com.jme3.export.binary.BinaryImporter;
 import com.jme3.system.AppSettings;
 import com.jme3.system.JmeCanvasContext;
 
-import gen.SimplexNoiseGen;
+import project.WorldGenProject;
 import render.WorldRenderer;
 import render.WorldRenderer.ViewType;
 
@@ -133,7 +133,12 @@ public class TerrainGui {
     // Frame
     frame = new JFrame("World Creator");
     frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-
+  }
+  
+  public void updateGUI(WorldRenderer ren) {
+    this.app = ren;
+    terrainVisualsPan.updateGUI(ren);
+    terrainPan.updateGUI(ren);
   }
 
   private void addListeners() {
@@ -238,6 +243,11 @@ public class TerrainGui {
   }
 
   private void show() {
+    
+    //load default project
+    WorldGenProject project = new WorldGenProject();
+    project.apply(app);
+    
     terrainPan.updateTerrain();
     frame.setLocationRelativeTo(null);
     frame.setVisible(true);
@@ -245,23 +255,26 @@ public class TerrainGui {
   
 
   private void doSave() {
-    SimplexNoiseGen nGen = app.getTerrainGenerator().getNoiseGenerator();
+    WorldGenProject project = new WorldGenProject(app);
     BinaryExporter exporter = new BinaryExporter();
     try {
-      exporter.save(nGen, new File("D:\\Dev\\temp\\testSave.wgen"));
-      System.out.println("TerrainGui.doSave: " + nGen);
+      exporter.save(project, new File("D:\\Dev\\temp\\testSave.wgen"));
+      System.out.println("TerrainGui.doSave: " + project);
     } catch (IOException e) {
       e.printStackTrace();
     }
-
+    
   }
 
   private void doLoad() {
-    //SimplexNoiseGen nGen = app.getTerrainGenerator().getNoiseGenerator();
     BinaryImporter exporter = new BinaryImporter();
     try {
-      SimplexNoiseGen nGen = (SimplexNoiseGen)exporter.load(new File("D:\\Dev\\temp\\testSave.wgen"));
-      System.out.println("TerrainGui.doLoad: " + nGen);
+      WorldGenProject project  = (WorldGenProject)exporter.load(new File("D:\\Dev\\temp\\testSave.wgen"));
+      //apply setting to the internals
+      project.apply(app);
+      //then update the GUI
+      updateGUI(app);
+      System.out.println("TerrainGui.doLoad: " + project);
     } catch (IOException e) {
       e.printStackTrace();
     }

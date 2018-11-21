@@ -1,8 +1,16 @@
 package gen;
 
+import java.io.IOException;
+
+import com.jme3.export.InputCapsule;
+import com.jme3.export.JmeExporter;
+import com.jme3.export.JmeImporter;
+import com.jme3.export.OutputCapsule;
+import com.jme3.export.Savable;
+
 import noise.SimplexNoise;
 
-public class SimplexNoiseGen {
+public class SimplexNoiseGen implements Savable {
 
   private int octaves = 12;
   private double roughness = 0.6;
@@ -17,6 +25,33 @@ public class SimplexNoiseGen {
 
   private transient float[] heightMap = null;
   private transient int genHash = -1;
+  
+  
+  @Override
+  public void write(JmeExporter ex) throws IOException {
+    OutputCapsule capsule = ex.getCapsule(this);
+    capsule.write(octaves, "octaves", 12);
+    capsule.write(roughness, "roughness", 0.6);
+    capsule.write(scale, "scale", 0.0005);
+    capsule.write(seed, "seed", 8092038379555713298l);
+    capsule.write(width, "width", 512);
+    capsule.write(height, "height", 512);
+    capsule.write(heightScale, "heightScale", 1);
+    capsule.write(sampleSpacing, "sampleSpacing", 1);
+  }
+  
+  @Override
+  public void read(JmeImporter im) throws IOException {
+    InputCapsule capsule = im.getCapsule(this);
+    octaves = capsule.readInt("octaves", 12);
+    roughness = capsule.readDouble("roughness", 0.6);
+    scale = capsule.readDouble("scale",0.0005);
+    seed = capsule.readLong("seed", 8092038379555713298l);
+    width = capsule.readInt("width", 512);
+    height=capsule.readInt("height", 512);
+    heightScale = capsule.readFloat("heightScale", 1);
+    sampleSpacing = capsule.readDouble("sampleSpacing", 1);
+  }
   
   public SimplexNoiseGen() {
   }
@@ -181,5 +216,13 @@ public class SimplexNoiseGen {
       return false;
     return true;
   }
+
+  @Override
+  public String toString() {
+    return "SimplexNoiseGen [octaves=" + octaves + ", roughness=" + roughness + ", scale=" + scale + ", seed=" + seed + ", width=" + width + ", height="
+        + height + ", heightScale=" + heightScale + ", sampleSpacing=" + sampleSpacing + "]";
+  }
+  
+  
 
 }

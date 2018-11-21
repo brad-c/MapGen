@@ -32,5 +32,9 @@ public class TypeUtil {
   public static Vector3f getColor3f(ColorRGBA waterColor) {
     return new Vector3f(waterColor.r, waterColor.g, waterColor.b);
   }
+
+  public static Color getColorAWT(Vector4f coastlineColor) {
+    return new Color(coastlineColor.x,coastlineColor.y,coastlineColor.z,coastlineColor.w);
+  }
   
 }

@@ -21,4 +21,9 @@ public class IntPanel extends NumPanel {
     }
   }
 
+  public void setValue(int octaves) {
+    tf.setText(octaves + "");
+    
+  }
+
 }

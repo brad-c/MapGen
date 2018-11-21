@@ -63,11 +63,55 @@ public class TerrainVisualsPanel extends JPanel {
   public TerrainVisualsPanel(TerrainGui terrainGui) {
     this.app = terrainGui.getWorldRenderer();
     initComponenets();
+    //set all the defaults
+    updateGUI(app);
+    
     addComponents();
     addListeners();
 
     // We are pushing these values atm
     updateSunPos();
+  }
+
+  public void updateGUI(WorldRenderer ren) {
+    this.app = ren;
+
+    TerrainGenerator tGen = app.getTerrainGenerator();
+    ambientSlider.setValue((int) (tGen.getAmbientLight() * 100));
+
+    // TODO:
+    List<ResourceEntry> hipTex = ResourceFinder.INST.findTextures("hipso_");
+    ResourceEntry sel = find(hipTex, tGen.getHipsoTex());
+    if (sel != null) {
+      hipsoCB.setSelectedItem(sel);
+    }
+    List<ResourceEntry> bathTex = ResourceFinder.INST.findTextures("bath_");
+    sel = find(bathTex, tGen.getBathTexture());
+    if (sel != null) {
+      bathCB.setSelectedItem(sel);
+    }
+
+    waterTypeCB.setSelectedItem(app.getWaterType());
+
+    coastlineCB.setSelected(tGen.isRenderCoastline());
+    coastlineThicknessSlider.setValue((int) (tGen.getCoastlineThickness() * 100));
+    coastlineColorB.setColor(TypeUtil.getColorAWT(tGen.getCoastlineColor()));
+
+    // Color Filter
+    ColorFilter cf = app.getColorFilter();
+    colorFilterEnabledCB.setSelected(cf.isEnabled());
+
+    blackAndWhiteEnabledCB.setSelected(cf.isBlackAndWhite());
+    invertColorsEnabledCB.setSelected(cf.isInvertColors());
+
+    // map -1 to 1 to 0 to 100
+    int selVal = (int) ((cf.getBrightness() + 1) / 2 * 100);
+    brightnessSlider.setValue(selVal);
+
+    selVal = (int) ((cf.getContrast() + 1) / 2 * 100);
+    contrastSlider.setValue(selVal);
+    
+    updateWaterUI();
   }
 
   private void initComponenets() {
@@ -85,45 +129,29 @@ public class TerrainVisualsPanel extends JPanel {
 
     List<ResourceEntry> hipTex = ResourceFinder.INST.findTextures("hipso_");
     hipsoCB = new JComboBox<>(hipTex.toArray(new ResourceEntry[hipTex.size()]));
-    ResourceEntry sel = find(hipTex, tGen.getHipsoTex());
-    if (sel != null) {
-      hipsoCB.setSelectedItem(sel);
-    }
 
     List<ResourceEntry> bathTex = ResourceFinder.INST.findTextures("bath_");
     bathCB = new JComboBox<>(bathTex.toArray(new ResourceEntry[bathTex.size()]));
-    sel = find(bathTex, tGen.getBathTexture());
-    if (sel != null) {
-      bathCB.setSelectedItem(sel);
-    }
 
     // Water
     waterDetailsPan = new JPanel(new BorderLayout());
     waterTypeCB = new JComboBox<>(WaterType.values());
-    waterTypeCB.setSelectedItem(app.getWaterType());
 
     // Coastline
     coastlineCB = new JCheckBox("Enabled");
-    coastlineCB.setSelected(tGen.isRenderCoastline());
     coastlineThicknessSlider = new JSlider(60, 100, (int) (tGen.getCoastlineThickness() * 100));
     coastlineThicknessSlider.setPreferredSize(sliderSize);
     com.jme3.math.Vector4f colf = tGen.getCoastlineColor();
     coastlineColorB = new ColorButton(new Color(colf.x, colf.y, colf.z));
 
     // Color Filter
-    ColorFilter cf = app.getColorFilter();
     colorFilterEnabledCB = new JCheckBox("Enabled");
-    colorFilterEnabledCB.setSelected(cf.isEnabled());
     blackAndWhiteEnabledCB = new JCheckBox("Black & White");
-    blackAndWhiteEnabledCB.setSelected(cf.isBlackAndWhite());
     invertColorsEnabledCB = new JCheckBox("Invert Colors");
-    invertColorsEnabledCB.setSelected(cf.isInvertColors());
-    // map -1 to 1 to 0 to 100
-    int selVal = (int) ((cf.getBrightness() + 1) / 2 * 100);
-    brightnessSlider = new JSlider(0, 100, selVal);
+
+    brightnessSlider = new JSlider(0, 100);
     brightnessSlider.setPreferredSize(sliderSize);
-    selVal = (int) ((cf.getContrast() + 1) / 2 * 100);
-    contrastSlider = new JSlider(0, 100, selVal);
+    contrastSlider = new JSlider(0, 100);
     contrastSlider.setPreferredSize(sliderSize);
   }
 
