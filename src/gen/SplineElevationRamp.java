@@ -10,6 +10,8 @@ import javax.vecmath.Vector2d;
 import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 
+import com.jme3.math.FastMath;
+
 public class SplineElevationRamp extends ElevationRamp {
 
   private PolynomialSplineFunction func;
@@ -17,7 +19,6 @@ public class SplineElevationRamp extends ElevationRamp {
   private List<Vector2d> cps;
   
   public SplineElevationRamp() {
-    //func = getInterpFunc(Collections.singletonList(new Vector2d(0.5,0.5)));
     setControlPoints(Collections.singletonList(new Vector2d(0.5,0.5)));
   }
   
@@ -29,7 +30,7 @@ public class SplineElevationRamp extends ElevationRamp {
   public float applyRamp(float inVal) {
     if(func != null) {
       if(func.isValidPoint(inVal)) {
-        return (float)func.value(inVal);
+        return FastMath.clamp((float)func.value(inVal), 0, 1);
       }
     }
     return inVal;

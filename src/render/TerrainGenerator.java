@@ -41,7 +41,7 @@ public class TerrainGenerator {
   private WorldRenderer renderer;
   private float waterHeight = 20;
 
-  private boolean renderCoastline = true;
+  private boolean renderCoastline = false;
   private float coastlineThickness = 0.8f;
   // TODO: Make support alpha
   private Vector3f coastlineColor = new Vector3f(0, 0, 0);

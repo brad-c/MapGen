@@ -35,12 +35,12 @@ public class PurdyWaterPanel extends JPanel {
     transpSlider.setPreferredSize(new Dimension(80, transpSlider.getPreferredSize().height));
     
     
-    setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
+    setLayout(new FlowLayout(FlowLayout.LEFT));
     add(new JLabel("Shallow:"));
     add(colorB);
-    add(new JLabel("Deep: "));
+    add(new JLabel("Deep:"));
     add(deepColorB);
-    add(new JLabel("Transp: "));
+    add(new JLabel("Transp:"));
     add(transpSlider);
 
     colorB.addColorListener(new ColorChangeListener() {
