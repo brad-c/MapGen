@@ -31,7 +31,6 @@ public class TerrainGenerator {
 
   private String hipsoTex = "textures/hipso_one.png";
   private String bathTex = "textures/bath_dark.png";
-  private Vector4f waterColor = new Vector4f(5 / 255f, 36 / 255f, 78 / 255f, 1.0f);
 
   private boolean discardWater;
 
@@ -43,8 +42,7 @@ public class TerrainGenerator {
 
   private boolean renderCoastline = false;
   private float coastlineThickness = 0.8f;
-  // TODO: Make support alpha
-  private Vector3f coastlineColor = new Vector3f(0, 0, 0);
+  private Vector4f coastlineColor = new Vector4f(0, 0, 0, 1);
 
   // The reference heightmap resolution used to determine the appropriate
   // horizontol spacing for noise sampling and vertical scale for rendered heights
@@ -209,14 +207,15 @@ public class TerrainGenerator {
     }
   }
 
-  public Vector3f getCoastlineColor() {
+  public Vector4f getCoastlineColor() {
     return coastlineColor;
   }
-
-  public void setCoastlineColor(Vector3f col) {
+  
+  public void setCoastlineColor(Vector4f col) {
     coastlineColor = col;
     if (terrainMat != null) {
-      terrainMat.setVector3("CoastlineColor", coastlineColor);
+      // TODO: Make support alpha
+      terrainMat.setVector3("CoastlineColor", new Vector3f(coastlineColor.x,coastlineColor.y,coastlineColor.z));
     }
   }
 
@@ -229,17 +228,6 @@ public class TerrainGenerator {
 
   public float getWaterHeight() {
     return waterHeight;
-  }
-
-  public Vector4f getWaterColor() {
-    return waterColor;
-  }
-
-  public void setWaterColor(Vector4f waterColor) {
-    this.waterColor = waterColor;
-    if (terrainMat != null) {
-      terrainMat.setVector4("WaterColor", waterColor);
-    }
   }
 
   public float getAmbientLight() {

@@ -1,7 +1,6 @@
 MaterialDef Terrain {
 
-    MaterialParameters {
-        Vector4 WaterColor
+    MaterialParameters {        
         Texture2D ColorMap
         Texture2D WaterColorMap
         Float WaterLevel
@@ -27,8 +26,7 @@ MaterialDef Terrain {
             HAS_COLORMAP : ColorMap    
             HAS_WATERCOLORMAP : WaterColorMap
             HAS_WATER_LEVEL : WaterLevel  
-            HAS_MAX_HEIGHT : MaxHeight 
-            HAS_WATER_COLOR : WaterColor
+            HAS_MAX_HEIGHT : MaxHeight             
             HAS_SUN_DIR : SunDir  
             RENDER_COASTLINE : RenderCoastline   
             HAS_COASTLINE_THICKNESS : CoastlineThickness

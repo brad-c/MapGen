@@ -5,9 +5,6 @@
 #ifdef HAS_WATERCOLORMAP
   uniform sampler2D m_WaterColorMap;
 #endif
-#ifdef HAS_WATER_COLOR
-  uniform vec4 m_WaterColor;
-#endif
 #ifdef RENDER_COASTLINE
   uniform bool m_RenderCoastline;
   uniform vec3 m_CoastlineColor;
@@ -35,17 +32,11 @@ void main(){
         color *= texture2D(m_ColorMap, texCoord1);
       }     
     #endif
-    
    
-    
     #ifdef HAS_WATERCOLORMAP
       vec4 wcol  = texture2D(m_WaterColorMap, texCoord1);
-    #else
-      #ifdef HAS_WATER_COLOR
-        vec4 wcol = m_WaterColor; 
-      #else
-        vec4 wcol = vec4(0.0,0.0,0.7,1.0);
-      #endif                        
+    #else     
+      vec4 wcol = vec4(0.0,0.0,0.7,1.0);                             
     #endif
 
     color = mix(wcol, color, 1.0 - isWater);

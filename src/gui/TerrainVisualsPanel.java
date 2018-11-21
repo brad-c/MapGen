@@ -107,7 +107,7 @@ public class TerrainVisualsPanel extends JPanel {
     coastlineCB.setSelected(tGen.isRenderCoastline());
     coastlineThicknessSlider = new JSlider(60, 100, (int) (tGen.getCoastlineThickness() * 100));
     coastlineThicknessSlider.setPreferredSize(sliderSize);
-    com.jme3.math.Vector3f colf = tGen.getCoastlineColor();
+    com.jme3.math.Vector4f colf = tGen.getCoastlineColor();
     coastlineColorB = new ColorButton(new Color(colf.x, colf.y, colf.z));
 
     // Color Filter
@@ -276,7 +276,7 @@ public class TerrainVisualsPanel extends JPanel {
         app.enqueue(new Runnable() {
           @Override
           public void run() {
-            app.getTerrainGenerator().setCoastlineColor(TypeUtil.getColor3f(coastlineColorB.getColor()));
+            app.getTerrainGenerator().setCoastlineColor(TypeUtil.getColor4f(coastlineColorB.getColor()));
           }
         });
 
