@@ -9,9 +9,12 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.IOException;
 import java.util.concurrent.Callable;
 
 import javax.swing.ButtonGroup;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -19,9 +22,12 @@ import javax.swing.JTabbedPane;
 import javax.swing.JToggleButton;
 import javax.swing.SwingUtilities;
 
+import com.jme3.export.binary.BinaryExporter;
+import com.jme3.export.binary.BinaryImporter;
 import com.jme3.system.AppSettings;
 import com.jme3.system.JmeCanvasContext;
 
+import gen.SimplexNoiseGen;
 import render.WorldRenderer;
 import render.WorldRenderer.ViewType;
 
@@ -52,16 +58,19 @@ public class TerrainGui {
   private JFrame frame;
 
   private TerrainParamatersPanel terrainPan;
-  
+
   private TerrainVisualsPanel terrainVisualsPan;
-  
-  //View
+
+  // View
   private JToggleButton view3dB;
   private JToggleButton view2dB;
-  
-  private JTabbedPane tabbedPane;
-  
-  //layout
+
+  private JTabbedPane editorTP;
+
+  private JButton saveB;
+  private JButton loadB;
+
+  // layout
   private JPanel rootPan;
 
   public TerrainGui() {
@@ -70,66 +79,82 @@ public class TerrainGui {
   public WorldRenderer getWorldRenderer() {
     return app;
   }
-  
+
   public JFrame getFrame() {
     return frame;
   }
-  
-  private void createGui() {
 
+  private void createGui() {
     initComponenets();
     addComponents();
     addListeners();
-
     frame.getContentPane().add(rootPan);
     frame.pack();
   }
 
   private void addComponents() {
-    
     JPanel northPan = new JPanel(new FlowLayout(FlowLayout.LEFT));
     northPan.add(view3dB);
     northPan.add(view2dB);
+    northPan.add(saveB);
+    northPan.add(loadB);
 
     JPanel canvasPan = new JPanel(new BorderLayout());
     canvasPan.add(northPan, BorderLayout.NORTH);
     canvasPan.add(canvas, BorderLayout.CENTER);
-    
+
     rootPan = new JPanel(new BorderLayout());
     rootPan.add(canvasPan, BorderLayout.CENTER);
-    rootPan.add(tabbedPane, BorderLayout.WEST);
+    rootPan.add(editorTP, BorderLayout.WEST);
   }
 
-  
-  
   private void initComponenets() {
-   
     terrainPan = new TerrainParamatersPanel(this);
     terrainVisualsPan = new TerrainVisualsPanel(this);
-    
-    tabbedPane = new JTabbedPane();
-    tabbedPane.add("Generator", terrainPan);
-    tabbedPane.add("Renderer", terrainVisualsPan);
-    
-    //Camera
+
+    editorTP = new JTabbedPane();
+    editorTP.add("Generator", terrainPan);
+    editorTP.add("Renderer", terrainVisualsPan);
+
+    // Camera
     view3dB = new JToggleButton("3D");
     view2dB = new JToggleButton("2D");
     boolean is3d = app.getViewType() == ViewType.THREE_D;
     view3dB.setSelected(is3d);
     view2dB.setSelected(!is3d);
-        
+
     ButtonGroup bg = new ButtonGroup();
     bg.add(view2dB);
     bg.add(view3dB);
-    
-    //Frame
+
+    saveB = new JButton("Save");
+    loadB = new JButton("Load");
+
+    // Frame
     frame = new JFrame("World Creator");
     frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-    
+
   }
 
-  
   private void addListeners() {
+
+    saveB.addActionListener(new ActionListener() {
+
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        doSave();
+      }
+
+    });
+
+    loadB.addActionListener(new ActionListener() {
+
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        doLoad();
+      }
+
+    });
 
     frame.addWindowListener(new WindowAdapter() {
       @Override
@@ -137,7 +162,7 @@ public class TerrainGui {
         app.stop();
       }
     });
-    
+
     canvas.addComponentListener(new ComponentAdapter() {
 
       @Override
@@ -151,9 +176,9 @@ public class TerrainGui {
       }
 
     });
-    
+
     view2dB.addActionListener(new ActionListener() {
-      
+
       @Override
       public void actionPerformed(ActionEvent e) {
         app.enqueue(new Runnable() {
@@ -162,12 +187,12 @@ public class TerrainGui {
             app.setViewType(ViewType.TWO_D);
           }
         });
-        
+
       }
     });
-    
+
     view3dB.addActionListener(new ActionListener() {
-      
+
       @Override
       public void actionPerformed(ActionEvent e) {
         app.enqueue(new Runnable() {
@@ -176,7 +201,7 @@ public class TerrainGui {
             app.setViewType(ViewType.THREE_D);
           }
         });
-        
+
       }
     });
 
@@ -217,6 +242,29 @@ public class TerrainGui {
     frame.setLocationRelativeTo(null);
     frame.setVisible(true);
   }
+  
 
+  private void doSave() {
+    SimplexNoiseGen nGen = app.getTerrainGenerator().getNoiseGenerator();
+    BinaryExporter exporter = new BinaryExporter();
+    try {
+      exporter.save(nGen, new File("D:\\Dev\\temp\\testSave.wgen"));
+      System.out.println("TerrainGui.doSave: " + nGen);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
+  }
+
+  private void doLoad() {
+    //SimplexNoiseGen nGen = app.getTerrainGenerator().getNoiseGenerator();
+    BinaryImporter exporter = new BinaryImporter();
+    try {
+      SimplexNoiseGen nGen = (SimplexNoiseGen)exporter.load(new File("D:\\Dev\\temp\\testSave.wgen"));
+      System.out.println("TerrainGui.doLoad: " + nGen);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
 
 }

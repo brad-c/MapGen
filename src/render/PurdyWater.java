@@ -111,7 +111,7 @@ public class PurdyWater {
       return;
     }
     
-    waterFilter.setWaterHeight(renderer.getWaterHeight());
+    waterFilter.setWaterHeight(renderer.getTerrainGenerator().getRenderedWaterHeight());
     
     float rs = renderer.getTerrainGenerator().getRenderScale();
     float startFade = Math.max(0.3f, 0.6f * rs);
@@ -119,7 +119,7 @@ public class PurdyWater {
     waterFilter.setFoamExistence(new Vector3f(startFade, endFade, 1f));
    
     //Blueify the water at depth
-    float colorExtinction = renderer.getWaterHeight();
+    float colorExtinction = renderer.getTerrainGenerator().getRenderedWaterHeight();
     waterFilter.setColorExtinction(new Vector3f(colorExtinction / 3f, colorExtinction / 2f, colorExtinction));
   }
  

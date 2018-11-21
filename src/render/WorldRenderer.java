@@ -40,7 +40,7 @@ public class WorldRenderer extends SimpleApplication {
   private FilterPostProcessor postProcessor;
   private ColorFilter colorFilter;
 
-  private float waterLevel = 0.7f;
+  //private float waterLevel = 0.7f;
   private WaterType waterType = WaterType.PURDY;
   
   private Node simpleWaterRoot;
@@ -103,7 +103,7 @@ public class WorldRenderer extends SimpleApplication {
     postProcessor.addFilter(new FXAAFilter());
         
     setWaterType(getWaterType());
-    setWaterLevel(waterLevel);
+    setWaterLevel(getWaterLevel());
     
   }
 
@@ -174,18 +174,17 @@ public class WorldRenderer extends SimpleApplication {
   }
 
   public float getWaterLevel() {
-    return waterLevel;
+    return terGen.getWaterLevel();
   }
 
-  public float getWaterHeight() {
-    return terGen.getRenderedHeightScale() * waterLevel;
-  }
+//  public float getWaterHeight() {
+//    return terGen.getRenderedHeightScale() * waterLevel;
+//  }
 
   public void setWaterLevel(float waterLevel) {
-    this.waterLevel = waterLevel;
-    terGen.setWaterHeight(terGen.getHeightScale() * waterLevel);
+    terGen.setWaterLevel(waterLevel);
     if (simpleWaterRoot != null) {
-      simpleWaterRoot.setLocalTranslation(new Vector3f(0, getWaterHeight() - 0.1f, 0));
+      simpleWaterRoot.setLocalTranslation(new Vector3f(0, terGen.getRenderedWaterHeight() - 0.1f, 0));
     }
     purdyWater.updateWaterFilter();
   }
@@ -256,7 +255,7 @@ public class WorldRenderer extends SimpleApplication {
     // creating a quad to render water to
     simpleWaterRoot = new Node();
     simpleWaterRoot.attachChild(createWaterPlaneGeometry(terGen.getSize()));
-    simpleWaterRoot.setLocalTranslation(new Vector3f(0, getWaterHeight(), 0));
+    simpleWaterRoot.setLocalTranslation(new Vector3f(0, terGen.getRenderedWaterHeight(), 0));
   }
 
   private Geometry createWaterPlaneGeometry(float planeSize) {

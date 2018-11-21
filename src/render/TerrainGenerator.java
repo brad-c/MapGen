@@ -17,6 +17,8 @@ import gen.SimplexNoiseGen;
 
 public class TerrainGenerator {
 
+  private WorldRenderer renderer;
+  
   private Material terrainMat;
   private TerrainQuad terrain;
   private SimplexNoiseGen noiseGen = new SimplexNoiseGen();
@@ -26,6 +28,7 @@ public class TerrainGenerator {
   private String baseHeightMapSource = "textures/circleGradLarge.png";
   private float noiseRatio = 1;
   private float erodeFilter = 0;
+  private float waterLevel = 0.7f;
   private ElevationRamp landElevationRamp = new ExponentialElevationRamp();
   private ElevationRamp waterElevationRamp = new ExponentialElevationRamp(true);
 
@@ -37,8 +40,10 @@ public class TerrainGenerator {
   private Vector3f sunDir = new Vector3f(1, -1, 0).normalizeLocal();
   private float ambientLight = 0.1f;
 
-  private WorldRenderer renderer;
-  private float waterHeight = 20;
+  
+  
+  
+  //private float waterHeight = 20;
 
   private boolean renderCoastline = false;
   private float coastlineThickness = 0.8f;
@@ -153,17 +158,32 @@ public class TerrainGenerator {
   }
 
   public Float getRenderedWaterHeight() {
-    return getRenderScale() * waterHeight;
+    return getRenderScale() * getWaterHeight();
   }
+  
+  private float getWaterHeight() {
+    return heightScale * waterLevel;
+  }
+  
+  public void setWaterLevel(float waterLevel) {
+    this.waterLevel = waterLevel;
+    if (terrainMat != null) {
+      terrainMat.setFloat("WaterLevel", getRenderedWaterHeight());
+    }
+  }
+  
+  public float getWaterLevel( ) {
+    return waterLevel;
+  }
+  
 
   private void createTerrainMaterial() {
 
     terrainMat = new Material(renderer.getAssetManager(), "materials/terrain.j3md");
 
     // apply defaults
-    setWaterHeight(getWaterHeight());
+    setWaterLevel(getWaterLevel());
     setHeightScale(getHeightScale());
-    setWaterHeight(getWaterHeight());
     setSunDirection(getSunDirection());
     setHipsoTexture(getHipsoTex());
     setBathTexture(getBathTexture());
@@ -219,16 +239,6 @@ public class TerrainGenerator {
     }
   }
 
-  public void setWaterHeight(float waterHeight) {
-    this.waterHeight = waterHeight;
-    if (terrainMat != null) {
-      terrainMat.setFloat("WaterLevel", getRenderedWaterHeight());
-    }
-  }
-
-  public float getWaterHeight() {
-    return waterHeight;
-  }
 
   public float getAmbientLight() {
     return ambientLight;
