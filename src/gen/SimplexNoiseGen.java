@@ -12,48 +12,76 @@ import noise.SimplexNoise;
 
 public class SimplexNoiseGen implements Savable {
 
-  private int octaves = 12;
-  private double roughness = 0.6;
-  private double scale = 0.0005;
-  private long seed = 8092038379555713298l;
+  public static final int DEF_OCTAVES = 12;
+  public static final double DEF_ROUGHNESS = 0.6;
+  public static final double DEF_SCALE = 0.0005;
+  public static final long DEF_SEED = 8092038379555713298l;
+  public static final int DEF_WIDTH = 512;
+  public static final int DEF_HEIGHT = 512;
+  public static final int DEF_HEIGHT_SCALE = 1;
+  public static final double DEF_SAMPLE_SPACING = 1;
   
-  private int width = 512;
-  private int height = 512;
-  private float heightScale = 1;
+  private int octaves;
+  private double roughness;
+  private double scale;
+  private long seed;
+  
+  private int width;
+  private int height;
+  private float heightScale;
 
-  private double sampleSpacing = 1;
+  private double sampleSpacing;
 
   private transient float[] heightMap = null;
   private transient int genHash = -1;
   
   
+  public SimplexNoiseGen() {
+    octaves = DEF_OCTAVES;
+    roughness = DEF_ROUGHNESS;
+    scale = DEF_SCALE;
+    seed = DEF_SEED;
+    width = DEF_WIDTH;
+    height = DEF_HEIGHT;
+    heightScale = DEF_HEIGHT_SCALE;
+    sampleSpacing = DEF_SAMPLE_SPACING;
+  }
+  
+  
   @Override
   public void write(JmeExporter ex) throws IOException {
     OutputCapsule capsule = ex.getCapsule(this);
-    capsule.write(octaves, "octaves", 12);
-    capsule.write(roughness, "roughness", 0.6);
-    capsule.write(scale, "scale", 0.0005);
-    capsule.write(seed, "seed", 8092038379555713298l);
-    capsule.write(width, "width", 512);
-    capsule.write(height, "height", 512);
-    capsule.write(heightScale, "heightScale", 1);
-    capsule.write(sampleSpacing, "sampleSpacing", 1);
+//    capsule.write(octaves, "octaves", DEF_OCTAVES);
+//    capsule.write(roughness, "roughness", DEF_ROUGHNESS);
+//    capsule.write(scale, "scale", DEF_SCALE);
+//    capsule.write(seed, "seed", DEF_SEED);
+//    capsule.write(width, "width", DEF_WIDTH);
+//    capsule.write(height, "height", DEF_HEIGHT);
+//    capsule.write(heightScale, "heightScale", DEF_HEIGHT_SCALE);
+//    capsule.write(sampleSpacing, "sampleSpacing", DEF_SAMPLE_SPACING);
+    
+    capsule.write(octaves, "octaves", -1);
+    capsule.write(roughness, "roughness", -1);
+    capsule.write(scale, "scale", -1);
+    capsule.write(seed, "seed", -1);
+    capsule.write(width, "width", -1);
+    capsule.write(height, "height", -1);
+    capsule.write(heightScale, "heightScale", -1);
+    capsule.write(sampleSpacing, "sampleSpacing", -1);
+    
   }
   
   @Override
   public void read(JmeImporter im) throws IOException {
     InputCapsule capsule = im.getCapsule(this);
-    octaves = capsule.readInt("octaves", 12);
-    roughness = capsule.readDouble("roughness", 0.6);
-    scale = capsule.readDouble("scale",0.0005);
-    seed = capsule.readLong("seed", 8092038379555713298l);
-    width = capsule.readInt("width", 512);
-    height=capsule.readInt("height", 512);
-    heightScale = capsule.readFloat("heightScale", 1);
-    sampleSpacing = capsule.readDouble("sampleSpacing", 1);
-  }
-  
-  public SimplexNoiseGen() {
+    octaves = capsule.readInt("octaves", DEF_OCTAVES);
+    roughness = capsule.readDouble("roughness", DEF_ROUGHNESS);
+    scale = capsule.readDouble("scale",DEF_SCALE);
+    seed = capsule.readLong("seed", DEF_SEED);
+    width = capsule.readInt("width", DEF_WIDTH);
+    height=capsule.readInt("height", DEF_HEIGHT);
+    heightScale = capsule.readFloat("heightScale", DEF_HEIGHT_SCALE);
+    sampleSpacing = capsule.readDouble("sampleSpacing", DEF_SAMPLE_SPACING);
   }
   
   public float[] getOrUpdateHeightMap() {

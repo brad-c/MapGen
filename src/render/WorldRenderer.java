@@ -42,7 +42,6 @@ public class WorldRenderer extends SimpleApplication {
   private WaterType waterType = WaterType.PURDY;
   
   private Node simpleWaterRoot;
-  //private Vector4f simpleWaterColor = new Vector4f(5 / 255f, 36 / 255f, 78 / 255f, 1.0f);
   private Vector4f simpleWaterColor;
   private Material simpleWaterMaterial;
   

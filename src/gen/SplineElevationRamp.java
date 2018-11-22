@@ -1,5 +1,6 @@
 package gen;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -10,16 +11,22 @@ import javax.vecmath.Vector2d;
 import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 
+import com.jme3.export.InputCapsule;
+import com.jme3.export.JmeExporter;
+import com.jme3.export.JmeImporter;
+import com.jme3.export.OutputCapsule;
 import com.jme3.math.FastMath;
 
 public class SplineElevationRamp extends ElevationRamp {
 
+  public static final List<Vector2d> DEF_CONTROL_POINTS = Collections.singletonList(new Vector2d(0.5,0.5));
+  
   private PolynomialSplineFunction func;
   
   private List<Vector2d> cps;
   
   public SplineElevationRamp() {
-    setControlPoints(Collections.singletonList(new Vector2d(0.5,0.5)));
+    setControlPoints(DEF_CONTROL_POINTS);
   }
   
   public List<Vector2d> getControlPoints() {
@@ -77,11 +84,38 @@ public class SplineElevationRamp extends ElevationRamp {
   }
 
   @Override
+  public void write(JmeExporter ex) throws IOException {
+    OutputCapsule cap = ex.getCapsule(this);
+    cap.write(createArray(cps, true), "controlPointsX", null);
+    cap.write(createArray(cps, false), "controlPointsY", null);
+  }
+
+  @Override
+  public void read(JmeImporter im) throws IOException {
+    InputCapsule cap = im.getCapsule(this);
+  
+    double[] x = cap.readDoubleArray("controlPointsX", null);
+    double[] y = cap.readDoubleArray("controlPointsY", null);
+    
+    cps = new ArrayList<>(x.length);
+    for(int i=0;i<x.length;i++) {
+      cps.add(new Vector2d(x[i],y[i]));
+    }
+    
+  }
+  
+  private double[] createArray(List<Vector2d> controlPoints, boolean isX) {
+    double[] cpa = new double[controlPoints.size()];
+    for(int i=0;i<controlPoints.size();i++) {
+      Vector2d cp = controlPoints.get(i);
+      cpa[i] = isX ? cp.x : cp.y;
+    }
+    return cpa;
+  }
+
+  @Override
   public String toString() {
     return "SplineElevationRamp [cps=" + Arrays.toString(cps.toArray()) + "]";
   }
-
-  
-  
 
 }

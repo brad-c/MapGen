@@ -11,9 +11,9 @@ import com.jme3.texture.Texture;
 
 import crap.ImageHeightmapLoader;
 import gen.ElevationRamp;
-import gen.ExponentialElevationRamp;
 import gen.HeightMapUtil;
 import gen.SimplexNoiseGen;
+import project.TerrainParameters;
 
 public class TerrainGenerator {
 
@@ -23,14 +23,14 @@ public class TerrainGenerator {
   private TerrainQuad terrain;
   private SimplexNoiseGen noiseGen = new SimplexNoiseGen();
 
-  private int size = 512;
-  private float heightScale = 300;
-  private String baseHeightMapSource = "textures/circleGradLarge.png";
-  private float noiseRatio = 1;
-  private float erodeFilter = 0;
-  private float waterLevel = 0.7f;
-  private ElevationRamp landElevationRamp = new ExponentialElevationRamp();
-  private ElevationRamp waterElevationRamp = new ExponentialElevationRamp(true);
+  private int size;
+  private float heightScale;
+  private String baseHeightMapSource;
+  private float noiseRatio;
+  private float erodeFilter;
+  private float waterLevel;
+  private ElevationRamp landElevationRamp;
+  private ElevationRamp waterElevationRamp;
 
   private String hipsoTex = "textures/hipso_one.png";
   private String bathTex = "textures/bath_dark.png";
@@ -49,6 +49,12 @@ public class TerrainGenerator {
   // to ensure the appearance of te terrain is constant at different size
   private static final int BASE_RESOLUTION = 2048;
 
+  public TerrainGenerator() {
+    //apply defaults
+    TerrainParameters params = new TerrainParameters();
+    params.apply(this);
+  }
+  
   public void init(WorldRenderer app) {
     this.renderer = app;
     createTerrainMaterial();
@@ -56,8 +62,14 @@ public class TerrainGenerator {
 
   public TerrainQuad generateTerrain() {
 
-    // baseHeightMapSource =
-    // "D:\\Dev\\TerrainGen\\MapGen\\resources\\textures\\gradTest.png";
+    //Make sure everying is all updated for the correct scale
+    noiseGen.setSize(size);
+    double spacing = BASE_RESOLUTION / size;
+    noiseGen.setSampleSpacing(spacing);
+    // for rescaling of height values
+    setHeightScale(heightScale);
+
+    
     long t1 = System.currentTimeMillis();
     float[] heightData = ImageHeightmapLoader.loadGrayScaleData(baseHeightMapSource, size, 1, true);
     logTime("GS Image: ", t1);
@@ -298,17 +310,16 @@ public class TerrainGenerator {
 
   public void setSize(int size) {
     this.size = size;
-    noiseGen.setSize(size);
-
-    double spacing = BASE_RESOLUTION / size;
-    noiseGen.setSampleSpacing(spacing);
-    // for rescaling of height values
-    setHeightScale(heightScale);
   }
 
   public SimplexNoiseGen getNoiseGenerator() {
     return noiseGen;
   }
+  
+  public void setNoiseGenerator(SimplexNoiseGen noiseGen) {
+    this.noiseGen = noiseGen;
+  }
+  
 
   public void setHipsoTexture(String tex) {
     hipsoTex = tex;

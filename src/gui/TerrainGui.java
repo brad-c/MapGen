@@ -22,8 +22,8 @@ import javax.swing.JTabbedPane;
 import javax.swing.JToggleButton;
 import javax.swing.SwingUtilities;
 
-import com.jme3.export.binary.BinaryExporter;
-import com.jme3.export.binary.BinaryImporter;
+import com.jme3.export.xml.XMLExporter;
+import com.jme3.export.xml.XMLImporter;
 import com.jme3.system.AppSettings;
 import com.jme3.system.JmeCanvasContext;
 
@@ -256,7 +256,8 @@ public class TerrainGui {
 
   private void doSave() {
     WorldGenProject project = new WorldGenProject(app);
-    BinaryExporter exporter = new BinaryExporter();
+//    BinaryExporter exporter = new BinaryExporter();
+    XMLExporter exporter = new XMLExporter();
     try {
       exporter.save(project, new File("D:\\Dev\\temp\\testSave.wgen"));
       System.out.println("TerrainGui.doSave: " + project);
@@ -267,17 +268,41 @@ public class TerrainGui {
   }
 
   private void doLoad() {
-    BinaryImporter exporter = new BinaryImporter();
+    WorldGenProject project = null;
+    //BinaryImporter importer = new BinaryImporter();
+    XMLImporter importer = new XMLImporter();
     try {
-      WorldGenProject project  = (WorldGenProject)exporter.load(new File("D:\\Dev\\temp\\testSave.wgen"));
-      //apply setting to the internals
-      project.apply(app);
-      //then update the GUI
-      updateGUI(app);
+      project  = (WorldGenProject)importer.load(new File("D:\\Dev\\temp\\testSave.wgen"));
       System.out.println("TerrainGui.doLoad: " + project);
     } catch (IOException e) {
       e.printStackTrace();
+      return;
     }
+    if(project == null) {
+      System.out.println("TerrainGui.doLoad: null project");
+      return;
+    }
+   
+    final WorldGenProject p = project;
+    
+    app.enqueue(new Runnable() {
+      
+      @Override
+      public void run() {
+      //apply setting to the internals
+        p.apply(app);
+        SwingUtilities.invokeLater(new Runnable() {
+          @Override
+          public void run() {
+            //then update the GUI
+            updateGUI(app);
+          }
+        });
+        app.updateTerrain();
+        
+      }
+    });
+    
   }
 
 }

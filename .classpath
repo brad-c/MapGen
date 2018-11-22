@@ -37,7 +37,7 @@
 	<classpathentry kind="lib" path="D:/Dev/TerrainGen/JMonkeyBinaries/lib/jme3-lwjgl.jar"/>
 	<classpathentry kind="lib" path="D:/Dev/TerrainGen/JMonkeyBinaries/lib/jme3-networking.jar"/>
 	<classpathentry kind="lib" path="D:/Dev/TerrainGen/JMonkeyBinaries/lib/jme3-niftygui.jar"/>
-	<classpathentry kind="lib" path="D:/Dev/TerrainGen/JMonkeyBinaries/lib/jme3-plugins.jar"/>
+	<classpathentry kind="lib" path="D:/Dev/TerrainGen/JMonkeyBinaries/lib/jme3-plugins.jar" sourcepath="D:/Dev/TerrainGen/JMonkeyBinaries/sources/jme3-plugins-sources.jar"/>
 	<classpathentry kind="lib" path="D:/Dev/TerrainGen/JMonkeyBinaries/lib/jme3-terrain.jar" sourcepath="D:/Dev/TerrainGen/JMonkeyBinaries/sources/jme3-terrain-sources.jar"/>
 	<classpathentry kind="lib" path="D:/Dev/TerrainGen/JMonkeyBinaries/lib/jme3-testdata.jar"/>
 	<classpathentry kind="lib" path="D:/Dev/TerrainGen/JMonkeyBinaries/lib/joal.jar"/>

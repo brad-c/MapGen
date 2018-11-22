@@ -66,8 +66,8 @@ public class WorldRendererState implements Savable {
     capsule.write(camState2d, "camState2d", null);
     capsule.write(camState3d, "camState3d", null);
     capsule.write(viewType, "viewType", null);
-    capsule.write(simpleWaterColor, "simpleWaterColor", DEF_WATER_COL);
-    capsule.write(waterType, "waterType", DEF_WATER_TYPE);
+    capsule.write(simpleWaterColor, "simpleWaterColor", null);
+    capsule.write(waterType, "waterType", null);
   }
 
   @Override

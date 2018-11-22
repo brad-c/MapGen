@@ -1,7 +1,16 @@
 package gen;
 
+import java.io.IOException;
+
+import com.jme3.export.InputCapsule;
+import com.jme3.export.JmeExporter;
+import com.jme3.export.JmeImporter;
+import com.jme3.export.OutputCapsule;
+
 public class ExponentialElevationRamp extends ElevationRamp {
 
+  public static final float DEF_B = 9.12f;
+  
   private float b;
   private float maxVal;
   private boolean invert;
@@ -11,7 +20,7 @@ public class ExponentialElevationRamp extends ElevationRamp {
   }
   
   public ExponentialElevationRamp(boolean invert) {
-    this(9.12f, invert);
+    this(DEF_B, invert);
   }
   
   public ExponentialElevationRamp(float b) {
@@ -52,13 +61,24 @@ public class ExponentialElevationRamp extends ElevationRamp {
 
   @Override
   public float applyRamp(float inVal) {
-    
     float res = applyFunc(inVal);
     res = HeightMapUtil.normalise(res, 0, maxVal);
     return res;
   }
 
-  
+  @Override
+  public void write(JmeExporter ex) throws IOException {
+    OutputCapsule cap = ex.getCapsule(this);
+    cap.write(b, "b", -1);
+    cap.write(invert, "invert", false);
+  }
+
+  @Override
+  public void read(JmeImporter im) throws IOException {
+    InputCapsule cap = im.getCapsule(this);
+    setB(cap.readFloat("b", DEF_B));
+    setInvert(cap.readBoolean("invert", false));
+  }
 
   @Override
   public String toString() {

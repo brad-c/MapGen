@@ -1,6 +1,8 @@
 package gen;
 
-public abstract class ElevationRamp {
+import com.jme3.export.Savable;
+
+public abstract class ElevationRamp implements Savable {
   
   public ElevationRamp() {
   }
