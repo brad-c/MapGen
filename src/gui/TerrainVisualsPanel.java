@@ -68,9 +68,6 @@ public class TerrainVisualsPanel extends JPanel {
     
     addComponents();
     addListeners();
-
-    // We are pushing these values atm
-    updateSunPos();
   }
 
   public void updateGUI(WorldRenderer ren) {

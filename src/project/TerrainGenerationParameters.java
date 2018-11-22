@@ -13,7 +13,7 @@ import gen.ExponentialElevationRamp;
 import gen.SimplexNoiseGen;
 import render.TerrainGenerator;
 
-public class TerrainParameters implements Savable {
+public class TerrainGenerationParameters implements Savable {
 
   public static final int DEF_SIZE = 512;
   public static final float DEF_HEIGHT_SCALE = 300;
@@ -37,7 +37,7 @@ public class TerrainParameters implements Savable {
   private ElevationRamp landElevationRamp;
   private ElevationRamp waterElevationRamp;
 
-  public TerrainParameters() {
+  public TerrainGenerationParameters() {
     noiseGen = DEF_NOISE;
     size = DEF_SIZE;
     heightScale = DEF_HEIGHT_SCALE;
@@ -49,7 +49,7 @@ public class TerrainParameters implements Savable {
     waterElevationRamp = DEF_WATER_RAMP;
   }
   
-  public TerrainParameters(TerrainGenerator gen) {
+  public TerrainGenerationParameters(TerrainGenerator gen) {
     noiseGen = gen.getNoiseGenerator();
     size = gen.getSize();
     heightScale = gen.getHeightScale();

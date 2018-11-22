@@ -13,7 +13,8 @@ import crap.ImageHeightmapLoader;
 import gen.ElevationRamp;
 import gen.HeightMapUtil;
 import gen.SimplexNoiseGen;
-import project.TerrainParameters;
+import project.TerrainDisplayParamaters;
+import project.TerrainGenerationParameters;
 
 public class TerrainGenerator {
 
@@ -21,7 +22,7 @@ public class TerrainGenerator {
   
   private Material terrainMat;
   private TerrainQuad terrain;
-  private SimplexNoiseGen noiseGen = new SimplexNoiseGen();
+  private SimplexNoiseGen noiseGen;
 
   private int size;
   private float heightScale;
@@ -32,17 +33,17 @@ public class TerrainGenerator {
   private ElevationRamp landElevationRamp;
   private ElevationRamp waterElevationRamp;
 
-  private String hipsoTex = "textures/hipso_one.png";
-  private String bathTex = "textures/bath_dark.png";
+  private String hipsoTex;
+  private String bathTex;
 
   private boolean discardWater;
 
-  private Vector3f sunDir = new Vector3f(1, -1, 0).normalizeLocal();
-  private float ambientLight = 0.1f;
+  private Vector3f sunDir;
+  private float ambientLight;
 
-  private boolean renderCoastline = false;
-  private float coastlineThickness = 0.8f;
-  private Vector4f coastlineColor = new Vector4f(0, 0, 0, 1);
+  private boolean renderCoastline;
+  private float coastlineThickness;
+  private Vector4f coastlineColor;
 
   // The reference heightmap resolution used to determine the appropriate
   // horizontol spacing for noise sampling and vertical scale for rendered heights
@@ -51,7 +52,8 @@ public class TerrainGenerator {
 
   public TerrainGenerator() {
     //apply defaults
-    new TerrainParameters().apply(this);
+    new TerrainGenerationParameters().apply(this);
+    new TerrainDisplayParamaters().apply(this);
   }
   
   public void init(WorldRenderer app) {
@@ -258,7 +260,7 @@ public class TerrainGenerator {
   }
 
   public void setSunDirection(Vector3f dir) {
-    sunDir.set(dir);
+    sunDir = new Vector3f(dir);
     if (terrainMat != null) {
       terrainMat.setVector3("SunDir", dir.normalizeLocal());
     }
@@ -318,7 +320,6 @@ public class TerrainGenerator {
   public void setNoiseGenerator(SimplexNoiseGen noiseGen) {
     this.noiseGen = noiseGen;
   }
-  
 
   public void setHipsoTexture(String tex) {
     hipsoTex = tex;

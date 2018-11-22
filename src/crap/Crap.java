@@ -7,7 +7,7 @@ import com.jme3.export.xml.XMLExporter;
 import com.jme3.renderer.Camera;
 
 import gen.SimplexNoiseGen;
-import project.TerrainParameters;
+import project.TerrainGenerationParameters;
 import project.WorldGenProject;
 
 public class Crap {
@@ -20,7 +20,7 @@ public class Crap {
 //    TerrainElevationRampEditor.showTestFrame();
     WorldGenProject proj = new WorldGenProject();
     
-    TerrainParameters tp = new TerrainParameters();
+    TerrainGenerationParameters tp = new TerrainGenerationParameters();
     tp.setErodeFilter(1);
     
     SimplexNoiseGen ng = new SimplexNoiseGen();

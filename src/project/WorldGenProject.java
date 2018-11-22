@@ -13,24 +13,30 @@ import render.WorldRenderer;
 public class WorldGenProject implements Savable {
   
   private WorldRendererState worldRenderState;
-  private TerrainParameters terrainParams;
+  private TerrainGenerationParameters terrainGenerationParameters;
+  private TerrainDisplayParamaters terrainDisplayParamaters;
   
   public WorldGenProject() {
     worldRenderState = new WorldRendererState();
-    terrainParams = new TerrainParameters();
+    terrainGenerationParameters = new TerrainGenerationParameters();
+    terrainDisplayParamaters = new TerrainDisplayParamaters();
   }
   
   public WorldGenProject(WorldRenderer wr) {
     worldRenderState = new WorldRendererState(wr);
-    terrainParams = new TerrainParameters(wr.getTerrainGenerator());
+    terrainGenerationParameters = new TerrainGenerationParameters(wr.getTerrainGenerator());
+    terrainDisplayParamaters = new TerrainDisplayParamaters(wr.getTerrainGenerator());
   }
   
   public void apply(WorldRenderer wr) {
     if(worldRenderState != null) {
       worldRenderState.apply(wr);
     }
-    if(terrainParams != null) {
-      terrainParams.apply(wr.getTerrainGenerator());
+    if(terrainGenerationParameters != null) {
+      terrainGenerationParameters.apply(wr.getTerrainGenerator());
+    }
+    if(terrainDisplayParamaters != null) {
+      terrainDisplayParamaters.apply(wr.getTerrainGenerator());
     }
   }
   
@@ -39,14 +45,16 @@ public class WorldGenProject implements Savable {
   public void write(JmeExporter ex) throws IOException {
     OutputCapsule capsule = ex.getCapsule(this);
     capsule.write(worldRenderState, "worldRenderState", null);
-    capsule.write(terrainParams, "terrainParams", null);
+    capsule.write(terrainGenerationParameters, "terrainGenerationParameters", null);
+    capsule.write(terrainDisplayParamaters, "terrainDisplayParamaters", null);
   }
 
   @Override
   public void read(JmeImporter im) throws IOException {
     InputCapsule capsule = im.getCapsule(this);
     worldRenderState = (WorldRendererState)capsule.readSavable("worldRenderState", null);
-    terrainParams = (TerrainParameters)capsule.readSavable("terrainParams", null);
+    terrainGenerationParameters = (TerrainGenerationParameters)capsule.readSavable("terrainGenerationParameters", null);
+    terrainDisplayParamaters= (TerrainDisplayParamaters)capsule.readSavable("terrainDisplayParamaters", null);
   }
 
 }
