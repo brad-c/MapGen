@@ -19,6 +19,7 @@ import com.jme3.scene.Node;
 import com.jme3.scene.shape.Quad;
 import com.jme3.terrain.geomipmap.TerrainQuad;
 
+import project.WorldRendererState;
 import util.TypeUtil;
 
 public class WorldRenderer extends SimpleApplication {
@@ -39,7 +40,7 @@ public class WorldRenderer extends SimpleApplication {
   private FilterPostProcessor postProcessor;
   private ColorFilter colorFilter;
 
-  private WaterType waterType = WaterType.PURDY;
+  private WaterType waterType;
   
   private Node simpleWaterRoot;
   private Vector4f simpleWaterColor;
@@ -49,10 +50,12 @@ public class WorldRenderer extends SimpleApplication {
   
   private OrthoCamAppState orthCamState;
   private OrthoCameraController orthController;
-  private ViewType viewType = ViewType.THREE_D;
+  private ViewType viewType;
 
   private CameraState prevCamState2d;
   private CameraState prevCamState3d;
+  
+  private boolean isInitialised = false;
   
 
   public WorldRenderer() {
@@ -62,6 +65,9 @@ public class WorldRenderer extends SimpleApplication {
     terGen = new TerrainGenerator();
     colorFilter = new ColorFilter();
     colorFilter.setEnabled(false);
+    
+    //apply defaults
+    new WorldRendererState().apply(this);
   }
 
   @Override
@@ -71,7 +77,7 @@ public class WorldRenderer extends SimpleApplication {
       context.getSettings().setFrameRate(160);
     }
     super.initialize();
-
+    isInitialised = true;
   }
 
   @Override
@@ -116,6 +122,10 @@ public class WorldRenderer extends SimpleApplication {
     ViewType oldType = viewType;
     this.viewType = type;
 
+    if(!isInitialised) {
+      return;
+    }
+    
     // save current state
     if (oldType == ViewType.THREE_D) {
       prevCamState3d = CameraState.saveState(cam);

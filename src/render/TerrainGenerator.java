@@ -51,8 +51,7 @@ public class TerrainGenerator {
 
   public TerrainGenerator() {
     //apply defaults
-    TerrainParameters params = new TerrainParameters();
-    params.apply(this);
+    new TerrainParameters().apply(this);
   }
   
   public void init(WorldRenderer app) {

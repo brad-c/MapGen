@@ -101,8 +101,6 @@ public class TerrainParameters implements Savable {
     waterElevationRamp = (ElevationRamp)cap.readSavable("waterElevationRamp", DEF_WATER_RAMP);
   }
 
-  
-  
   public SimplexNoiseGen getNoiseGen() {
     return noiseGen;
   }

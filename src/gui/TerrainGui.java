@@ -139,6 +139,8 @@ public class TerrainGui {
     this.app = ren;
     terrainVisualsPan.updateGUI(ren);
     terrainPan.updateGUI(ren);
+    view2dB.setSelected(ren.getViewType() == ViewType.TWO_D);
+    view3dB.setSelected(ren.getViewType() == ViewType.THREE_D);
   }
 
   private void addListeners() {

@@ -13,6 +13,9 @@ public class CameraState implements Savable {
 
 
   public static CameraState saveState(Camera cam) {
+    if(cam == null) {
+      return null;
+    }
     try {
       CameraState res = new CameraState(cam);
       return res;
