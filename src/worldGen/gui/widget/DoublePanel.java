@@ -8,13 +8,13 @@ public class DoublePanel extends NumPanel {
   private static final long serialVersionUID = 1L;
   
   private double defVal;
-  // private NumberFormat formatter = new DecimalFormat("#0.00000");
-  private NumberFormat formatter = new DecimalFormat();
+  private NumberFormat formatter = new DecimalFormat("0.######");
 
   public DoublePanel(String label, int size, double defVal) {
     super(label, size);
     this.defVal = defVal;
     tf.setText(formatter.format(defVal));
+    
   }
 
   public double getVal() {

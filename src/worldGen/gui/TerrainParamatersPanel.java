@@ -57,8 +57,6 @@ public class TerrainParamatersPanel extends JPanel {
     addComponents();
     addListeners();
     
-    //TODO: We need to push the water level value to the terrain atm
-    updateWaterLevel();
   }
 
   public void updateGUI(WorldRenderer ren) {
@@ -72,8 +70,8 @@ public class TerrainParamatersPanel extends JPanel {
     resolutionCB.setSelectedItem(tGen.getSize());
     noiseMixPan.setValue(tGen.getNoiseRatio());
     waterLevelSlider.setValue( (int) (app.getWaterLevel() * 100));
-    //TODO;
-//    erodePan.setValue();
+    erodePan.setValue(tGen.getErodeFilter());
+
   }
   
   private void initComponenets() {
@@ -83,7 +81,7 @@ public class TerrainParamatersPanel extends JPanel {
     // Noise
     octPan = new IntPanel("Oct", 2, nGen.getOctaves());
     roughPan = new DoublePanel("Rgh", 3, nGen.getRoughness());
-    scalePan = new DoublePanel("Scale", 4, nGen.getScale());
+    scalePan = new DoublePanel("Scale", 5, nGen.getScale());
     heightScalePan = new DoublePanel("Elv Scale", 3, tGen.getHeightScale());
     seedPan = new LongPanel("Seed", 15, nGen.getSeed());
     seedB = new JButton("Roll");
@@ -205,24 +203,6 @@ public class TerrainParamatersPanel extends JPanel {
       }
     });
 
-    seedB.addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent arg0) {
-
-        app.enqueue(new Runnable() {
-          @Override
-          public void run() {
-            SimplexNoiseGen nGen = app.getTerrainGenerator().getNoiseGenerator();
-            Random r = new Random();
-            nGen.setSeed(r.nextLong());
-            seedPan.setVal(nGen.getSeed());
-            updateTerrain();
-          }
-        });
-
-      }
-    });
-    
     waterLevelSlider.addChangeListener(new ChangeListener() {
 
       @Override

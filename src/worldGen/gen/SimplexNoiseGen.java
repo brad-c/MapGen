@@ -14,7 +14,7 @@ public class SimplexNoiseGen implements Savable {
 
   public static final int DEF_OCTAVES = 12;
   public static final double DEF_ROUGHNESS = 0.6;
-  public static final double DEF_SCALE = 0.0005;
+  public static final double DEF_SCALE = 0.001;
   public static final long DEF_SEED = 8092038379555713298l;
   public static final int DEF_WIDTH = 512;
   public static final int DEF_HEIGHT = 512;
@@ -47,19 +47,21 @@ public class SimplexNoiseGen implements Savable {
     sampleSpacing = DEF_SAMPLE_SPACING;
   }
   
+  public SimplexNoiseGen(SimplexNoiseGen ng) {
+    octaves = ng.getOctaves();
+    roughness = ng.getRoughness();
+    scale = ng.getScale();
+    seed = ng.getSeed();
+    width = ng.getWidth();
+    height = ng.getHeight();
+    heightScale = ng.getHeightScale();
+    sampleSpacing = ng.getSampleSpacing();
+  }
+  
   
   @Override
   public void write(JmeExporter ex) throws IOException {
     OutputCapsule capsule = ex.getCapsule(this);
-//    capsule.write(octaves, "octaves", DEF_OCTAVES);
-//    capsule.write(roughness, "roughness", DEF_ROUGHNESS);
-//    capsule.write(scale, "scale", DEF_SCALE);
-//    capsule.write(seed, "seed", DEF_SEED);
-//    capsule.write(width, "width", DEF_WIDTH);
-//    capsule.write(height, "height", DEF_HEIGHT);
-//    capsule.write(heightScale, "heightScale", DEF_HEIGHT_SCALE);
-//    capsule.write(sampleSpacing, "sampleSpacing", DEF_SAMPLE_SPACING);
-    
     capsule.write(octaves, "octaves", -1);
     capsule.write(roughness, "roughness", -1);
     capsule.write(scale, "scale", -1);

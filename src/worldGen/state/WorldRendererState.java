@@ -20,26 +20,25 @@ public class WorldRendererState implements Savable {
   public static final WaterType DEF_WATER_TYPE = WaterType.PURDY;
   public static final ViewType DEF_VIEW_TYPE = ViewType.THREE_D;
   public static final PurdyWaterState DEF_PURDY_WATER = new PurdyWaterState();
+  public static final ColorFilterState DEF_COLOR_FILTER = new ColorFilterState();
   
-  private Vector4f simpleWaterColor;
-  
-  private WaterType waterType;
   
   private ViewType viewType;
   private CameraState camState2d;
   private CameraState camState3d;
   
-  
+  private Vector4f simpleWaterColor;
+  private WaterType waterType;
   private PurdyWaterState purdyWater;
-  //private ColorFilter
   
-  
+  private ColorFilterState colorFilter;
   
   public WorldRendererState() {
     simpleWaterColor = DEF_WATER_COL;
     waterType = DEF_WATER_TYPE;
     viewType = DEF_VIEW_TYPE;
     purdyWater = DEF_PURDY_WATER;
+    colorFilter = DEF_COLOR_FILTER;
   }
   
   public WorldRendererState(WorldRenderer wr) {
@@ -49,6 +48,7 @@ public class WorldRendererState implements Savable {
     waterType = wr.getWaterType();
     viewType = wr.getViewType();
     purdyWater = new PurdyWaterState(wr.getPurdyWater());
+    colorFilter = new ColorFilterState(wr.getColorFilter());
   }
   
   public void apply(WorldRenderer wr) {
@@ -70,6 +70,9 @@ public class WorldRendererState implements Savable {
     if(purdyWater != null) {
       purdyWater.apply(wr.getPurdyWater());
     }
+    if(colorFilter != null) {
+      colorFilter.apply(wr.getColorFilter());
+    }
   }
   
   @Override
@@ -81,6 +84,7 @@ public class WorldRendererState implements Savable {
     capsule.write(simpleWaterColor, "simpleWaterColor", null);
     capsule.write(waterType, "waterType", null);
     capsule.write(purdyWater, "purdyWater", null);
+    capsule.write(colorFilter, "colorFilter", null);
   }
 
   @Override
@@ -92,7 +96,7 @@ public class WorldRendererState implements Savable {
     simpleWaterColor = (Vector4f)capsule.readSavable("simpleWaterColor", DEF_WATER_COL);
     waterType = capsule.readEnum("waterType", WaterType.class, DEF_WATER_TYPE);
     purdyWater = (PurdyWaterState)capsule.readSavable("purdyWater", DEF_PURDY_WATER);
-    
+    colorFilter = (ColorFilterState)capsule.readSavable("colorFilter", DEF_COLOR_FILTER);
   }
 
 }

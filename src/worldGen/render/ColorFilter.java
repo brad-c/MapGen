@@ -7,17 +7,20 @@ import com.jme3.post.Filter;
 import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;
 
+import worldGen.state.ColorFilterState;
+
 public class ColorFilter extends Filter {
 
-  private boolean isBlackAndWhite = true;
-  private boolean isInvertColors = false;
+  private boolean isBlackAndWhite;
+  private boolean isInvertColors;
   
   //Value between -1 and 1
-  private float brightness = 0;
-  private float contrast = 0;
+  private float brightness;
+  private float contrast;
   
   public ColorFilter() {
     super("ColorFilter");
+    new ColorFilterState().apply(this);
   }
 
   @Override

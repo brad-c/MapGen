@@ -50,7 +50,7 @@ public class TerrainGenerationParameters implements Savable {
   }
   
   public TerrainGenerationParameters(TerrainGenerator gen) {
-    noiseGen = gen.getNoiseGenerator();
+    noiseGen = new SimplexNoiseGen(gen.getNoiseGenerator());
     size = gen.getSize();
     heightScale = gen.getHeightScale();
     baseHeightMapSource = gen.getBaseHeightMapSource();
@@ -63,7 +63,7 @@ public class TerrainGenerationParameters implements Savable {
   
   public void apply(TerrainGenerator gen) {
     gen.setSize(size);
-    gen.setNoiseGenerator(noiseGen);
+    gen.setNoiseGenerator(new SimplexNoiseGen(noiseGen));
     gen.setHeightScale(heightScale);
     gen.setBaseHeightMapSource(baseHeightMapSource);
     gen.setNoiseRatio(noiseRatio);
