@@ -18,7 +18,7 @@ public class TerrainGenerationParameters implements Savable {
   public static final int DEF_SIZE = 512;
   public static final float DEF_HEIGHT_SCALE = 300;
   public static final String DEF_HEIGHT_MAP = "textures/circleGradLarge.png";
-  public static final float DEF_NOISE_RATIO = 1;
+  public static final float DEF_NOISE_RATIO = 0.5f;
   public static final float DEF_ERODE_FILTER = 0;
   public static final float DEF_WATER_LEVEL = 0.7f;
   public static final ElevationRamp DEF_LAND_RAMP = new ExponentialElevationRamp();

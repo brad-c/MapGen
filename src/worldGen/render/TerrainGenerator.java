@@ -81,11 +81,11 @@ public class TerrainGenerator {
 
     t1 = System.currentTimeMillis();
     for (int i = 0; i < noiseData.length; i++) {
-      heightData[i] += (noiseData[i] * noiseRatio);
+      heightData[i] = (heightData[i] * (1 - noiseRatio)) + (noiseData[i] * noiseRatio);
     }
     HeightMapUtil.normalise(heightData);
     logTime("Mix: ", t1);
-
+    
     if (landElevationRamp != null) {
       t1 = System.currentTimeMillis();
       float waterRat = getRenderedWaterHeight() / getRenderedHeightScale();

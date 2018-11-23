@@ -1,6 +1,5 @@
 package worldGen.gui;
 
-import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -42,7 +41,7 @@ public class TerrainParamatersPanel extends JPanel {
 
   // Terrain
   private JComboBox<Integer> resolutionCB;
-  private DoublePanel noiseMixPan;
+  private JSlider noiseMixSlider;
   private DoublePanel heightScalePan;
   private JButton updateB;
   private JButton seedB;
@@ -56,7 +55,6 @@ public class TerrainParamatersPanel extends JPanel {
     updateGUI(app);
     addComponents();
     addListeners();
-    
   }
 
   public void updateGUI(WorldRenderer ren) {
@@ -68,7 +66,9 @@ public class TerrainParamatersPanel extends JPanel {
     heightScalePan.setValue(tGen.getHeightScale());
     seedPan.setVal(nGen.getSeed());
     resolutionCB.setSelectedItem(tGen.getSize());
-    noiseMixPan.setValue(tGen.getNoiseRatio());
+        
+    noiseMixSlider.setValue((int)(tGen.getNoiseRatio() * 100));
+    
     waterLevelSlider.setValue( (int) (app.getWaterLevel() * 100));
     erodePan.setValue(tGen.getErodeFilter());
 
@@ -88,13 +88,12 @@ public class TerrainParamatersPanel extends JPanel {
 
     // Terrain
     resolutionCB = new JComboBox<>(new Integer[] { 256, 512, 1024, 2048 });
-    noiseMixPan = new DoublePanel("Noise Ratio", 3, tGen.getNoiseRatio());
+    noiseMixSlider = new JSlider(0,100);
     erodePan = new DoublePanel("Smooth", 2, 0);
     updateB = new JButton("Update");
     landRampB = new JButton("...");
     
     waterLevelSlider = new JSlider(0, 100);
-    waterLevelSlider.setPreferredSize(new Dimension(120, new JSlider().getPreferredSize().height));
   }
 
   private void addComponents() {
@@ -120,7 +119,7 @@ public class TerrainParamatersPanel extends JPanel {
     line1 = new JPanel(new FlowLayout(FlowLayout.LEFT));
     line1.add(heightScalePan);
     line1.add(erodePan);
-    line1.add(noiseMixPan);
+    //line1.add(noiseMixPan);
     
     line2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
     line2.add(new JLabel("Elevation Ramp"));
@@ -131,12 +130,19 @@ public class TerrainParamatersPanel extends JPanel {
     JPanel line3 = new JPanel(new FlowLayout(FlowLayout.LEFT));
     line3.add(new JLabel("Water Level"));
     line3.add(waterLevelSlider);
+        
+    JPanel line4 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    line4.add(new JLabel("Noise Ratio"));
+    line4.add(noiseMixSlider);
+    
     
     JPanel terrainPan = new JPanel(new GridBagLayout());
     terrainPan.setBorder(new TitledBorder("Terrain"));
-    terrainPan.add(line1, new GridBagConstraints(0,0,1,1,1,0,GridBagConstraints.WEST,GridBagConstraints.NONE,insets,0,0));
-    terrainPan.add(line3, new GridBagConstraints(0,1,1,1,1,0,GridBagConstraints.WEST,GridBagConstraints.NONE,insets,0,0));
-    terrainPan.add(line2, new GridBagConstraints(0,2,1,1,1,0,GridBagConstraints.WEST,GridBagConstraints.NONE,insets,0,0));
+    int y=0;
+    terrainPan.add(line1, new GridBagConstraints(0,y++,1,1,1,0,GridBagConstraints.WEST,GridBagConstraints.NONE,insets,0,0));
+    terrainPan.add(line4, new GridBagConstraints(0,y++,1,1,1,0,GridBagConstraints.WEST,GridBagConstraints.NONE,insets,0,0));
+    terrainPan.add(line3, new GridBagConstraints(0,y++,1,1,1,0,GridBagConstraints.WEST,GridBagConstraints.NONE,insets,0,0));
+    terrainPan.add(line2, new GridBagConstraints(0,y++,1,1,1,0,GridBagConstraints.WEST,GridBagConstraints.NONE,insets,0,0));
     
     
     JPanel updatePan = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -228,18 +234,13 @@ public class TerrainParamatersPanel extends JPanel {
   public void updateTerrain() {
 
     TerrainGenerator tGen = app.getTerrainGenerator();
-
     tGen.setSize(resolutionCB.getItemAt(resolutionCB.getSelectedIndex()));
-
     tGen.setHeightScale((float) heightScalePan.getVal());
-
     tGen.setErodeFilter((float) erodePan.getVal());
-    tGen.setNoiseRatio((float) noiseMixPan.getVal());
+    tGen.setNoiseRatio(noiseMixSlider.getValue() / 100f);
 
     SimplexNoiseGen gen = tGen.getNoiseGenerator();
-    if (seedPan.getVal() != 0) {
-      gen.setSeed(seedPan.getVal());
-    }
+    gen.setSeed(seedPan.getVal());
     gen.setOctaves(octPan.getVal());
     gen.setRoughness(roughPan.getVal());
     gen.setScale(scalePan.getVal());

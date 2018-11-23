@@ -320,8 +320,6 @@ public class TerrainGui {
   }
   
   private void doNew() {
-    
-    
     app.enqueue(new Runnable() {
       @Override
       public void run() {
