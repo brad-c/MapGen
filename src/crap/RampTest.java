@@ -13,8 +13,8 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.vecmath.Vector2d;
 
-import gen.ExponentialElevationRamp;
-import gen.HeightMapUtil;
+import worldGen.gen.ExponentialElevationRamp;
+import worldGen.gen.HeightMapUtil;
 
 public class RampTest {
 

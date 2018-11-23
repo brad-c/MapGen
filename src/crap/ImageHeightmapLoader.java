@@ -9,7 +9,7 @@ import java.io.InputStream;
 
 import javax.imageio.ImageIO;
 
-import gui.ResourceFinder;
+import worldGen.gui.ResourceFinder;
 
 public class ImageHeightmapLoader {
 

@@ -6,9 +6,9 @@ import java.io.IOException;
 import com.jme3.export.xml.XMLExporter;
 import com.jme3.renderer.Camera;
 
-import gen.SimplexNoiseGen;
-import project.TerrainGenerationParameters;
-import project.WorldGenProject;
+import worldGen.gen.SimplexNoiseGen;
+import worldGen.state.TerrainGenerationParameters;
+import worldGen.state.WorldGenProject;
 
 public class Crap {
 
