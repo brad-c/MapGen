@@ -36,10 +36,11 @@ public class PurdyWaterPanel extends JPanel {
     
     
     setLayout(new FlowLayout(FlowLayout.LEFT));
-    add(new JLabel("Shallow:"));
-    add(colorB);
-    add(new JLabel("Deep:"));
+    
+    add(new JLabel("Depth Fog:"));
     add(deepColorB);
+    add(new JLabel("Surface:"));
+    add(colorB);
     add(new JLabel("Transp:"));
     add(transpSlider);
 

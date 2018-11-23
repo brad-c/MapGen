@@ -120,7 +120,9 @@ public class PurdyWater {
    
     //Blueify the water at depth
     float colorExtinction = renderer.getTerrainGenerator().getRenderedWaterHeight();
-    waterFilter.setColorExtinction(new Vector3f(colorExtinction / 3f, colorExtinction / 2f, colorExtinction));
+    //colorExtinction = 0;
+    //waterFilter.setColorExtinction(new Vector3f(colorExtinction / 3f, colorExtinction / 2f, colorExtinction));
+    waterFilter.setColorExtinction(new Vector3f(colorExtinction, colorExtinction, colorExtinction));
   }
  
 }

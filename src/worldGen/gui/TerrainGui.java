@@ -15,6 +15,7 @@ import java.util.concurrent.Callable;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -30,6 +31,7 @@ import com.jme3.system.JmeCanvasContext;
 import worldGen.render.WorldRenderer;
 import worldGen.render.WorldRenderer.ViewType;
 import worldGen.state.WorldGenProject;
+import worldGen.util.TypeUtil;
 
 public class TerrainGui {
 
@@ -53,6 +55,8 @@ public class TerrainGui {
     });
   }
 
+  public static final String WGX_FILE_EXT = "wgx";
+
   private WorldRenderer app;
   private Canvas canvas;
   private JFrame frame;
@@ -68,8 +72,11 @@ public class TerrainGui {
   private JTabbedPane editorTP;
 
   private JButton saveB;
+  private JButton saveAsB;
   private JButton loadB;
   private JButton newB;
+
+  private File currentSaveFile;
 
   // layout
   private JPanel rootPan;
@@ -98,6 +105,7 @@ public class TerrainGui {
     northPan.add(view3dB);
     northPan.add(view2dB);
     northPan.add(saveB);
+    northPan.add(saveAsB);
     northPan.add(loadB);
     northPan.add(newB);
 
@@ -130,6 +138,8 @@ public class TerrainGui {
     bg.add(view3dB);
 
     saveB = new JButton("Save");
+    saveAsB = new JButton("Save As");
+
     loadB = new JButton("Load");
     newB = new JButton("New");
 
@@ -137,7 +147,7 @@ public class TerrainGui {
     frame = new JFrame("World Creator");
     frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
   }
-  
+
   public void updateGUI(WorldRenderer ren) {
     this.app = ren;
     terrainVisualsPan.updateGUI(ren);
@@ -157,6 +167,15 @@ public class TerrainGui {
 
     });
 
+    saveAsB.addActionListener(new ActionListener() {
+
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        doSaveAs();
+      }
+
+    });
+
     loadB.addActionListener(new ActionListener() {
 
       @Override
@@ -165,7 +184,7 @@ public class TerrainGui {
       }
 
     });
-    
+
     newB.addActionListener(new ActionListener() {
 
       @Override
@@ -257,79 +276,124 @@ public class TerrainGui {
   }
 
   private void show() {
-    
-    //load default project
+
+    // load default project
     WorldGenProject project = new WorldGenProject();
     project.apply(app);
-    
+
     terrainPan.updateTerrain();
     frame.setLocationRelativeTo(null);
     frame.setVisible(true);
   }
-  
+
+  private void doSaveAs() {
+    JFileChooser fc = new JFileChooser();
+    if (currentSaveFile != null) {
+      fc.setCurrentDirectory(currentSaveFile.getParentFile());
+    } else {
+      fc.setCurrentDirectory(new File("."));
+    }
+    fc.addChoosableFileFilter(new WGFileFilter());
+    fc.setAcceptAllFileFilterUsed(false);
+    
+    int val = fc.showSaveDialog(frame);
+    if (val == JFileChooser.APPROVE_OPTION) {
+      File sel = fc.getSelectedFile();
+      if (!sel.getName().endsWith(".wgx")) {
+        sel = new File(sel.getParentFile(), sel.getName() + ".wgx");
+      }
+      saveProject(sel);
+    }
+
+  }
 
   private void doSave() {
+    if (currentSaveFile == null) {
+      doSaveAs();
+    } else {
+      saveProject(currentSaveFile);
+    }
+  }
+
+  private void saveProject(File file) {
     WorldGenProject project = new WorldGenProject(app);
-//    BinaryExporter exporter = new BinaryExporter();
+    // BinaryExporter exporter = new BinaryExporter();
     XMLExporter exporter = new XMLExporter();
     try {
-      exporter.save(project, new File("D:\\Dev\\temp\\testSave.wgen"));
-      System.out.println("TerrainGui.doSave: " + project);
+      exporter.save(project, file);
+      currentSaveFile = file;
     } catch (IOException e) {
       e.printStackTrace();
     }
-    
   }
 
   private void doLoad() {
+    JFileChooser fc = new JFileChooser();
+    if (currentSaveFile != null) {
+      fc.setCurrentDirectory(currentSaveFile.getParentFile());
+    } else {
+      fc.setCurrentDirectory(new File("."));
+    }
+    fc.addChoosableFileFilter(new WGFileFilter());
+    fc.setAcceptAllFileFilterUsed(false);
+    
+    //new WGFileFilter()
+    int val = fc.showOpenDialog(frame);
+    if (val == JFileChooser.APPROVE_OPTION) {
+      File sel = fc.getSelectedFile();
+      loadProject(sel);
+    }
+  }
+
+  private void loadProject(File file) {
+
     WorldGenProject project = null;
-    //BinaryImporter importer = new BinaryImporter();
+    // BinaryImporter importer = new BinaryImporter();
     XMLImporter importer = new XMLImporter();
     try {
-      project  = (WorldGenProject)importer.load(new File("D:\\Dev\\temp\\testSave.wgen"));
-      System.out.println("TerrainGui.doLoad: " + project);
+      project = (WorldGenProject) importer.load(file);
+      currentSaveFile = file;
     } catch (IOException e) {
       e.printStackTrace();
       return;
     }
-    if(project == null) {
-      System.out.println("TerrainGui.doLoad: null project");
+    if (project == null) {
       return;
     }
-   
+
     final WorldGenProject p = project;
-    
+
     app.enqueue(new Runnable() {
-      
+
       @Override
       public void run() {
-      //apply setting to the internals
+        // apply setting to the internals
         p.apply(app);
         SwingUtilities.invokeLater(new Runnable() {
           @Override
           public void run() {
-            //then update the GUI
+            // then update the GUI
             updateGUI(app);
           }
         });
         app.updateTerrain();
-        
+
       }
     });
-    
+
   }
-  
+
   private void doNew() {
     app.enqueue(new Runnable() {
       @Override
       public void run() {
         final WorldGenProject p = new WorldGenProject();
-        //apply setting to the internals
+        // apply setting to the internals
         p.apply(app);
         SwingUtilities.invokeLater(new Runnable() {
           @Override
           public void run() {
-            //then update the GUI
+            // then update the GUI
             updateGUI(app);
           }
         });
@@ -337,6 +401,24 @@ public class TerrainGui {
         app.resetCameraToDefault();
       }
     });
+  }
+
+  private class WGFileFilter extends javax.swing.filechooser.FileFilter {
+
+    @Override
+    public boolean accept(File f) {
+      if (f.isDirectory()) {
+        return true;
+      }
+
+      String extension = TypeUtil.getExtension(f);
+      return WGX_FILE_EXT.equals(extension);
+    }
+
+    @Override
+    public String getDescription() {
+      return "World Gen Projects";
+    }
   }
 
 }
