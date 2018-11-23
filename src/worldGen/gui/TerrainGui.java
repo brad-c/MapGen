@@ -11,9 +11,11 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.concurrent.Callable;
 
 import javax.swing.ButtonGroup;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -22,6 +24,8 @@ import javax.swing.JPopupMenu;
 import javax.swing.JTabbedPane;
 import javax.swing.JToggleButton;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.UIManager.LookAndFeelInfo;
 
 import com.jme3.export.xml.XMLExporter;
 import com.jme3.export.xml.XMLImporter;
@@ -46,6 +50,17 @@ public class TerrainGui {
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
+
+        try {
+          for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+            if ("Nimbus".equals(info.getName())) {
+              UIManager.setLookAndFeel(info.getClassName());
+              break;
+            }
+          }
+        } catch (Exception e) {
+        }
+
         JPopupMenu.setDefaultLightWeightPopupEnabled(false);
         terrainGui.createGui();
         terrainGui.startApp();
@@ -146,6 +161,15 @@ public class TerrainGui {
     // Frame
     frame = new JFrame("World Creator");
     frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+    try {
+      URL url = Thread.currentThread().getContextClassLoader().getResource("icons/globe.png");
+      ImageIcon img = new ImageIcon(url);
+      frame.setIconImage(img.getImage());
+    } catch (Exception e) {
+      System.out.println("TerrainGui.initComponenets: Could not load frame icon");
+    }
+
   }
 
   public void updateGUI(WorldRenderer ren) {
@@ -295,7 +319,7 @@ public class TerrainGui {
     }
     fc.addChoosableFileFilter(new WGFileFilter());
     fc.setAcceptAllFileFilterUsed(false);
-    
+
     int val = fc.showSaveDialog(frame);
     if (val == JFileChooser.APPROVE_OPTION) {
       File sel = fc.getSelectedFile();
@@ -336,8 +360,8 @@ public class TerrainGui {
     }
     fc.addChoosableFileFilter(new WGFileFilter());
     fc.setAcceptAllFileFilterUsed(false);
-    
-    //new WGFileFilter()
+
+    // new WGFileFilter()
     int val = fc.showOpenDialog(frame);
     if (val == JFileChooser.APPROVE_OPTION) {
       File sel = fc.getSelectedFile();
