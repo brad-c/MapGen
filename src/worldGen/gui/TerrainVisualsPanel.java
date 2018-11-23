@@ -55,6 +55,7 @@ public class TerrainVisualsPanel extends JPanel {
 
   // Color Filter
   private JCheckBox colorFilterEnabledCB;
+  private JCheckBox sepiaEnabledCB;
   private JCheckBox blackAndWhiteEnabledCB;
   private JCheckBox invertColorsEnabledCB;
   private JSlider brightnessSlider;
@@ -99,6 +100,7 @@ public class TerrainVisualsPanel extends JPanel {
     colorFilterEnabledCB.setSelected(cf.isEnabled());
 
     blackAndWhiteEnabledCB.setSelected(cf.isBlackAndWhite());
+    sepiaEnabledCB.setSelected(cf.isSepia());
     invertColorsEnabledCB.setSelected(cf.isInvertColors());
 
     // map -1 to 1 to 0 to 100
@@ -144,6 +146,7 @@ public class TerrainVisualsPanel extends JPanel {
     // Color Filter
     colorFilterEnabledCB = new JCheckBox("Enabled");
     blackAndWhiteEnabledCB = new JCheckBox("Black & White");
+    sepiaEnabledCB = new JCheckBox("Sepia");
     invertColorsEnabledCB = new JCheckBox("Invert Colors");
 
     brightnessSlider = new JSlider(0, 100);
@@ -196,10 +199,12 @@ public class TerrainVisualsPanel extends JPanel {
 
     JPanel cPan = new JPanel(new GridBagLayout());
     cPan.setBorder(new TitledBorder("Color Fliter"));
+    
     cPan.add(colorFilterEnabledCB, new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, insets, 0, 0));
     cPan.add(blackAndWhiteEnabledCB, new GridBagConstraints(1, 0, 1, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, insets, 0, 0));
-    cPan.add(invertColorsEnabledCB, new GridBagConstraints(2, 0, 1, 1, 1, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, insets, 0, 0));
-    cPan.add(bcPan, new GridBagConstraints(0, 1, 3, 1, 1, 0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, insets, 0, 0));
+    cPan.add(sepiaEnabledCB, new GridBagConstraints(2, 0, 1, 1, 1, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, insets, 0, 0));
+    cPan.add(invertColorsEnabledCB, new GridBagConstraints(0, 1, 2, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, insets, 0, 0));
+    cPan.add(bcPan, new GridBagConstraints(0, 2, 3, 1, 1, 0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, insets, 0, 0));
 
     JPanel waterPan = new JPanel(new GridBagLayout());
     waterPan.setBorder(new TitledBorder("Water"));
@@ -361,6 +366,20 @@ public class TerrainVisualsPanel extends JPanel {
           @Override
           public void run() {
             app.getColorFilter().setBlackAndWhite(blackAndWhiteEnabledCB.isSelected());
+          }
+        });
+
+      }
+    });
+    
+    sepiaEnabledCB.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent arg0) {
+
+        app.enqueue(new Runnable() {
+          @Override
+          public void run() {
+            app.getColorFilter().setSepia(sepiaEnabledCB.isSelected());
           }
         });
 

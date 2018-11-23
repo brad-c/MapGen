@@ -12,6 +12,7 @@ import worldGen.state.ColorFilterState;
 public class ColorFilter extends Filter {
 
   private boolean isBlackAndWhite;
+  private boolean isSepia;
   private boolean isInvertColors;
   
   //Value between -1 and 1
@@ -82,5 +83,18 @@ public class ColorFilter extends Filter {
       material.setFloat("Contrast", contrast);
     }
   }
+
+  public boolean isSepia() {
+    return isSepia;
+  }
+
+  public void setSepia(boolean isSepia) {
+    this.isSepia = isSepia;
+    if(material != null) {
+      material.setBoolean("IsSepia", isSepia);
+    }
+  }
+  
+  
 
 }

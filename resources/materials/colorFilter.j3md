@@ -3,7 +3,8 @@ MaterialDef ColorFilter {
     MaterialParameters {       
       Texture2D Texture   
       Int NumSamples 
-      Boolean IsBlackAndWhite    
+      Boolean IsBlackAndWhite
+      Boolean IsSepia    
       Boolean IsInvertColors
       Float Brightness
       Float Contrast
@@ -19,6 +20,7 @@ MaterialDef ColorFilter {
         
         Defines {         
           BLACK_AND_WHITE : IsBlackAndWhite
+          SEPIA : IsSepia
           INVERT_COLORS : IsInvertColors
           BRIGHTNESS : Brightness
           CONTRAST : Contrast

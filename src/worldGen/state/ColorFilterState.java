@@ -13,7 +13,8 @@ import worldGen.render.ColorFilter;
 public class ColorFilterState implements Savable {
 
   public static final boolean DEF_ENABLED = false;
-  public static final boolean DEF_B_AND_W = true;
+  public static final boolean DEF_B_AND_W = false;
+  public static final boolean DEF_SEPIA = false;
   public static final boolean DEF_INV_COL = false;
   public static final float DEF_BRIGHTNESS = 0;
   public static final float DEF_CONTRAST = 0;
@@ -21,6 +22,7 @@ public class ColorFilterState implements Savable {
   private boolean enabled;
   
   private boolean isBlackAndWhite;
+  private boolean isSepia;
   private boolean isInvertColors;
   
   private float brightness;
@@ -29,6 +31,7 @@ public class ColorFilterState implements Savable {
   public ColorFilterState() {
     enabled = DEF_ENABLED;
     isBlackAndWhite = DEF_B_AND_W;
+    isSepia = DEF_SEPIA;
     isInvertColors = DEF_INV_COL;
     brightness = DEF_BRIGHTNESS;
     contrast = DEF_CONTRAST;
@@ -37,6 +40,7 @@ public class ColorFilterState implements Savable {
   public ColorFilterState(ColorFilter cf) {
     enabled = cf.isEnabled();
     isBlackAndWhite =cf.isBlackAndWhite();
+    isSepia = cf.isSepia();
     isInvertColors = cf.isInvertColors();
     brightness = cf.getBrightness();
     contrast = cf.getContrast();
@@ -45,6 +49,7 @@ public class ColorFilterState implements Savable {
   public void apply(ColorFilter cf) {
     cf.setEnabled(enabled);
     cf.setBlackAndWhite(isBlackAndWhite);
+    cf.setSepia(isSepia);
     cf.setInvertColors(isInvertColors);
     cf.setBrightness(brightness);
     cf.setContrast(contrast);
@@ -55,6 +60,7 @@ public class ColorFilterState implements Savable {
     OutputCapsule cap = ex.getCapsule(this);
     cap.write(enabled, "enabled", DEF_ENABLED);
     cap.write(isBlackAndWhite, "isBlackAndWhite", DEF_B_AND_W);
+    cap.write(isSepia, "isSepia", DEF_SEPIA);
     cap.write(isInvertColors, "isInvertColors", DEF_INV_COL);
     cap.write(brightness, "brightness", -100);
     cap.write(contrast, "contrast", -100);
@@ -65,6 +71,7 @@ public class ColorFilterState implements Savable {
     InputCapsule cap = im.getCapsule(this);
     enabled = cap.readBoolean("enabled", DEF_ENABLED);
     isBlackAndWhite = cap.readBoolean("isBlackAndWhite", DEF_B_AND_W);
+    isSepia = cap.readBoolean("isSepia", DEF_SEPIA);
     isInvertColors = cap.readBoolean("isInvertColors", DEF_INV_COL);
     brightness = cap.readFloat("brightness", DEF_BRIGHTNESS);
     contrast = cap.readFloat("contrast", DEF_CONTRAST);
