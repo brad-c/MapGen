@@ -31,8 +31,7 @@ public class EditorPanel extends JPanel {
     
     appState = new EditorAppState();
     appState.setController(controller);
-    
-    
+        
     initComponents();
     addComponents();
     addListeners();
@@ -63,6 +62,7 @@ public class EditorPanel extends JPanel {
     if(!isActive) {
       world.setCameraControlEnabled(true);
     }
+    controller.setEnabled(isActive);
   }
 
   private void initComponents() {

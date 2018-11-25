@@ -1,16 +1,17 @@
 package worldGen.render;
 
 import com.jme3.terrain.geomipmap.TerrainQuad;
-import com.jme3.terrain.heightmap.AbstractHeightMap;
 import com.jme3.terrain.heightmap.RawHeightMap;
 
-import crap.ImageHeightmapLoader;
+import worldGen.gen.HeightMapProvider;
 import worldGen.gen.HeightMapUtil;
 
 public class HeightMapEditor {
 
   private WorldRenderer world;
   private TerrainQuad terrain;
+  
+  private RawHeightMap heightmap;
   
   public HeightMapEditor() {
   }
@@ -20,13 +21,15 @@ public class HeightMapEditor {
     TerrainGenerator tGen = world.getTerrainGenerator();
     int size = tGen.getSize();
     
-    String hms = tGen.getBaseHeightMapSource();
+//    String hms = tGen.getBaseHeightMapSource();
+//
+//    float[] heightData = ImageHeightmapLoader.loadGrayScaleData(hms, size, 1, true);
     
-    float[] heightData = ImageHeightmapLoader.loadGrayScaleData(hms, size, 1, true);
-    
+    HeightMapProvider hm = tGen.getBaseHeightMap();
+    float[] heightData = hm.getOrUpdateHeightMap(tGen.getSize(), true);
     HeightMapUtil.scale(heightData, tGen.getRenderedHeightScale());
     
-    AbstractHeightMap heightmap;
+    
     heightmap = new RawHeightMap(heightData);
     
     int patchSize = size + 1;
@@ -48,6 +51,16 @@ public class HeightMapEditor {
       return;
     }
     terrain.removeFromParent();
+    
+    
+    //TODO: Wrong place ?s
+    float[] heightData = terrain.getHeightMap();
+    float[] result = new float[heightData.length];
+    System.arraycopy(heightData, 0, result, 0, heightData.length);
+    HeightMapUtil.normalise(result);
+    world.getTerrainGenerator().getBaseHeightMap().setHeightData(result);
+    System.out.println("HeightMapEditor.detatch: dataSize=" + terrain.getTotalSize() + " terrainSize=" + world.getTerrainGenerator().getSize());
+    
   }
 
   public TerrainQuad getTerrain() {

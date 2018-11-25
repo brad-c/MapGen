@@ -9,8 +9,8 @@ import com.jme3.terrain.heightmap.AbstractHeightMap;
 import com.jme3.terrain.heightmap.RawHeightMap;
 import com.jme3.texture.Texture;
 
-import crap.ImageHeightmapLoader;
 import worldGen.gen.ElevationRamp;
+import worldGen.gen.HeightMapProvider;
 import worldGen.gen.HeightMapUtil;
 import worldGen.gen.SimplexNoiseGen;
 import worldGen.state.TerrainDisplayParamaters;
@@ -26,13 +26,20 @@ public class TerrainGenerator {
 
   private int size;
   private float heightScale;
-  private String baseHeightMapSource;
+  
   private float noiseRatio;
   private float erodeFilter;
   private float waterLevel;
   private ElevationRamp landElevationRamp;
   private ElevationRamp waterElevationRamp;
+  
+  
+  private String baseHeightMapSource;
+  private HeightMapProvider baseHeightMap;
 
+  
+  
+  
   private String hipsoTex;
   private String bathTex;
 
@@ -54,6 +61,8 @@ public class TerrainGenerator {
     //apply defaults
     new TerrainGenerationParameters().apply(this);
     new TerrainDisplayParamaters().apply(this);
+    
+    baseHeightMap = new HeightMapProvider();
   }
   
   public void init(WorldRenderer app) {
@@ -77,6 +86,8 @@ public class TerrainGenerator {
 
   public TerrainQuad generateTerrain() {
 
+    System.out.println("TerrainGenerator.generateTerrain: ");
+    
     //Make sure everying is all updated for the correct scale
     noiseGen.setSize(size);
     double spacing = BASE_RESOLUTION / size;
@@ -86,7 +97,7 @@ public class TerrainGenerator {
 
     
     long t1 = System.currentTimeMillis();
-    float[] heightData = ImageHeightmapLoader.loadGrayScaleData(baseHeightMapSource, size, 1, true);
+    float[] heightData = baseHeightMap.getOrUpdateHeightMap(size, true);
     logTime("GS Image: ", t1);
 
     t1 = System.currentTimeMillis();
@@ -293,6 +304,14 @@ public class TerrainGenerator {
 
   public float getHeightScale() {
     return heightScale;
+  }
+  
+  public HeightMapProvider getBaseHeightMap() {
+    return baseHeightMap;
+  }
+
+  public void setBaseHeightMap(HeightMapProvider baseHeightMap) {
+    this.baseHeightMap = baseHeightMap;
   }
 
   public String getBaseHeightMapSource() {

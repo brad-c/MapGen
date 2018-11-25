@@ -215,19 +215,6 @@ public class TerrainParamatersPanel extends JPanel {
       }
     });
 
-    updateB.addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent arg0) {
-
-        app.enqueue(new Runnable() {
-          @Override
-          public void run() {
-            updateTerrain();
-          }
-        });
-      }
-    });
-
     waterLevelSlider.addChangeListener(new ChangeListener() {
 
       @Override
