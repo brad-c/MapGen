@@ -46,6 +46,8 @@ public class OrthoCameraController implements AnalogListener, ActionListener {
   private float zoomScale = 512;
 
   private WorldRenderer terrainRenderer;
+  
+  private MyMouseListener mouseListener = new MyMouseListener();
 
   public OrthoCameraController(WorldRenderer terrainRenderer) {
     this.camera = terrainRenderer.getCamera();
@@ -65,7 +67,7 @@ public class OrthoCameraController implements AnalogListener, ActionListener {
     inputManager.addMapping(ZOOM_IN, new MouseAxisTrigger(MouseInput.AXIS_WHEEL, false), new KeyTrigger(KeyInput.KEY_Q));
     inputManager.addMapping(ZOOM_OUT, new MouseAxisTrigger(MouseInput.AXIS_WHEEL, true), new KeyTrigger(KeyInput.KEY_Z));
 
-    inputManager.addRawInputListener(new MyMouseListener());
+    inputManager.addRawInputListener(mouseListener);
 
     inputManager.addListener(this, mappings);
     inputManager.setCursorVisible(true);
@@ -118,6 +120,7 @@ public class OrthoCameraController implements AnalogListener, ActionListener {
 
     inputManager.removeListener(this);
     inputManager.setCursorVisible(true);
+    inputManager.removeRawInputListener(mouseListener);
   }
 
   @Override

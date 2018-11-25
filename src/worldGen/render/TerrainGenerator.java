@@ -60,6 +60,20 @@ public class TerrainGenerator {
     this.renderer = app;
     createTerrainMaterial();
   }
+  
+  public void attach() {
+    if(renderer == null || terrain == null) {
+      return;
+    }
+    renderer.getRootNode().attachChild(terrain);
+  }
+  
+  public void detatch() {
+    if(renderer == null || terrain == null) {
+      return;
+    }
+    terrain.removeFromParent();
+  }
 
   public TerrainQuad generateTerrain() {
 
@@ -120,7 +134,7 @@ public class TerrainGenerator {
 
     t1 = System.currentTimeMillis();
 
-    // int patchSize = 65;
+    //int patchSize = 65;
     int patchSize = size + 1;
     terrain = new TerrainQuad("my terrain", patchSize, size + 1, heightmap.getHeightMap());
 
@@ -347,6 +361,10 @@ public class TerrainGenerator {
 
   public TerrainQuad getTerrain() {
     return terrain;
+  }
+
+  public Material getTerrainMaterial() {
+    return terrainMat;
   }
 
   private void logTime(String string, long t1) {

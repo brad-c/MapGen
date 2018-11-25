@@ -1,12 +1,16 @@
 package worldGen.gui;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
+import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -34,15 +38,22 @@ public class PurdyWaterPanel extends JPanel {
     transpSlider = new JSlider(0,100,(int)(water.getWaterTransparency() * 100));
     transpSlider.setPreferredSize(new Dimension(80, transpSlider.getPreferredSize().height));
     
+    JPanel pan = new JPanel(new GridBagLayout());
+    pan.setBorder(new TitledBorder("Terrain"));
+    int y = 0;
+    Insets insets = new Insets(0, 0, 0, 0);
+    y++;
+    pan.add(new JLabel("Surface:"), new GridBagConstraints(0, y, 1, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, insets, 0, 0));
+    pan.add(colorB, new GridBagConstraints(1, y, 1, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, insets, 0, 0));
+    pan.add(new JLabel("Transp:"), new GridBagConstraints(2, y, 1, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, insets, 0, 0));
+    pan.add(transpSlider, new GridBagConstraints(3, y, 1, 1, 1, 0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, insets, 0, 0));
+    y++;
+    pan.add(new JLabel("Depth Fog:"), new GridBagConstraints(0, y, 1, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, insets, 0, 0));
+    pan.add(deepColorB, new GridBagConstraints(1, y, 1, 1, 1, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, insets, 0, 0));
     
-    setLayout(new FlowLayout(FlowLayout.LEFT));
     
-    add(new JLabel("Depth Fog:"));
-    add(deepColorB);
-    add(new JLabel("Surface:"));
-    add(colorB);
-    add(new JLabel("Transp:"));
-    add(transpSlider);
+    setLayout(new BorderLayout());
+    add(pan, BorderLayout.CENTER);
 
     colorB.addColorListener(new ColorChangeListener() {
       @Override

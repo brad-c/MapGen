@@ -61,14 +61,16 @@ public class WorldRendererState implements Savable {
     if(simpleWaterColor != null) {
       wr.setSimpleWaterColor(simpleWaterColor);
     }
+    //TODO: Purdy water needs to be applied before water type
+    //as water type might change the enabled state of the purdy water
+    if(purdyWater != null) {
+      purdyWater.apply(wr.getPurdyWater());
+    }
     if(waterType != null) {
       wr.setWaterType(waterType);
     }
     if(viewType != null) {
       wr.setViewType(viewType);
-    }
-    if(purdyWater != null) {
-      purdyWater.apply(wr.getPurdyWater());
     }
     if(colorFilter != null) {
       colorFilter.apply(wr.getColorFilter());
@@ -98,6 +100,64 @@ public class WorldRendererState implements Savable {
     purdyWater = (PurdyWaterState)capsule.readSavable("purdyWater", DEF_PURDY_WATER);
     colorFilter = (ColorFilterState)capsule.readSavable("colorFilter", DEF_COLOR_FILTER);
   }
+
+  public ViewType getViewType() {
+    return viewType;
+  }
+
+  public void setViewType(ViewType viewType) {
+    this.viewType = viewType;
+  }
+
+  public CameraState getCamState2d() {
+    return camState2d;
+  }
+
+  public void setCamState2d(CameraState camState2d) {
+    this.camState2d = camState2d;
+  }
+
+  public CameraState getCamState3d() {
+    return camState3d;
+  }
+
+  public void setCamState3d(CameraState camState3d) {
+    this.camState3d = camState3d;
+  }
+
+  public Vector4f getSimpleWaterColor() {
+    return simpleWaterColor;
+  }
+
+  public void setSimpleWaterColor(Vector4f simpleWaterColor) {
+    this.simpleWaterColor = simpleWaterColor;
+  }
+
+  public WaterType getWaterType() {
+    return waterType;
+  }
+
+  public void setWaterType(WaterType waterType) {
+    this.waterType = waterType;
+  }
+
+  public PurdyWaterState getPurdyWater() {
+    return purdyWater;
+  }
+
+  public void setPurdyWater(PurdyWaterState purdyWater) {
+    this.purdyWater = purdyWater;
+  }
+
+  public ColorFilterState getColorFilter() {
+    return colorFilter;
+  }
+
+  public void setColorFilter(ColorFilterState colorFilter) {
+    this.colorFilter = colorFilter;
+  }
+  
+  
 
 }
 

@@ -17,7 +17,6 @@ import com.jme3.renderer.queue.RenderQueue.Bucket;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.shape.Quad;
-import com.jme3.terrain.geomipmap.TerrainQuad;
 
 import worldGen.state.WorldRendererState;
 import worldGen.util.TypeUtil;
@@ -37,6 +36,7 @@ public class WorldRenderer extends SimpleApplication {
   }
 
   private TerrainGenerator terGen;
+  private HeightMapEditor heightMapEditor;
   private FilterPostProcessor postProcessor;
   private ColorFilter colorFilter;
 
@@ -65,6 +65,7 @@ public class WorldRenderer extends SimpleApplication {
     terGen = new TerrainGenerator();
     colorFilter = new ColorFilter();
     colorFilter.setEnabled(false);
+    heightMapEditor = new HeightMapEditor();
     
     //apply defaults
     new WorldRendererState().apply(this);
@@ -92,6 +93,7 @@ public class WorldRenderer extends SimpleApplication {
     setViewType(getViewType(), true);
 
     terGen.init(this);
+    heightMapEditor.init(this);
     purdyWater.init(this);
     
 
@@ -174,14 +176,11 @@ public class WorldRenderer extends SimpleApplication {
   }
 
   public void updateTerrain() {
-    TerrainQuad terrain = terGen.getTerrain();
-    if (terrain != null) {
-      terrain.removeFromParent();
-    }
+    terGen.detatch();
     // for recalc of water height
     setWaterLevel(getWaterLevel());
-    terrain = terGen.generateTerrain();
-    rootNode.attachChild(terrain);
+    terGen.generateTerrain();
+    terGen.attach();
   }
 
   public void setSunDirection(Vector3f dir) {
@@ -193,6 +192,10 @@ public class WorldRenderer extends SimpleApplication {
 
   public TerrainGenerator getTerrainGenerator() {
     return terGen;
+  }
+
+  public HeightMapEditor getHeightMapEditor() {
+    return heightMapEditor;
   }
 
   public PurdyWater getPurdyWater() {
@@ -255,11 +258,9 @@ public class WorldRenderer extends SimpleApplication {
     }
   }
 
-
   public void resetCameraToDefault() {
     setViewType(ViewType.THREE_D);
     setCameraToDefault();
-    
   }
   
   private void setCameraToDefault() {

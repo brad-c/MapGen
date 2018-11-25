@@ -1,26 +1,26 @@
-package worldGen.render;
+package worldGen.gui.heightmap;
 
 import com.jme3.app.Application;
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
 
-public class OrthoCamAppState extends AbstractAppState {
+public class EditorAppState  extends AbstractAppState {
 
   private Application app;
-  private OrthoCameraController orthoCam;
+  private EditorController controller;
 
-  public OrthoCamAppState() {
+  public EditorAppState() {
   }
 
   /**
    * This is called by SimpleApplication during initialize().
    */
-  void setController(OrthoCameraController cam) {
-    this.orthoCam = cam;
+  void setController(EditorController cam) {
+    this.controller = cam;
   }
 
-  public OrthoCameraController getController() {
-    return orthoCam;
+  public EditorController getController() {
+    return controller;
   }
 
   @Override
@@ -28,22 +28,21 @@ public class OrthoCamAppState extends AbstractAppState {
     super.initialize(stateManager, app);
     this.app = app;
     if (app.getInputManager() != null) {
-      orthoCam.registerWithInput(app.getInputManager());
+      controller.registerWithInput();
     }
   }
 
   @Override
   public void setEnabled(boolean enabled) {
     super.setEnabled(enabled);
-
-    orthoCam.setEnabled(enabled);
+    controller.setEnabled(enabled);
   }
 
   @Override
   public void cleanup() {
     super.cleanup();
     if (app.getInputManager() != null) {
-      orthoCam.unregisterInput();
+      controller.unregisterInput();
     }
   }
 

@@ -13,11 +13,13 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
+import javax.swing.JToggleButton;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import worldGen.gen.SimplexNoiseGen;
+import worldGen.gui.heightmap.EditorPanel;
 import worldGen.gui.ramp.TerrainElevationRampEditor;
 import worldGen.gui.widget.DoublePanel;
 import worldGen.gui.widget.IntPanel;
@@ -26,9 +28,9 @@ import worldGen.render.TerrainGenerator;
 import worldGen.render.WorldRenderer;
 
 public class TerrainParamatersPanel extends JPanel {
-  
+
   private static final long serialVersionUID = 1L;
-  
+
   private WorldRenderer app;
   private TerrainGui terrainGui;
 
@@ -48,6 +50,10 @@ public class TerrainParamatersPanel extends JPanel {
   private JButton landRampB;
   private JSlider waterLevelSlider;
 
+  // Base heightmap
+  private JToggleButton heightMapB;
+  private EditorPanel heightMapEdPan;
+
   public TerrainParamatersPanel(TerrainGui terrainGui) {
     this.terrainGui = terrainGui;
     this.app = terrainGui.getWorldRenderer();
@@ -62,18 +68,18 @@ public class TerrainParamatersPanel extends JPanel {
     SimplexNoiseGen nGen = tGen.getNoiseGenerator();
     octPan.setValue(nGen.getOctaves());
     roughPan.setValue(nGen.getRoughness());
-    scalePan.setValue( nGen.getScale());
+    scalePan.setValue(nGen.getScale());
     heightScalePan.setValue(tGen.getHeightScale());
     seedPan.setVal(nGen.getSeed());
     resolutionCB.setSelectedItem(tGen.getSize());
-        
-    noiseMixSlider.setValue((int)(tGen.getNoiseRatio() * 100));
-    
-    waterLevelSlider.setValue( (int) (app.getWaterLevel() * 100));
+
+    noiseMixSlider.setValue((int) (tGen.getNoiseRatio() * 100));
+
+    waterLevelSlider.setValue((int) (app.getWaterLevel() * 100));
     erodePan.setValue(tGen.getErodeFilter());
 
   }
-  
+
   private void initComponenets() {
     TerrainGenerator tGen = app.getTerrainGenerator();
     SimplexNoiseGen nGen = tGen.getNoiseGenerator();
@@ -88,71 +94,84 @@ public class TerrainParamatersPanel extends JPanel {
 
     // Terrain
     resolutionCB = new JComboBox<>(new Integer[] { 256, 512, 1024, 2048 });
-    noiseMixSlider = new JSlider(0,100);
+    noiseMixSlider = new JSlider(0, 100);
     erodePan = new DoublePanel("Smooth", 2, 0);
     updateB = new JButton("Update");
     landRampB = new JButton("...");
-    
+
     waterLevelSlider = new JSlider(0, 100);
+
+    heightMapB = new JToggleButton("Edit");
+    heightMapEdPan = new EditorPanel(terrainGui);
   }
 
   private void addComponents() {
-        
+
     Insets insets = new Insets(0, 0, 0, 0);
-    
-    //Noise
+
+    // Noise
     JPanel line1 = new JPanel(new FlowLayout(FlowLayout.LEFT));
     line1.add(seedPan);
     line1.add(seedB);
-    
+
     JPanel line2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
     line2.add(octPan);
     line2.add(roughPan);
     line2.add(scalePan);
-    
+
     JPanel noisePan = new JPanel(new GridBagLayout());
     noisePan.setBorder(new TitledBorder("Noise"));
-    noisePan.add(line1, new GridBagConstraints(0,0,1,1,1,0,GridBagConstraints.WEST,GridBagConstraints.NONE,insets,0,0));
-    noisePan.add(line2, new GridBagConstraints(0,1,1,1,1,0,GridBagConstraints.WEST,GridBagConstraints.NONE,insets,0,0));
-    
-    //Terrain
+    noisePan.add(line1, new GridBagConstraints(0, 0, 1, 1, 1, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, insets, 0, 0));
+    noisePan.add(line2, new GridBagConstraints(0, 1, 1, 1, 1, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, insets, 0, 0));
+
+    // Terrain
     line1 = new JPanel(new FlowLayout(FlowLayout.LEFT));
     line1.add(heightScalePan);
     line1.add(erodePan);
-    //line1.add(noiseMixPan);
-    
+    // line1.add(noiseMixPan);
+
     line2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
     line2.add(new JLabel("Elevation Ramp"));
     line2.add(landRampB);
     line2.add(new JLabel("Resolution"));
     line2.add(resolutionCB);
-    
+
     JPanel line3 = new JPanel(new FlowLayout(FlowLayout.LEFT));
     line3.add(new JLabel("Water Level"));
     line3.add(waterLevelSlider);
-        
+
     JPanel line4 = new JPanel(new FlowLayout(FlowLayout.LEFT));
     line4.add(new JLabel("Noise Ratio"));
     line4.add(noiseMixSlider);
-    
-    
+
     JPanel terrainPan = new JPanel(new GridBagLayout());
     terrainPan.setBorder(new TitledBorder("Terrain"));
-    int y=0;
-    terrainPan.add(line1, new GridBagConstraints(0,y++,1,1,1,0,GridBagConstraints.WEST,GridBagConstraints.NONE,insets,0,0));
-    terrainPan.add(line4, new GridBagConstraints(0,y++,1,1,1,0,GridBagConstraints.WEST,GridBagConstraints.NONE,insets,0,0));
-    terrainPan.add(line3, new GridBagConstraints(0,y++,1,1,1,0,GridBagConstraints.WEST,GridBagConstraints.NONE,insets,0,0));
-    terrainPan.add(line2, new GridBagConstraints(0,y++,1,1,1,0,GridBagConstraints.WEST,GridBagConstraints.NONE,insets,0,0));
+    int y = 0;
+    terrainPan.add(line1, new GridBagConstraints(0, y++, 1, 1, 1, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, insets, 0, 0));
+    terrainPan.add(line4, new GridBagConstraints(0, y++, 1, 1, 1, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, insets, 0, 0));
+    terrainPan.add(line3, new GridBagConstraints(0, y++, 1, 1, 1, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, insets, 0, 0));
+    terrainPan.add(line2, new GridBagConstraints(0, y++, 1, 1, 1, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, insets, 0, 0));
+
+    JPanel hmbPan = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+    hmbPan.add(heightMapB);
     
+    JPanel hmPan = new JPanel(new GridBagLayout());
+    hmPan.setBorder(new TitledBorder("Base Height Map"));
+    y = 0;
+    hmPan.add(hmbPan, new GridBagConstraints(0, y++, 1, 1, 1, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, insets, 0, 0));
+    hmPan.add(heightMapEdPan, new GridBagConstraints(0, y++, 1, 1, 1, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, insets, 0, 0));
     
+
     JPanel updatePan = new JPanel(new FlowLayout(FlowLayout.RIGHT));
     updatePan.add(updateB);
 
     setLayout(new GridBagLayout());
-    add(noisePan, new GridBagConstraints(0,0,1,1,0,0,GridBagConstraints.WEST,GridBagConstraints.HORIZONTAL,insets,0,0));
-    add(terrainPan, new GridBagConstraints(0,1,1,1,0,0,GridBagConstraints.WEST,GridBagConstraints.HORIZONTAL,insets,0,0));
-    add(updateB, new GridBagConstraints(0,2,1,1,0,0,GridBagConstraints.EAST,GridBagConstraints.NONE,new Insets(4,4,4,4),0,0));
-    add(new JPanel(), new GridBagConstraints(0,3,1,1,1,1,GridBagConstraints.WEST,GridBagConstraints.BOTH,insets,0,0));
+    y = 0;
+    add(noisePan, new GridBagConstraints(0, y++, 1, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, insets, 0, 0));
+    add(terrainPan, new GridBagConstraints(0, y++, 1, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, insets, 0, 0));
+    add(hmPan, new GridBagConstraints(0, y++, 1, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, insets, 0, 0));
+    add(updateB, new GridBagConstraints(0, y++, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
+    add(new JPanel(), new GridBagConstraints(0, y++, 1, 1, 1, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH, insets, 0, 0));
   }
 
   private void addListeners() {
@@ -223,6 +242,34 @@ public class TerrainParamatersPanel extends JPanel {
       }
     });
 
+    heightMapB.addActionListener(new ActionListener() {
+
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        updateCanvas();
+      }
+
+    });
+
+  }
+  
+  private void updateCanvas() {
+    
+    heightMapEdPan.setActive(heightMapB.isSelected());
+    app.enqueue(new Runnable() {
+      @Override
+      public void run() {
+        boolean isEditor = heightMapB.isSelected();
+        if (isEditor) {
+          app.getTerrainGenerator().detatch();
+          app.getHeightMapEditor().attach();
+        } else {
+          app.getTerrainGenerator().attach();
+          app.getHeightMapEditor().detatch();
+          
+        }
+      }
+    });
   }
 
   private void updateWaterLevel() {
@@ -230,7 +277,7 @@ public class TerrainParamatersPanel extends JPanel {
     float ratio = val / 100f;
     app.setWaterLevel(ratio);
   }
-  
+
   public void updateTerrain() {
 
     TerrainGenerator tGen = app.getTerrainGenerator();
@@ -248,6 +295,6 @@ public class TerrainParamatersPanel extends JPanel {
     app.updateTerrain();
   }
 
- 
+  
 
 }

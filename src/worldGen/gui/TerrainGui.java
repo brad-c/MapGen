@@ -32,6 +32,7 @@ import com.jme3.export.xml.XMLImporter;
 import com.jme3.system.AppSettings;
 import com.jme3.system.JmeCanvasContext;
 
+import worldGen.gui.heightmap.EditorPanel;
 import worldGen.render.WorldRenderer;
 import worldGen.render.WorldRenderer.ViewType;
 import worldGen.state.WorldGenProject;
@@ -72,6 +73,11 @@ public class TerrainGui {
 
   public static final String WGX_FILE_EXT = "wgx";
 
+  public static enum GuiMode {
+    TERRAIN_EDITOR,
+    HEIGHTMAP_EDITOR
+  }
+
   private WorldRenderer app;
   private Canvas canvas;
   private JFrame frame;
@@ -80,9 +86,15 @@ public class TerrainGui {
 
   private TerrainVisualsPanel terrainVisualsPan;
 
+  private EditorPanel heightMapPan;
+
   // View
   private JToggleButton view3dB;
   private JToggleButton view2dB;
+
+//  private GuiMode mode = GuiMode.TERRAIN_EDITOR;
+//  private WorldRendererState terrGenState;
+//  private WorldRendererState hmEdState;
 
   private JTabbedPane editorTP;
 
@@ -95,6 +107,7 @@ public class TerrainGui {
 
   // layout
   private JPanel rootPan;
+  private JPanel canvasPan;
 
   public TerrainGui() {
   }
@@ -106,6 +119,38 @@ public class TerrainGui {
   public JFrame getFrame() {
     return frame;
   }
+  
+  public Canvas getCanvas() {
+    return canvas;
+  }
+  
+  public JTabbedPane getTabbedPane() {
+    return editorTP;
+  }
+
+  public void updateGUI(WorldRenderer ren) {
+    this.app = ren;
+    terrainVisualsPan.updateGUI(ren);
+    terrainPan.updateGUI(ren);
+    heightMapPan.updateGUI(ren);
+    view2dB.setSelected(ren.getViewType() == ViewType.TWO_D);
+    view3dB.setSelected(ren.getViewType() == ViewType.THREE_D);
+  }
+
+//  public void setGuiMode(GuiMode mode) {
+//    this.mode = mode;
+//    rootPan.remove(heightMapPan);
+//    rootPan.remove(editorTP);
+//    if (mode == GuiMode.HEIGHTMAP_EDITOR) {
+//      rootPan.add(heightMapPan, BorderLayout.WEST);
+//    } else {
+//      rootPan.add(editorTP, BorderLayout.WEST);
+//    }
+//    rootPan.revalidate();
+//    rootPan.repaint();
+//
+//    updateCanvas();
+//  }
 
   private void createGui() {
     initComponenets();
@@ -116,15 +161,21 @@ public class TerrainGui {
   }
 
   private void addComponents() {
-    JPanel northPan = new JPanel(new FlowLayout(FlowLayout.LEFT));
-    northPan.add(view3dB);
-    northPan.add(view2dB);
-    northPan.add(saveB);
-    northPan.add(saveAsB);
-    northPan.add(loadB);
-    northPan.add(newB);
+    JPanel viewPan = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    viewPan.add(view3dB);
+    viewPan.add(view2dB);
 
-    JPanel canvasPan = new JPanel(new BorderLayout());
+    JPanel savePan = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+    savePan.add(saveB);
+    savePan.add(saveAsB);
+    savePan.add(loadB);
+    savePan.add(newB);
+
+    JPanel northPan = new JPanel(new BorderLayout());
+    northPan.add(viewPan, BorderLayout.WEST);
+    northPan.add(savePan, BorderLayout.EAST);
+
+    canvasPan.setLayout(new BorderLayout());
     canvasPan.add(northPan, BorderLayout.NORTH);
     canvasPan.add(canvas, BorderLayout.CENTER);
 
@@ -134,8 +185,12 @@ public class TerrainGui {
   }
 
   private void initComponenets() {
+
+    canvasPan = new JPanel();
+
     terrainPan = new TerrainParamatersPanel(this);
     terrainVisualsPan = new TerrainVisualsPanel(this);
+    heightMapPan = new EditorPanel(this);
 
     editorTP = new JTabbedPane();
     editorTP.add("Generator", terrainPan);
@@ -170,14 +225,6 @@ public class TerrainGui {
       System.out.println("TerrainGui.initComponenets: Could not load frame icon");
     }
 
-  }
-
-  public void updateGUI(WorldRenderer ren) {
-    this.app = ren;
-    terrainVisualsPan.updateGUI(ren);
-    terrainPan.updateGUI(ren);
-    view2dB.setSelected(ren.getViewType() == ViewType.TWO_D);
-    view3dB.setSelected(ren.getViewType() == ViewType.THREE_D);
   }
 
   private void addListeners() {
@@ -275,7 +322,6 @@ public class TerrainGui {
     settings.setHeight(480);
 
     app = new WorldRenderer();
-
     app.setPauseOnLostFocus(false);
     app.setSettings(settings);
     app.createCanvas();
@@ -441,8 +487,10 @@ public class TerrainGui {
 
     @Override
     public String getDescription() {
-      return "World Gen Projects";
+      return "World Gen Projects (.wgx)";
     }
   }
+
+  
 
 }
