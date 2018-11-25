@@ -29,7 +29,7 @@ public class WorldRenderer extends SimpleApplication {
     PURDY,
     TERRAIN
   };
-  
+
   public enum ViewType {
     THREE_D,
     TWO_D,
@@ -41,33 +41,33 @@ public class WorldRenderer extends SimpleApplication {
   private ColorFilter colorFilter;
 
   private WaterType waterType;
-  
+
   private Node simpleWaterRoot;
   private Vector4f simpleWaterColor;
   private Material simpleWaterMaterial;
-  
+
   private PurdyWater purdyWater = new PurdyWater();
-  
+
   private OrthoCamAppState orthCamState;
   private OrthoCameraController orthController;
   private ViewType viewType;
 
   private CameraState prevCamState2d;
   private CameraState prevCamState3d;
-  
+
   private boolean isInitialised = false;
-  
+  private boolean cameraControlEnabled = true;
 
   public WorldRenderer() {
     super(new FlyCamAppState(), new OrthoCamAppState());
     orthCamState = stateManager.getState(OrthoCamAppState.class);
-    
+
     terGen = new TerrainGenerator();
     colorFilter = new ColorFilter();
     colorFilter.setEnabled(false);
     heightMapEditor = new HeightMapEditor();
-    
-    //apply defaults
+
+    // apply defaults
     new WorldRendererState().apply(this);
   }
 
@@ -95,7 +95,6 @@ public class WorldRenderer extends SimpleApplication {
     terGen.init(this);
     heightMapEditor.init(this);
     purdyWater.init(this);
-    
 
     postProcessor = new FilterPostProcessor(assetManager);
     int numSamples = getContext().getSettings().getSamples();
@@ -103,14 +102,14 @@ public class WorldRenderer extends SimpleApplication {
       postProcessor.setNumSamples(numSamples);
     }
     viewPort.addProcessor(postProcessor);
-        
+
     postProcessor.addFilter(purdyWater.getWaterFilter());
     postProcessor.addFilter(colorFilter);
     postProcessor.addFilter(new FXAAFilter());
-        
+
     setWaterType(getWaterType());
     setWaterLevel(getWaterLevel());
-    
+
   }
 
   public void setViewType(ViewType type) {
@@ -124,10 +123,10 @@ public class WorldRenderer extends SimpleApplication {
     ViewType oldType = viewType;
     this.viewType = type;
 
-    if(!isInitialised) {
+    if (!isInitialised) {
       return;
     }
-    
+
     // save current state
     if (oldType == ViewType.THREE_D) {
       prevCamState3d = CameraState.saveState(cam);
@@ -136,12 +135,12 @@ public class WorldRenderer extends SimpleApplication {
     }
 
     if (viewType == ViewType.THREE_D) {
-      stateManager.getState(FlyCamAppState.class).setEnabled(true);
+      stateManager.getState(FlyCamAppState.class).setEnabled(true && cameraControlEnabled);
       orthCamState.setEnabled(false);
       CameraState.applyState(cam, prevCamState3d);
     } else {
       stateManager.getState(FlyCamAppState.class).setEnabled(false);
-      orthCamState.setEnabled(true);
+      orthCamState.setEnabled(true && cameraControlEnabled);
       CameraState.applyState(cam, prevCamState2d);
     }
   }
@@ -149,25 +148,39 @@ public class WorldRenderer extends SimpleApplication {
   public ViewType getViewType() {
     return viewType;
   }
-  
+
   public CameraState getCameraState(ViewType type) {
-    if(type == getViewType()) {
+    if (type == getViewType()) {
       return new CameraState(cam);
-    } else if(type == ViewType.THREE_D) {
+    } else if (type == ViewType.THREE_D) {
       return prevCamState3d;
-    } else if(type == ViewType.TWO_D) {
+    } else if (type == ViewType.TWO_D) {
       return prevCamState2d;
     }
     return null;
   }
-  
+
   public void setCameraState(ViewType type, CameraState state) {
-    if(type == getViewType()) {
+    if (type == getViewType()) {
       CameraState.applyState(cam, state);
-    } else if(type == ViewType.THREE_D) {
+    } else if (type == ViewType.THREE_D) {
       prevCamState3d = state;
-    } else if(type == ViewType.TWO_D) {
+    } else if (type == ViewType.TWO_D) {
       prevCamState2d = state;
+    }
+  }
+
+  public void setCameraControlEnabled(boolean enabled) {
+    cameraControlEnabled = enabled;
+    if(!enabled) {
+      stateManager.getState(FlyCamAppState.class).setEnabled(false);
+      orthCamState.setEnabled(false);
+    } else {
+      if (viewType == ViewType.THREE_D) {
+        stateManager.getState(FlyCamAppState.class).setEnabled(true);
+      } else {
+        orthCamState.setEnabled(true);
+      }
     }
   }
 
@@ -229,7 +242,7 @@ public class WorldRenderer extends SimpleApplication {
     if (waterType == WaterType.SIMPLE) {
       addWaterPlane();
     }
-    
+
     terGen.setDiscardWater(waterType == WaterType.NONE);
     purdyWater.setEnabled(waterType == WaterType.PURDY);
   }
@@ -246,14 +259,14 @@ public class WorldRenderer extends SimpleApplication {
       simpleWaterRoot.removeFromParent();
     }
   }
-  
+
   public Vector4f getSimpleWaterColor() {
     return simpleWaterColor;
   }
 
   public void setSimpleWaterColor(Vector4f simpleWaterColor) {
     this.simpleWaterColor = simpleWaterColor;
-    if(simpleWaterMaterial != null) {
+    if (simpleWaterMaterial != null) {
       simpleWaterMaterial.setColor("Color", TypeUtil.getColorRGBA(simpleWaterColor));
     }
   }
@@ -262,7 +275,7 @@ public class WorldRenderer extends SimpleApplication {
     setViewType(ViewType.THREE_D);
     setCameraToDefault();
   }
-  
+
   private void setCameraToDefault() {
     if (flyCam != null) {
       flyCam.setMoveSpeed(850);
@@ -284,7 +297,6 @@ public class WorldRenderer extends SimpleApplication {
     cam.setFrustumFar(4000);
   }
 
-
   private void createWaterPlane() {
     // creating a quad to render water to
     simpleWaterRoot = new Node();
@@ -304,6 +316,5 @@ public class WorldRenderer extends SimpleApplication {
     water.setMaterial(simpleWaterMaterial);
     return water;
   }
-
 
 }

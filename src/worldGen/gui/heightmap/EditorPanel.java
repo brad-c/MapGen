@@ -16,7 +16,6 @@ public class EditorPanel extends JPanel {
 
   private static final long serialVersionUID = 1L;
 
-  private TerrainGui terrainGui;
   private WorldRenderer world;
 
   private JToggleButton incHeightB;
@@ -26,7 +25,7 @@ public class EditorPanel extends JPanel {
   private EditorAppState appState;
 
   public EditorPanel(TerrainGui terrainGui) {
-    this.terrainGui = terrainGui;
+
     world = terrainGui.getWorldRenderer();
     controller = new EditorController(world);
     
@@ -53,15 +52,17 @@ public class EditorPanel extends JPanel {
       if(!sm.hasState(appState)) {
         sm.attach(appState);
       }
-      appState.setEnabled(true);
     } else {
       if(sm.hasState(appState)) {
         sm.detach(appState);
-        appState.setEnabled(false);
       }
     }
-    
+    appState.setEnabled(isActive);
     incHeightB.setEnabled(isActive);
+    
+    if(!isActive) {
+      world.setCameraControlEnabled(true);
+    }
   }
 
   private void initComponents() {
@@ -80,6 +81,7 @@ public class EditorPanel extends JPanel {
       @Override
       public void actionPerformed(ActionEvent e) {
         controller.setIncHeight(incHeightB.isSelected());
+        world.setCameraControlEnabled(!incHeightB.isSelected());
       }
 
     });
