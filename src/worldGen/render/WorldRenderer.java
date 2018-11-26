@@ -35,8 +35,15 @@ public class WorldRenderer extends SimpleApplication {
     TWO_D,
   }
 
+  public enum Scene {
+    TERRAIN,
+    HEIGHT_MAP
+  }
+  
   private TerrainGenerator terGen;
   private HeightMapEditor heightMapEditor;
+  private Scene currentScene = Scene.TERRAIN;
+  
   private FilterPostProcessor postProcessor;
   private ColorFilter colorFilter;
 
@@ -112,6 +119,24 @@ public class WorldRenderer extends SimpleApplication {
 
   }
 
+  public void setScene(Scene scene) {
+    if(currentScene == scene) {
+      return;
+    }
+    currentScene  = scene;
+    if(currentScene == Scene.TERRAIN) {
+      heightMapEditor.detatch();
+      terGen.attach();
+    } else {
+      heightMapEditor.attach();
+      terGen.detatch();
+    }
+  }
+  
+  public Scene getScene() {
+    return currentScene;
+  }
+  
   public void setViewType(ViewType type) {
     setViewType(type, false);
   }
@@ -142,6 +167,8 @@ public class WorldRenderer extends SimpleApplication {
       stateManager.getState(FlyCamAppState.class).setEnabled(false);
       orthCamState.setEnabled(true && cameraControlEnabled);
       CameraState.applyState(cam, prevCamState2d);
+      //Size may have changed size state was captured
+      orthCamState.getController().updateFrustrum();
     }
   }
 
@@ -189,20 +216,18 @@ public class WorldRenderer extends SimpleApplication {
   }
 
   public void updateTerrain() {
-    //TODO: What a hack
-    boolean wasAttached = terGen.getTerrain() == null || terGen.detatch();
-    // for recalc of water height
+    if(currentScene == Scene.TERRAIN) {
+      terGen.detatch();
+    } else {
+      //apply outstanding changes before updating the terrain
+      heightMapEditor.applyChanges();
+    }
     setWaterLevel(getWaterLevel());
+    
     terGen.generateTerrain();
-    if(wasAttached) {
+    if(currentScene == Scene.TERRAIN) {
       terGen.attach();
     }
-
-//    terGen.detatch();
-//    // for recalc of water height
-//    setWaterLevel(getWaterLevel());
-//    terGen.generateTerrain();
-//    terGen.attach();
   }
 
   public void setSunDirection(Vector3f dir) {

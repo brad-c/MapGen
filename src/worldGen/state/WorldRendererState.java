@@ -17,7 +17,8 @@ import worldGen.render.WorldRenderer.WaterType;
 public class WorldRendererState implements Savable {
 
   public static final Vector4f DEF_WATER_COL = new Vector4f(5 / 255f, 36 / 255f, 78 / 255f, 1.0f);
-  public static final WaterType DEF_WATER_TYPE = WaterType.PURDY;
+//  public static final WaterType DEF_WATER_TYPE = WaterType.PURDY;
+  public static final WaterType DEF_WATER_TYPE = WaterType.TERRAIN;
   public static final ViewType DEF_VIEW_TYPE = ViewType.THREE_D;
   public static final PurdyWaterState DEF_PURDY_WATER = new PurdyWaterState();
   public static final ColorFilterState DEF_COLOR_FILTER = new ColorFilterState();

@@ -1,9 +1,9 @@
 package worldGen.render;
 
+import com.jme3.scene.Node;
 import com.jme3.terrain.geomipmap.TerrainQuad;
 import com.jme3.terrain.heightmap.RawHeightMap;
 
-import worldGen.gen.HeightMapProvider;
 import worldGen.gen.HeightMapUtil;
 
 public class HeightMapEditor {
@@ -11,29 +11,48 @@ public class HeightMapEditor {
   private WorldRenderer world;
   private TerrainQuad terrain;
   
-  private RawHeightMap heightmap;
+  private int size;
+  
+  private Node rootNode;
+  private float maxHeight;
   
   public HeightMapEditor() {
+    rootNode = new Node();
   }
   
   public void init(WorldRenderer world) {
     this.world = world;
+  }
+  
+  public void applyChanges() {
     
+    if(world == null) {
+      return;
+    }
+    doApply();
+    
+    if(world.getTerrainGenerator().getSize() != size) {
+      //The size of the terrain has been changed so get a rescaled version to work on
+      updateLocalTerrain();
+    }
   }
   
   private void updateLocalTerrain() {
-    TerrainGenerator tGen = world.getTerrainGenerator();
-    HeightMapProvider hm = tGen.getBaseHeightMap();
-        
-    int size = tGen.getSize();
-    float[] heightData = hm.getOrUpdateHeightMap(size, true);
+    rootNode.detachAllChildren();
     
-    HeightMapUtil.scaleHeights(heightData, tGen.getRenderedHeightScale());
-    heightmap = new RawHeightMap(heightData);
+    TerrainGenerator tGen = world.getTerrainGenerator();
+    size = tGen.getSize();
+    maxHeight = tGen.getRenderedHeightScale();
+        
+    float[] heightData = tGen.getBaseHeightMap().getOrUpdateHeightMap(size, true);
+    HeightMapUtil.scaleHeights(heightData, maxHeight);
+    RawHeightMap heightmap = new RawHeightMap(heightData);
       
     int patchSize = size + 1;
-    terrain = new TerrainQuad("my terrain", patchSize, size + 1, heightmap.getHeightMap());
+    terrain = new TerrainQuad("BaseHeightMap", patchSize, size + 1, heightmap.getHeightMap());
     terrain.setMaterial(tGen.getTerrainMaterial());
+    
+    rootNode.attachChild(terrain);
   }
   
   public void attach() {
@@ -41,43 +60,45 @@ public class HeightMapEditor {
       return;
     }
     updateLocalTerrain();
-    world.getRootNode().attachChild(terrain);
+    world.getRootNode().attachChild(rootNode);
   }
   
   public void detatch() {
-    if(world == null || terrain == null) {
+    if(world == null) {
       return;
     }
-    terrain.removeFromParent();
-    
-    
+    rootNode.removeFromParent();
+    doApply();
+    world.updateTerrain();
+  }
+
+  private void doApply() {
     float[] heightData = terrain.getHeightMap();
+        
+    
+    float[] result = new float[size * size];
     
     //just chopping off last column and last row as
     //the terrain adds one for some reason
-    int targetSize = (int)Math.sqrt(heightData.length - 1);
-    float[] result = new float[targetSize * targetSize];
-    
     int sourceIndex = 0 ;
     int targetIndex = 0 ;
-    
-    for(int x=0; x < targetSize; x++) {
-      for(int y=0; y < targetSize; y++) {
+    for(int x=0; x < size; x++) {
+      for(int y=0; y < size; y++) {
         result[targetIndex] = heightData[sourceIndex];
         sourceIndex++;
         targetIndex++;
       }
       sourceIndex++;
     }
-    TerrainGenerator tGen = world.getTerrainGenerator();
-    HeightMapUtil.normalise(result, 0, tGen.getRenderedHeightScale());
+    HeightMapUtil.normalise(result, 0, maxHeight);
     
     world.getTerrainGenerator().getBaseHeightMap().setHeightData(result);
-    world.updateTerrain();
   }
 
   public TerrainQuad getTerrain() {
     return terrain;
   }
+
+  
 
 }

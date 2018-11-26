@@ -26,6 +26,7 @@ import worldGen.gui.widget.IntPanel;
 import worldGen.gui.widget.LongPanel;
 import worldGen.render.TerrainGenerator;
 import worldGen.render.WorldRenderer;
+import worldGen.render.WorldRenderer.Scene;
 
 public class TerrainParamatersPanel extends JPanel {
 
@@ -255,20 +256,11 @@ public class TerrainParamatersPanel extends JPanel {
   }
   
   private void updateCanvas() {
-    
     heightMapEdPan.setActive(heightMapB.isSelected());
     app.enqueue(new Runnable() {
       @Override
       public void run() {
-        boolean isEditor = heightMapB.isSelected();
-        if (isEditor) {
-          app.getTerrainGenerator().detatch();
-          app.getHeightMapEditor().attach();
-        } else {
-          app.getTerrainGenerator().attach();
-          app.getHeightMapEditor().detatch();
-          
-        }
+        app.setScene(heightMapB.isSelected() ? Scene.HEIGHT_MAP : Scene.TERRAIN);
       }
     });
   }

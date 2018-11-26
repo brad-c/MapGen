@@ -17,11 +17,6 @@ public class HeightMapProvider {
     if (heightData == null) {
       this.size = sizeIn;
       heightData = ImageHeightmapLoader.loadGrayScaleData("textures/circleGradLarge.png", sizeIn, 1, true);
-//      int s2 = size * size;
-//      heightData = new float[s2];
-//      for(int i=0;i<s2;i++) {
-//        heightData[i] = 0.5f;
-//      }
     }
     
     float[] result;
@@ -30,11 +25,9 @@ public class HeightMapProvider {
     } else if(scaledData != null && scaledSize == sizeIn) {
       result = scaledData;
     } else {
-      System.out.println("HeightMapProvider.getOrUpdateHeightMap: Do the scaling");
       scaledData = HeightMapUtil.scale(heightData, size, sizeIn);
       scaledSize = sizeIn;
       result = scaledData;
-      
     }
    
     if (returnCopy) {
