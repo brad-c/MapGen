@@ -9,7 +9,7 @@ import com.jme3.terrain.geomipmap.TerrainQuad;
 
 public class HeightMapUtil {
 
-  public static void scale(float[] hm, float heightScale) {
+  public static void scaleHeights(float[] hm, float heightScale) {
     for (int i = 0; i < hm.length; i++) {
       hm[i] *= heightScale;
     }
@@ -22,6 +22,20 @@ public class HeightMapUtil {
 
     for (int i = 0; i < hm.length; i++) {
       hm[i] = normalise(hm[i], minMax[0], minMax[1]);
+    }
+  }
+  
+
+  public static void normalise(float[] hm, float maxMin, float minMax) {
+    float[] minAndMax = getMinMax(hm);
+    if(minAndMax[0] > maxMin) {
+      minAndMax[0] = maxMin;
+    }
+    if(minAndMax[1] < minMax) {
+      minAndMax[1] = minMax;
+    }
+    for (int i = 0; i < hm.length; i++) {
+      hm[i] = normalise(hm[i], minAndMax[0], minAndMax[1]);
     }
   }
 
@@ -54,8 +68,31 @@ public class HeightMapUtil {
     return (val < min) ? min : (val > max) ? max : val;
   }
   
+  //TODO: Better quality scaling
+  public static float[] scale(float[] heightData, int size, int newSize) {
+    float[] result = new float[newSize * newSize];
+    
+    int index = 0;
+    for(int x=0;x<newSize;x++) {
+      for(int y=0;y<newSize;y++) {
+        result[index] = getHeight(heightData, size, (float)x/(newSize - 1), (float)y/(newSize - 1));
+        index++;
+      }
+    }
+    return result;
+  }
+  
+  
+  private static float getHeight(float[] heightData, int size, float xRat, float yRat) {
+    int x = (int)(xRat * (size - 1));
+    int y = (int)(yRat * (size - 1));
+    int index = (y * size) + x;
+    return heightData[index];
+  }
+
+
   /** ------------------ From https://github.com/jMonkeyEngine/jmonkeyengine/blob/master/jme3-examples/src/main/java/jme3test/terrain/TerrainTestModifyHeight.java */
-  public static void adjustHeight(TerrainQuad terrain, Vector3f loc, float radius, float height) {
+  public static void adjustHeight(TerrainQuad terrain, Vector3f loc, float radius, float heightAdjust, float minHeight, float maxHeight) {
 
     // offset it by radius because in the loop we iterate through 2 radii
     int radiusStepsX = (int) (radius / terrain.getLocalScale().x);
@@ -63,7 +100,7 @@ public class HeightMapUtil {
 
     float xStepAmount = terrain.getLocalScale().x;
     float zStepAmount = terrain.getLocalScale().z;
-    long start = System.currentTimeMillis();
+
     List<Vector2f> locs = new ArrayList<>();
     List<Float> heights = new ArrayList<>();
 
@@ -75,7 +112,14 @@ public class HeightMapUtil {
 
         if (isInRadius(locX - loc.x, locZ - loc.z, radius)) {
           // see if it is in the radius of the tool
-          float h = calculateHeight(radius, height, locX - loc.x, locZ - loc.z);
+          float h = calculateHeight(radius, heightAdjust, locX - loc.x, locZ - loc.z);
+
+          //TODO: This is a really crappy hack to cap the values
+          float newHeight = terrain.getHeight(new Vector2f(locX, locZ)) + h;
+          if(newHeight < minHeight || newHeight > maxHeight) {
+            h = 0;
+          }
+          
           locs.add(new Vector2f(locX, locZ));
           heights.add(h);
         }
@@ -83,8 +127,7 @@ public class HeightMapUtil {
     }
 
     terrain.adjustHeight(locs, heights);
-    // System.out.println("Modified "+locs.size()+" points, took: " +
-    // (System.currentTimeMillis() - start)+" ms");
+
     terrain.updateModelBound();
   }
 
@@ -104,6 +147,7 @@ public class HeightMapUtil {
     }
     return heightFactor * val;
   }
+
   
   /** ------------------ End From https://github.com/jMonkeyEngine/jmonkeyengine/blob/master/jme3-examples/src/main/java/jme3test/terrain/TerrainTestModifyHeight.java */
 

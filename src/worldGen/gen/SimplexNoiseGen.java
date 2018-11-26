@@ -94,7 +94,7 @@ public class SimplexNoiseGen implements Savable {
     heightMap = generateOctavedSimplexNoise(width, height);
     HeightMapUtil.normalise(heightMap);
     if(heightScale != 1) {
-      HeightMapUtil.scale(heightMap, heightScale);
+      HeightMapUtil.scaleHeights(heightMap, heightScale);
     }
     genHash = hashCode();
     

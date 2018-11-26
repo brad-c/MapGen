@@ -19,7 +19,6 @@ import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
 import com.jme3.terrain.geomipmap.TerrainQuad;
 
-import worldGen.gen.HeightMapUtil;
 import worldGen.render.WorldRenderer;
 
 public class EditorController {
@@ -27,7 +26,8 @@ public class EditorController {
   private WorldRenderer world;
   private CanvasListener listener;
   private boolean enabled;
-  private boolean doStuff;
+  
+  private EditOperation currentOp;
 
   private Timer timer;
   
@@ -49,17 +49,11 @@ public class EditorController {
   public void setEnabled(boolean enabled) {
     this.enabled = enabled;
   }
-
-  public void setIncHeight(boolean doStuff) {
-    this.doStuff = doStuff;
+  
+  public void setOperation(EditOperation op) {
+    currentOp = op;
   }
 
-  private void modifyTerrain(Vector3f intersect, int dir) {
-    TerrainQuad terrain = world.getHeightMapEditor().getTerrain();
-    float radius = terrain.getTotalSize() / 10;
-    float height = dir * world.getTerrainGenerator().getHeightScale() / -500;
-    HeightMapUtil.adjustHeight(terrain, intersect, radius, height);
-  }
   
   private Vector3f getWorldIntersection(int x, int y) {
 
@@ -108,10 +102,6 @@ public class EditorController {
       mouseX = evt.getX();
       mouseY = evt.getY();
       
-      if(!doStuff) {
-        return;
-      }
-      
       if(evt.isReleased()) {
         if(currentTask != null) {
           currentTask.cancel();
@@ -119,7 +109,10 @@ public class EditorController {
         return;
       }
       
-      final int dir = evt.getButtonIndex() == 0 ? -1 : 1;
+      if(currentOp == null) {
+        return;
+      }
+      
       currentTask = new TimerTask() {
         @Override
         public void run() {
@@ -130,8 +123,11 @@ public class EditorController {
           world.enqueue(new Runnable() {
             @Override
             public void run() {
-              Vector3f intersect = getWorldIntersection(mouseX, mouseY);
-              modifyTerrain(intersect, dir);
+              EditOperation op = currentOp; //copy for thread safety
+              if(op != null) {
+                Vector3f intersect = getWorldIntersection(mouseX, mouseY);
+                op.doOperation(evt, world, intersect);
+              }
             }
           });
         }

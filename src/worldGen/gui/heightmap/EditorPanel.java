@@ -1,11 +1,19 @@
 package worldGen.gui.heightmap;
 
-import java.awt.FlowLayout;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSlider;
 import javax.swing.JToggleButton;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import com.jme3.app.state.AppStateManager;
 
@@ -18,11 +26,15 @@ public class EditorPanel extends JPanel {
 
   private WorldRenderer world;
 
-  private JToggleButton incHeightB;
-
   private EditorController controller;
 
   private EditorAppState appState;
+  
+  private AdjustHeightOperation adjustHeightOp;
+  private JToggleButton incHeightB;
+  private JSlider incHeightRadSlider;
+  private JSlider incHeightSpeedSlider;
+  
 
   public EditorPanel(TerrainGui terrainGui) {
 
@@ -31,7 +43,9 @@ public class EditorPanel extends JPanel {
     
     appState = new EditorAppState();
     appState.setController(controller);
-        
+    
+    adjustHeightOp = new AdjustHeightOperation();
+    
     initComponents();
     addComponents();
     addListeners();
@@ -55,24 +69,52 @@ public class EditorPanel extends JPanel {
       if(sm.hasState(appState)) {
         sm.detach(appState);
       }
+      incHeightB.setSelected(false);
     }
     appState.setEnabled(isActive);
+    
     incHeightB.setEnabled(isActive);
+    incHeightRadSlider.setEnabled(isActive);
+    incHeightSpeedSlider.setEnabled(isActive);
     
     if(!isActive) {
       world.setCameraControlEnabled(true);
     }
     controller.setEnabled(isActive);
+    updateControlls();
   }
 
   private void initComponents() {
-    incHeightB = new JToggleButton("Inc Height");
+    incHeightB = new JToggleButton("Adjust");
     incHeightB.setEnabled(false);
+    incHeightB.setToolTipText("Left click to raise terrain, right click to lower");
+    
+    Dimension sliderSize = new Dimension(20, new JSlider().getPreferredSize().height);
+    
+    incHeightRadSlider = new JSlider(10,100);
+    incHeightRadSlider.setValue((int)(adjustHeightOp.getRadius() * 100));
+    incHeightRadSlider.setEnabled(false);
+    incHeightRadSlider.setPreferredSize(sliderSize);
+    
+    incHeightSpeedSlider = new JSlider(1,100);
+    incHeightSpeedSlider.setValue((int)(adjustHeightOp.getSpeed() * 100));
+    incHeightSpeedSlider.setEnabled(false);
+    incHeightSpeedSlider.setPreferredSize(sliderSize);
   }
 
   private void addComponents() {
-    setLayout(new FlowLayout(FlowLayout.RIGHT));
-    add(incHeightB);
+    
+    Insets insets = new Insets(2, 2, 2, 2);
+    JPanel incPan = new JPanel(new GridBagLayout());
+    incPan.add(incHeightB, new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, insets, 0, 0));
+    incPan.add(new JLabel("Radius: "), new GridBagConstraints(1, 0, 1, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, insets, 0, 0));
+    incPan.add(incHeightRadSlider, new GridBagConstraints(2, 0, 1, 1, 1, 0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, insets, 0, 0));
+    incPan.add(new JLabel("Speed: "), new GridBagConstraints(3, 0, 1, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, insets, 0, 0));
+    incPan.add(incHeightSpeedSlider, new GridBagConstraints(4, 0, 1, 1, 1, 0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, insets, 0, 0));
+    incPan.add(new JPanel(),  new GridBagConstraints(0, 1, 1, 1, 0, 1, GridBagConstraints.WEST, GridBagConstraints.VERTICAL, insets, 0, 0));
+    
+    setLayout(new BorderLayout());
+    add(incPan, BorderLayout.CENTER);
   }
 
   private void addListeners() {
@@ -80,12 +122,41 @@ public class EditorPanel extends JPanel {
 
       @Override
       public void actionPerformed(ActionEvent e) {
-        controller.setIncHeight(incHeightB.isSelected());
-        world.setCameraControlEnabled(!incHeightB.isSelected());
+        updateControlls();
       }
 
     });
+    
+    incHeightRadSlider.addChangeListener(new ChangeListener() {
+      
+      @Override
+      public void stateChanged(ChangeEvent e) {
+        adjustHeightOp.setRadius(incHeightRadSlider.getValue() / 100f);
+      }
+    });
+    
+    incHeightSpeedSlider.addChangeListener(new ChangeListener() {
+      
+      @Override
+      public void stateChanged(ChangeEvent e) {
+        adjustHeightOp.setSpeed(incHeightSpeedSlider.getValue() / 100f);
+      }
+    });
 
+  }
+
+  private void updateControlls() {
+    world.enqueue(new Runnable() {
+      @Override
+      public void run() {
+        if(incHeightB.isSelected()) {
+          controller.setOperation(adjustHeightOp);
+        } else {
+          controller.setOperation(null);
+        }
+        world.setCameraControlEnabled(!incHeightB.isSelected());
+      }
+    });
   }
 
 }

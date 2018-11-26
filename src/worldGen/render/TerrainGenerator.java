@@ -77,16 +77,14 @@ public class TerrainGenerator {
     renderer.getRootNode().attachChild(terrain);
   }
   
-  public void detatch() {
+  public boolean detatch() {
     if(renderer == null || terrain == null) {
-      return;
+      return false;
     }
-    terrain.removeFromParent();
+    return terrain.removeFromParent();
   }
 
   public TerrainQuad generateTerrain() {
-
-    System.out.println("TerrainGenerator.generateTerrain: ");
     
     //Make sure everying is all updated for the correct scale
     noiseGen.setSize(size);
@@ -125,7 +123,7 @@ public class TerrainGenerator {
     }
 
     t1 = System.currentTimeMillis();
-    HeightMapUtil.scale(heightData, getRenderedHeightScale());
+    HeightMapUtil.scaleHeights(heightData, getRenderedHeightScale());
     logTime("Scale: ", t1);
 
     // ------ Create Terrain

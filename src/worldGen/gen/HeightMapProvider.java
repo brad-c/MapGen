@@ -4,45 +4,66 @@ import crap.ImageHeightmapLoader;
 
 public class HeightMapProvider {
 
-  float[] heightData;
-  int size;
+  private float[] heightData;
+  private int size;
+  
+  private float[] scaledData;
+  private int scaledSize;
 
   public HeightMapProvider() {
   }
 
-  public float[] getOrUpdateHeightMap(int size, boolean returnCopy) {
-    System.out.println("HeightMapProvider.getOrUpdateHeightMap: ");
+  public float[] getOrUpdateHeightMap(int sizeIn, boolean returnCopy) {
     if (heightData == null) {
-      System.out.println("HeightMapProvider.getOrUpdateHeightMap: LOADED!!!");
-      this.size = size;
-      heightData = ImageHeightmapLoader.loadGrayScaleData("textures/circleGradLarge.png", size, 1, true);
+      this.size = sizeIn;
+      heightData = ImageHeightmapLoader.loadGrayScaleData("textures/circleGradLarge.png", sizeIn, 1, true);
+//      int s2 = size * size;
+//      heightData = new float[s2];
+//      for(int i=0;i<s2;i++) {
+//        heightData[i] = 0.5f;
+//      }
     }
-
-    // TODO: Scale
-    float[] result = heightData;
+    
+    float[] result;
+    if(sizeIn == size) {
+      result = heightData;
+    } else if(scaledData != null && scaledSize == sizeIn) {
+      result = scaledData;
+    } else {
+      System.out.println("HeightMapProvider.getOrUpdateHeightMap: Do the scaling");
+      scaledData = HeightMapUtil.scale(heightData, size, sizeIn);
+      scaledSize = sizeIn;
+      result = scaledData;
+      
+    }
+   
     if (returnCopy) {
-      result = new float[heightData.length];
-      System.arraycopy(heightData, 0, result, 0, heightData.length);
+      float[] copy = new float[result.length];
+      System.arraycopy(result, 0, copy, 0, result.length);
+      result = copy;
     }
 
     return result;
   }
 
-  public float[] getHeightData() {
-    return heightData;
+  public float[] getHeightData(boolean copyData) {
+    float[] result = heightData;
+    if(copyData) {
+      float[] copy = new float[result.length];
+      System.arraycopy(result, 0, copy, 0, result.length);
+      result = copy;
+    }
+    return result;
   }
 
   public void setHeightData(float[] heightData) {
-    System.out.println("HeightMapProvider.setHeightData: ");
     this.heightData = heightData;
+    size = (int)Math.sqrt(heightData.length);
+    scaledData = null;
   }
-
+  
   public int getSize() {
     return size;
-  }
-
-  public void setSize(int size) {
-    this.size = size;
   }
 
 }

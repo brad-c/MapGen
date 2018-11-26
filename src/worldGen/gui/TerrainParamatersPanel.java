@@ -159,7 +159,7 @@ public class TerrainParamatersPanel extends JPanel {
     hmPan.setBorder(new TitledBorder("Base Height Map"));
     y = 0;
     hmPan.add(hmbPan, new GridBagConstraints(0, y++, 1, 1, 1, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, insets, 0, 0));
-    hmPan.add(heightMapEdPan, new GridBagConstraints(0, y++, 1, 1, 1, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, insets, 0, 0));
+    hmPan.add(heightMapEdPan, new GridBagConstraints(0, y++, 1, 1, 1, 0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, insets, 0, 0));
     
 
     JPanel updatePan = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -236,6 +236,20 @@ public class TerrainParamatersPanel extends JPanel {
         updateCanvas();
       }
 
+    });
+    
+    resolutionCB.addActionListener(new ActionListener() {
+      
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        app.enqueue(new Runnable() {
+          @Override
+          public void run() {
+            updateTerrain();
+          }
+        });
+        
+      }
     });
 
   }

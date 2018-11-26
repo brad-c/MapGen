@@ -189,11 +189,20 @@ public class WorldRenderer extends SimpleApplication {
   }
 
   public void updateTerrain() {
-    terGen.detatch();
+    //TODO: What a hack
+    boolean wasAttached = terGen.getTerrain() == null || terGen.detatch();
     // for recalc of water height
     setWaterLevel(getWaterLevel());
     terGen.generateTerrain();
-    terGen.attach();
+    if(wasAttached) {
+      terGen.attach();
+    }
+
+//    terGen.detatch();
+//    // for recalc of water height
+//    setWaterLevel(getWaterLevel());
+//    terGen.generateTerrain();
+//    terGen.attach();
   }
 
   public void setSunDirection(Vector3f dir) {

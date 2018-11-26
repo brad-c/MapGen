@@ -18,31 +18,29 @@ public class HeightMapEditor {
   
   public void init(WorldRenderer world) {
     this.world = world;
-    TerrainGenerator tGen = world.getTerrainGenerator();
-    int size = tGen.getSize();
-    
-//    String hms = tGen.getBaseHeightMapSource();
-//
-//    float[] heightData = ImageHeightmapLoader.loadGrayScaleData(hms, size, 1, true);
-    
-    HeightMapProvider hm = tGen.getBaseHeightMap();
-    float[] heightData = hm.getOrUpdateHeightMap(tGen.getSize(), true);
-    HeightMapUtil.scale(heightData, tGen.getRenderedHeightScale());
-    
-    
-    heightmap = new RawHeightMap(heightData);
-    
-    int patchSize = size + 1;
-    terrain = new TerrainQuad("my terrain", patchSize, size + 1, heightmap.getHeightMap());
-    
-    terrain.setMaterial(tGen.getTerrainMaterial());
     
   }
   
+  private void updateLocalTerrain() {
+    TerrainGenerator tGen = world.getTerrainGenerator();
+    HeightMapProvider hm = tGen.getBaseHeightMap();
+        
+    int size = tGen.getSize();
+    float[] heightData = hm.getOrUpdateHeightMap(size, true);
+    
+    HeightMapUtil.scaleHeights(heightData, tGen.getRenderedHeightScale());
+    heightmap = new RawHeightMap(heightData);
+      
+    int patchSize = size + 1;
+    terrain = new TerrainQuad("my terrain", patchSize, size + 1, heightmap.getHeightMap());
+    terrain.setMaterial(tGen.getTerrainMaterial());
+  }
+  
   public void attach() {
-    if(world == null || terrain == null) {
+    if(world == null) {
       return;
     }
+    updateLocalTerrain();
     world.getRootNode().attachChild(terrain);
   }
   
@@ -53,18 +51,33 @@ public class HeightMapEditor {
     terrain.removeFromParent();
     
     
-    //TODO: Wrong place ?s
     float[] heightData = terrain.getHeightMap();
-    float[] result = new float[heightData.length];
-    System.arraycopy(heightData, 0, result, 0, heightData.length);
-    HeightMapUtil.normalise(result);
-    world.getTerrainGenerator().getBaseHeightMap().setHeightData(result);
-    System.out.println("HeightMapEditor.detatch: dataSize=" + terrain.getTotalSize() + " terrainSize=" + world.getTerrainGenerator().getSize());
     
+    //just chopping off last column and last row as
+    //the terrain adds one for some reason
+    int targetSize = (int)Math.sqrt(heightData.length - 1);
+    float[] result = new float[targetSize * targetSize];
+    
+    int sourceIndex = 0 ;
+    int targetIndex = 0 ;
+    
+    for(int x=0; x < targetSize; x++) {
+      for(int y=0; y < targetSize; y++) {
+        result[targetIndex] = heightData[sourceIndex];
+        sourceIndex++;
+        targetIndex++;
+      }
+      sourceIndex++;
+    }
+    TerrainGenerator tGen = world.getTerrainGenerator();
+    HeightMapUtil.normalise(result, 0, tGen.getRenderedHeightScale());
+    
+    world.getTerrainGenerator().getBaseHeightMap().setHeightData(result);
+    world.updateTerrain();
   }
 
   public TerrainQuad getTerrain() {
     return terrain;
   }
-  
+
 }
