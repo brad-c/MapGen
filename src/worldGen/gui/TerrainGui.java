@@ -35,8 +35,9 @@ import com.jme3.system.JmeCanvasContext;
 import worldGen.gui.heightmap.EditorPanel;
 import worldGen.render.WorldRenderer;
 import worldGen.render.WorldRenderer.ViewType;
+import worldGen.state.SaveLoadContext;
 import worldGen.state.WorldGenProject;
-import worldGen.util.TypeUtil;
+import worldGen.util.FileUtil;
 
 public class TerrainGui {
 
@@ -136,21 +137,6 @@ public class TerrainGui {
     view2dB.setSelected(ren.getViewType() == ViewType.TWO_D);
     view3dB.setSelected(ren.getViewType() == ViewType.THREE_D);
   }
-
-//  public void setGuiMode(GuiMode mode) {
-//    this.mode = mode;
-//    rootPan.remove(heightMapPan);
-//    rootPan.remove(editorTP);
-//    if (mode == GuiMode.HEIGHTMAP_EDITOR) {
-//      rootPan.add(heightMapPan, BorderLayout.WEST);
-//    } else {
-//      rootPan.add(editorTP, BorderLayout.WEST);
-//    }
-//    rootPan.revalidate();
-//    rootPan.repaint();
-//
-//    updateCanvas();
-//  }
 
   private void createGui() {
     initComponenets();
@@ -386,6 +372,10 @@ public class TerrainGui {
   }
 
   private void saveProject(File file) {
+    
+    setSaveLoadContent(file);
+    notifyOfSave();
+    
     WorldGenProject project = new WorldGenProject(app);
     // BinaryExporter exporter = new BinaryExporter();
     XMLExporter exporter = new XMLExporter();
@@ -396,6 +386,14 @@ public class TerrainGui {
       e.printStackTrace();
     }
   }
+
+ 
+  private void notifyOfSave() {
+    terrainVisualsPan.onSave();
+    terrainPan.onSave();
+    heightMapPan.onSave();
+  }
+  
 
   private void doLoad() {
     JFileChooser fc = new JFileChooser();
@@ -417,6 +415,8 @@ public class TerrainGui {
 
   private void loadProject(File file) {
 
+    setSaveLoadContent(file);
+    
     WorldGenProject project = null;
     // BinaryImporter importer = new BinaryImporter();
     XMLImporter importer = new XMLImporter();
@@ -472,6 +472,13 @@ public class TerrainGui {
       }
     });
   }
+  
+  private void setSaveLoadContent(File file) {
+    SaveLoadContext ctx = SaveLoadContext.INSTANCE;
+    ctx.setCurrentFile(file);
+    ctx.setSaveBinaryDataExternally(true);
+    ctx.setProjectName(FileUtil.getFileNameNoExtension(file));
+  }
 
   private class WGFileFilter extends javax.swing.filechooser.FileFilter {
 
@@ -481,7 +488,7 @@ public class TerrainGui {
         return true;
       }
 
-      String extension = TypeUtil.getExtension(f);
+      String extension = FileUtil.getExtension(f);
       return WGX_FILE_EXT.equals(extension);
     }
 

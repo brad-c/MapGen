@@ -1,7 +1,5 @@
 package worldGen.gen;
 
-import crap.ImageHeightmapLoader;
-
 public class HeightMapProvider {
 
   private float[] heightData;
@@ -16,7 +14,12 @@ public class HeightMapProvider {
   public float[] getOrUpdateHeightMap(int sizeIn, boolean returnCopy) {
     if (heightData == null) {
       this.size = sizeIn;
-      heightData = ImageHeightmapLoader.loadGrayScaleData("textures/circleGradLarge.png", sizeIn, 1, true);
+      System.out.println("HeightMapProvider.getOrUpdateHeightMap: No data loaded");
+      int s2 = size*size;
+      heightData = new float[s2];
+      for(int i=0;i<s2; i++) {
+        heightData[i] = 0.5f;
+      }
     }
     
     float[] result;
@@ -51,12 +54,26 @@ public class HeightMapProvider {
 
   public void setHeightData(float[] heightData) {
     this.heightData = heightData;
-    size = (int)Math.sqrt(heightData.length);
+    if(heightData == null) {
+      size = -1;
+    } else {
+      size = (int)Math.sqrt(heightData.length);
+    }
     scaledData = null;
   }
   
   public int getSize() {
     return size;
+  }
+
+  public void setSource(String baseHeightMapSource) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  public String getSource() {
+    // TODO Auto-generated method stub
+    return null;
   }
 
 }

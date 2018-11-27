@@ -78,7 +78,6 @@ public class TerrainParamatersPanel extends JPanel {
 
     waterLevelSlider.setValue((int) (app.getWaterLevel() * 100));
     erodePan.setValue(tGen.getErodeFilter());
-
   }
 
   private void initComponenets() {
@@ -272,6 +271,10 @@ public class TerrainParamatersPanel extends JPanel {
   }
 
   public void updateTerrain() {
+    updateTerrain(true);
+  }
+  
+  public void updateTerrain(boolean updateWorld) {
 
     TerrainGenerator tGen = app.getTerrainGenerator();
     tGen.setSize(resolutionCB.getItemAt(resolutionCB.getSelectedIndex()));
@@ -285,7 +288,13 @@ public class TerrainParamatersPanel extends JPanel {
     gen.setRoughness(roughPan.getVal());
     gen.setScale(scalePan.getVal());
 
-    app.updateTerrain();
+    if(updateWorld) {
+      app.updateTerrain();
+    }
+  }
+
+  public void onSave() {
+    updateTerrain(false);
   }
 
   

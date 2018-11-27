@@ -1,5 +1,6 @@
 package worldGen.state;
 
+import java.io.File;
 import java.io.IOException;
 
 import com.jme3.export.InputCapsule;
@@ -8,10 +9,12 @@ import com.jme3.export.JmeImporter;
 import com.jme3.export.OutputCapsule;
 import com.jme3.export.Savable;
 
+import crap.ImageHeightmapLoader;
 import worldGen.gen.ElevationRamp;
 import worldGen.gen.ExponentialElevationRamp;
 import worldGen.gen.SimplexNoiseGen;
 import worldGen.render.TerrainGenerator;
+import worldGen.util.FileUtil;
 
 public class TerrainGenerationParameters implements Savable {
 
@@ -30,7 +33,8 @@ public class TerrainGenerationParameters implements Savable {
   
   private int size;
   private float heightScale;
-  private String baseHeightMapSource;
+//  private String baseHeightMapSource;
+  private float[] baseHeightMapData;
   private float noiseRatio;
   private float erodeFilter;
   private float waterLevel;
@@ -41,36 +45,37 @@ public class TerrainGenerationParameters implements Savable {
     noiseGen = DEF_NOISE;
     size = DEF_SIZE;
     heightScale = DEF_HEIGHT_SCALE;
-    baseHeightMapSource = DEF_HEIGHT_MAP;
     noiseRatio = DEF_NOISE_RATIO;
     erodeFilter = DEF_ERODE_FILTER;
     waterLevel = DEF_WATER_LEVEL;
     landElevationRamp = DEF_LAND_RAMP;
     waterElevationRamp = DEF_WATER_RAMP;
+    
+    baseHeightMapData = ImageHeightmapLoader.loadGrayScaleData(DEF_HEIGHT_MAP, size, 1, true);
   }
   
   public TerrainGenerationParameters(TerrainGenerator gen) {
     noiseGen = new SimplexNoiseGen(gen.getNoiseGenerator());
     size = gen.getSize();
     heightScale = gen.getHeightScale();
-    baseHeightMapSource = gen.getBaseHeightMapSource();
     noiseRatio = gen.getNoiseRatio();
     erodeFilter = gen.getErodeFilter();
     waterLevel = gen.getWaterLevel();
     landElevationRamp = gen.getLandElevationRamp();
     waterElevationRamp = gen.getWaterElevationRamp();
+    baseHeightMapData = gen.getBaseHeightMap().getHeightData(true);
   }
   
   public void apply(TerrainGenerator gen) {
     gen.setSize(size);
     gen.setNoiseGenerator(new SimplexNoiseGen(noiseGen));
     gen.setHeightScale(heightScale);
-    gen.setBaseHeightMapSource(baseHeightMapSource);
     gen.setNoiseRatio(noiseRatio);
     gen.setErodeFilter(erodeFilter);
     gen.setWaterLevel(waterLevel);
     gen.setLandElevationRamp(landElevationRamp);
     gen.setWaterElevationRamp(waterElevationRamp);
+    gen.getBaseHeightMap().setHeightData(baseHeightMapData);
   }
 
   @Override
@@ -79,12 +84,21 @@ public class TerrainGenerationParameters implements Savable {
     cap.write(noiseGen, "noiseGen", null);
     cap.write(size, "size", -1);
     cap.write(heightScale, "heightScale", -1);
-    cap.write(baseHeightMapSource, "baseHeightMapSource", null);
     cap.write(noiseRatio, "noiseRatio", -1);
     cap.write(erodeFilter, "erodeFilter", -1);
     cap.write(waterLevel, "waterLevel", -1);
     cap.write(landElevationRamp, "landElevationRamp", null);
     cap.write(waterElevationRamp, "waterElevationRamp", null);
+
+
+    SaveLoadContext ctx = SaveLoadContext.INSTANCE;
+    cap.write(ctx.isSaveBinaryDataExternally(), "isHeightMapDataExternal", true);
+    if(ctx.isSaveBinaryDataExternally()) {
+      FileUtil.saveHeightMap(getHeightMapFile(), baseHeightMapData);
+    } else {
+      cap.write(baseHeightMapData, "baseHeightMapData", null);
+    }
+    
   }
 
   @Override
@@ -93,12 +107,24 @@ public class TerrainGenerationParameters implements Savable {
     noiseGen = (SimplexNoiseGen)cap.readSavable("noiseGen", DEF_NOISE);
     size = cap.readInt("size", DEF_SIZE);
     heightScale = cap.readFloat("heightScale", DEF_HEIGHT_SCALE);
-    baseHeightMapSource = cap.readString("baseHeightMapSource", DEF_HEIGHT_MAP);
     noiseRatio = cap.readFloat("noiseRatio", DEF_NOISE_RATIO);
     erodeFilter = cap.readFloat("erodeFilter", DEF_ERODE_FILTER);
     waterLevel = cap.readFloat("waterLevel", DEF_WATER_LEVEL);
     landElevationRamp = (ElevationRamp)cap.readSavable("landElevationRamp", DEF_LAND_RAMP);
     waterElevationRamp = (ElevationRamp)cap.readSavable("waterElevationRamp", DEF_WATER_RAMP);
+    
+    boolean isDataExt = cap.readBoolean("isHeightMapDataExternal", true);
+    if(isDataExt) {
+      baseHeightMapData = FileUtil.loadHeightMap(getHeightMapFile());
+    } else {
+      baseHeightMapData = cap.readFloatArray("baseHeightMapData", null);
+    }
+  }
+  
+  private File getHeightMapFile() {
+    SaveLoadContext ctx = SaveLoadContext.INSTANCE;
+    File hmFile = new File(ctx.getCurrentFile().getParentFile(), ctx.getProjectName() + ".hmd");
+    return hmFile;
   }
 
   public SimplexNoiseGen getNoiseGen() {
@@ -124,15 +150,7 @@ public class TerrainGenerationParameters implements Savable {
   public void setHeightScale(float heightScale) {
     this.heightScale = heightScale;
   }
-
-  public String getBaseHeightMapSource() {
-    return baseHeightMapSource;
-  }
-
-  public void setBaseHeightMapSource(String baseHeightMapSource) {
-    this.baseHeightMapSource = baseHeightMapSource;
-  }
-
+  
   public float getNoiseRatio() {
     return noiseRatio;
   }
@@ -175,7 +193,7 @@ public class TerrainGenerationParameters implements Savable {
 
   @Override
   public String toString() {
-    return "TerrainParameters [noiseGen=" + noiseGen + ", size=" + size + ", heightScale=" + heightScale + ", baseHeightMapSource=" + baseHeightMapSource
+    return "TerrainParameters [noiseGen=" + noiseGen + ", size=" + size + ", heightScale=" + heightScale + ", "
         + ", noiseRatio=" + noiseRatio + ", erodeFilter=" + erodeFilter + ", waterLevel=" + waterLevel + ", landElevationRamp=" + landElevationRamp
         + ", waterElevationRamp=" + waterElevationRamp + "]";
   }

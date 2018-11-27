@@ -32,14 +32,9 @@ public class TerrainGenerator {
   private float waterLevel;
   private ElevationRamp landElevationRamp;
   private ElevationRamp waterElevationRamp;
-  
-  
-  private String baseHeightMapSource;
+      
   private HeightMapProvider baseHeightMap;
 
-  
-  
-  
   private String hipsoTex;
   private String bathTex;
 
@@ -58,11 +53,11 @@ public class TerrainGenerator {
   private static final int BASE_RESOLUTION = 2048;
 
   public TerrainGenerator() {
+    baseHeightMap = new HeightMapProvider();
+    
     //apply defaults
     new TerrainGenerationParameters().apply(this);
     new TerrainDisplayParamaters().apply(this);
-    
-    baseHeightMap = new HeightMapProvider();
   }
   
   public void init(WorldRenderer app) {
@@ -310,14 +305,6 @@ public class TerrainGenerator {
 
   public void setBaseHeightMap(HeightMapProvider baseHeightMap) {
     this.baseHeightMap = baseHeightMap;
-  }
-
-  public String getBaseHeightMapSource() {
-    return baseHeightMapSource;
-  }
-
-  public void setBaseHeightMapSource(String baseHeightMapSource) {
-    this.baseHeightMapSource = baseHeightMapSource;
   }
 
   public float getNoiseRatio() {

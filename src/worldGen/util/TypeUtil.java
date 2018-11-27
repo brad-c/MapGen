@@ -1,7 +1,6 @@
 package worldGen.util;
 
 import java.awt.Color;
-import java.io.File;
 
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
@@ -38,14 +37,5 @@ public class TypeUtil {
     return new Color(coastlineColor.x, coastlineColor.y, coastlineColor.z, coastlineColor.w);
   }
 
-  public static String getExtension(File f) {
-    String ext = null;
-    String s = f.getName();
-    int i = s.lastIndexOf('.');
-
-    if (i > 0 && i < s.length() - 1) {
-      ext = s.substring(i + 1).toLowerCase();
-    }
-    return ext;
-  }
+  
 }

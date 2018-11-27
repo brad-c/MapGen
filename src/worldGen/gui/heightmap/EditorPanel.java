@@ -7,6 +7,9 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -157,6 +160,25 @@ public class EditorPanel extends JPanel {
         world.setCameraControlEnabled(!incHeightB.isSelected());
       }
     });
+  }
+
+  public void onSave() {
+    Future<Object> f = world.enqueue(new Callable<Object>() {
+      
+      @Override
+      public Object call()  {
+        world.getHeightMapEditor().applyChanges();
+        return null;
+      }
+    });
+    try {
+      f.get();
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    } catch (ExecutionException e) {
+      e.printStackTrace();
+    }
+    
   }
 
 }

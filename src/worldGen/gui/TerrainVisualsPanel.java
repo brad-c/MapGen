@@ -112,6 +112,9 @@ public class TerrainVisualsPanel extends JPanel {
     
     updateWaterUI();
   }
+  
+  public void onSave() {
+  }
 
   private void initComponenets() {
 
@@ -468,5 +471,7 @@ public class TerrainVisualsPanel extends JPanel {
     waterDetailsPan.revalidate();
     waterDetailsPan.repaint();
   }
+
+  
 
 }
