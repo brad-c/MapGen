@@ -29,7 +29,7 @@ public class HeightMapEditor {
   }
   
   public void applyChanges() {
-    if(world == null) {
+    if(world == null || terrain == null) {
       return;
     }
     doApply();
@@ -77,13 +77,12 @@ public class HeightMapEditor {
   }
 
   private void doApply() {
+    
     if(terrain == null) {
       return;
     }
     
     float[] heightData = terrain.getHeightMap();
-        
-    
     float[] result = new float[size * size];
     
     //just chopping off last column and last row as
