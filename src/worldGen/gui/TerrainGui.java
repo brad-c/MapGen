@@ -431,35 +431,22 @@ public class TerrainGui {
       return;
     }
 
-    final WorldGenProject p = project;
-
-    app.enqueue(new Runnable() {
-
-      @Override
-      public void run() {
-        // apply setting to the internals
-        p.apply(app);
-        SwingUtilities.invokeLater(new Runnable() {
-          @Override
-          public void run() {
-            // then update the GUI
-            updateGUI(app);
-          }
-        });
-        app.updateTerrain();
-
-      }
-    });
+    applyProject(project, false);
 
   }
 
-  private void doNew() {
+  private void applyProject(final WorldGenProject p, boolean resetCamera) {
+    app.getHeightMapEditor().clearChanges();
     app.enqueue(new Runnable() {
+
       @Override
       public void run() {
-        final WorldGenProject p = new WorldGenProject();
         // apply setting to the internals
         p.apply(app);
+        app.updateTerrain();
+        if(resetCamera) {
+          app.resetCameraToDefault();
+        }
         SwingUtilities.invokeLater(new Runnable() {
           @Override
           public void run() {
@@ -467,10 +454,14 @@ public class TerrainGui {
             updateGUI(app);
           }
         });
-        app.updateTerrain();
-        app.resetCameraToDefault();
+        
+
       }
     });
+  }
+
+  private void doNew() {
+    applyProject(new WorldGenProject(), true);
   }
   
   private void setSaveLoadContent(File file) {

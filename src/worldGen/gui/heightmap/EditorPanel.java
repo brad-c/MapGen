@@ -28,7 +28,7 @@ public class EditorPanel extends JPanel {
   private static final long serialVersionUID = 1L;
 
   private WorldRenderer world;
-
+    
   private EditorController controller;
 
   private EditorAppState appState;
@@ -40,14 +40,14 @@ public class EditorPanel extends JPanel {
   
 
   public EditorPanel(TerrainGui terrainGui) {
-
+ 
     world = terrainGui.getWorldRenderer();
-    controller = new EditorController(world);
+    controller = new EditorController(this);
     
     appState = new EditorAppState();
     appState.setController(controller);
     
-    adjustHeightOp = new AdjustHeightOperation();
+    adjustHeightOp = new AdjustHeightOperation(world);
     
     initComponents();
     addComponents();
@@ -58,8 +58,12 @@ public class EditorPanel extends JPanel {
     return controller;
   }
 
+  public WorldRenderer getWorld() {
+    return world;
+  }
+  
   public void updateGUI(WorldRenderer ren) {
-
+    world.getHeightMapEditor().updateLocalTerrain();
   }
 
   public void setActive(boolean isActive) {
@@ -85,6 +89,11 @@ public class EditorPanel extends JPanel {
     }
     controller.setEnabled(isActive);
     updateControlls();
+  }
+  
+  public void cancelAction() {
+    incHeightB.setSelected(false);
+    controller.setOperation(null);
   }
 
   private void initComponents() {
@@ -180,5 +189,7 @@ public class EditorPanel extends JPanel {
     }
     
   }
+
+  
 
 }

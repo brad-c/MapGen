@@ -24,8 +24,11 @@ public class HeightMapEditor {
     this.world = world;
   }
   
+  public void clearChanges() {
+    terrain = null;
+  }
+  
   public void applyChanges() {
-    
     if(world == null) {
       return;
     }
@@ -37,7 +40,8 @@ public class HeightMapEditor {
     }
   }
   
-  private void updateLocalTerrain() {
+  public void updateLocalTerrain() {
+
     rootNode.detachAllChildren();
     
     TerrainGenerator tGen = world.getTerrainGenerator();
@@ -73,6 +77,10 @@ public class HeightMapEditor {
   }
 
   private void doApply() {
+    if(terrain == null) {
+      return;
+    }
+    
     float[] heightData = terrain.getHeightMap();
         
     
@@ -99,6 +107,5 @@ public class HeightMapEditor {
     return terrain;
   }
 
-  
 
 }

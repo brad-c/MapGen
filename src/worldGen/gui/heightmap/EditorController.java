@@ -6,6 +6,7 @@ import java.util.TimerTask;
 import com.jme3.collision.CollisionResult;
 import com.jme3.collision.CollisionResults;
 import com.jme3.input.InputManager;
+import com.jme3.input.KeyInput;
 import com.jme3.input.RawInputListener;
 import com.jme3.input.event.JoyAxisEvent;
 import com.jme3.input.event.JoyButtonEvent;
@@ -31,8 +32,11 @@ public class EditorController {
 
   private Timer timer;
   
-  public EditorController(WorldRenderer world) {
-    this.world = world;
+  private EditorPanel editorPanel;
+  
+  public EditorController(EditorPanel editorPanel) {
+    this.editorPanel = editorPanel;
+    this.world = editorPanel.getWorld();
     listener = new CanvasListener();
     timer = new Timer(true);
   }
@@ -48,10 +52,19 @@ public class EditorController {
 
   public void setEnabled(boolean enabled) {
     this.enabled = enabled;
+    if(currentOp != null) {
+      currentOp.setEnabled(enabled);
+    }
   }
   
   public void setOperation(EditOperation op) {
+    if(currentOp != null) {
+      currentOp.setEnabled(false);
+    }
     currentOp = op;
+    if(currentOp != null) {
+      currentOp.setEnabled(enabled);
+    }
   }
 
   
@@ -92,6 +105,12 @@ public class EditorController {
       }
       mouseX = evt.getX();
       mouseY = evt.getY();
+      
+      if(currentOp == null) {
+        return;
+      }
+      currentOp.onMouseMotionEvent(evt, world, getWorldIntersection(mouseX, mouseY));
+      
     }
 
     @Override
@@ -153,6 +172,14 @@ public class EditorController {
 
     @Override
     public void onKeyEvent(KeyInputEvent evt) {
+      if(!evt.isPressed()) {
+        return;
+      }
+      System.out.println("EditorController.CanvasListener.onKeyEvent: 22");
+      if(evt.getKeyCode() == KeyInput.KEY_ESCAPE) {
+        System.out.println("EditorController.CanvasListener.enclosing_method: ");
+        editorPanel.cancelAction();
+      }
     }
 
     @Override
