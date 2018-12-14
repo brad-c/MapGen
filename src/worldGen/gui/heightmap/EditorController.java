@@ -18,8 +18,8 @@ import com.jme3.math.Ray;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
-import com.jme3.terrain.geomipmap.TerrainQuad;
 
+import worldGen.render.MyTerrainPatch;
 import worldGen.render.WorldRenderer;
 
 public class EditorController {
@@ -76,7 +76,7 @@ public class EditorController {
     Vector3f direction = cam.getWorldCoordinates(new Vector2f(x, y), 0.3f);
     direction.subtractLocal(origin).normalizeLocal();
 
-    TerrainQuad terrain = world.getHeightMapEditor().getTerrain();
+    MyTerrainPatch terrain = world.getHeightMapEditor().getTerrain();
     if (terrain == null) {
       return null;
     }

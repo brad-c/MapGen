@@ -7,6 +7,8 @@ import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.terrain.geomipmap.TerrainQuad;
 
+import worldGen.render.MyTerrainPatch;
+
 public class HeightMapUtil {
 
   public static void scaleHeights(float[] hm, float heightScale) {
@@ -130,6 +132,39 @@ public class HeightMapUtil {
 
     terrain.updateModelBound();
   }
+  
+  
+  public static void adjustHeight(MyTerrainPatch terrain, Vector3f loc, float radius, float heightAdjust, float minHeight, float maxHeight) {
+
+    // offset it by radius because in the loop we iterate through 2 radii
+    int radiusStepsX = (int) (radius / terrain.getLocalScale().x);
+    int radiusStepsZ = (int) (radius / terrain.getLocalScale().z);
+
+    float xStepAmount = terrain.getLocalScale().x;
+    float zStepAmount = terrain.getLocalScale().z;
+
+    List<Vector2f> locs = new ArrayList<>();
+    List<Float> heights = new ArrayList<>();
+
+    for (int z = -radiusStepsZ; z < radiusStepsZ; z++) {
+      for (int x = -radiusStepsX; x < radiusStepsX; x++) {
+
+        float locX = loc.x + (x * xStepAmount);
+        float locZ = loc.z + (z * zStepAmount);
+
+        if (isInRadius(locX - loc.x, locZ - loc.z, radius)) {
+          // see if it is in the radius of the tool
+          float h = calculateHeight(radius, heightAdjust, locX - loc.x, locZ - loc.z);
+          locs.add(new Vector2f(locX, locZ));
+          heights.add(h);
+        }
+      }
+    }
+   
+    terrain.adjustHeight(locs, heights, minHeight, maxHeight);
+    terrain.updateModelBound();
+  }
+  
 
   private static boolean isInRadius(float x, float y, float radius) {
     Vector2f point = new Vector2f(x, y);

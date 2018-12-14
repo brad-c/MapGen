@@ -5,14 +5,13 @@ import com.jme3.input.event.MouseMotionEvent;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState.BlendMode;
 import com.jme3.math.ColorRGBA;
-import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.debug.Arrow;
 import com.jme3.scene.shape.Sphere;
-import com.jme3.terrain.geomipmap.TerrainQuad;
 
 import worldGen.gen.HeightMapUtil;
+import worldGen.render.MyTerrainPatch;
 import worldGen.render.WorldRenderer;
 
 public class AdjustHeightOperation implements EditOperation {
@@ -59,7 +58,7 @@ public class AdjustHeightOperation implements EditOperation {
     if (intersect == null) {
       return;
     }
-    TerrainQuad terrain = world.getHeightMapEditor().getTerrain();
+    MyTerrainPatch terrain = world.getHeightMapEditor().getTerrain();
     float radius = getScaledRadius(terrain);
     float height = dir * world.getTerrainGenerator().getRenderedHeightScale() / -40;
     height *= speedRatio;
@@ -92,7 +91,7 @@ public class AdjustHeightOperation implements EditOperation {
     this.speedRatio = speed;
   }
 
-  private float getScaledRadius(TerrainQuad terrain) {
+  private float getScaledRadius(MyTerrainPatch terrain) {
     float radius = terrain.getTotalSize() / 4;
     radius *= radiusRatio;
     return radius;
@@ -111,14 +110,14 @@ public class AdjustHeightOperation implements EditOperation {
       world.getRootNode().attachChild(markerNormal);
     }
 
-    TerrainQuad terrain = world.getHeightMapEditor().getTerrain();
+    MyTerrainPatch terrain = world.getHeightMapEditor().getTerrain();
     if (terrain == null || intersection == null) {
       return;
     }
     marker.setLocalTranslation(new Vector3f(intersection.x, intersection.y, intersection.z));
     markerNormal.setLocalTranslation(new Vector3f(intersection.x, intersection.y, intersection.z));
     
-    Vector3f normal = terrain.getNormal(new Vector2f(intersection.x, intersection.z));
+    Vector3f normal = terrain.getMeshNormal((int)intersection.x, (int)intersection.z);
     normal.multLocal(getScaledRadius(terrain));
     ((Arrow) markerNormal.getMesh()).setArrowExtent(normal);
 

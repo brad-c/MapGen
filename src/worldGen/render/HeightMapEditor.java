@@ -1,15 +1,14 @@
 package worldGen.render;
 
+import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
-import com.jme3.terrain.geomipmap.TerrainQuad;
-import com.jme3.terrain.heightmap.RawHeightMap;
 
 import worldGen.gen.HeightMapUtil;
 
 public class HeightMapEditor {
 
   private WorldRenderer world;
-  private TerrainQuad terrain;
+  private MyTerrainPatch tp;
   
   private int size;
   
@@ -25,11 +24,11 @@ public class HeightMapEditor {
   }
   
   public void clearChanges() {
-    terrain = null;
+    tp = null;
   }
   
   public void applyChanges() {
-    if(world == null || terrain == null) {
+    if(world == null || tp == null) {
       return;
     }
     doApply();
@@ -50,13 +49,11 @@ public class HeightMapEditor {
         
     float[] heightData = tGen.getBaseHeightMap().getOrUpdateHeightMap(size, true);
     HeightMapUtil.scaleHeights(heightData, maxHeight);
-    RawHeightMap heightmap = new RawHeightMap(heightData);
-      
-    int patchSize = size + 1;
-    terrain = new TerrainQuad("BaseHeightMap", patchSize, size + 1, heightmap.getHeightMap());
-    terrain.setMaterial(tGen.getTerrainMaterial());
     
-    rootNode.attachChild(terrain);
+    tp = new MyTerrainPatch("a", size, new Vector3f(2,1,2), heightData, new Vector3f(-size,0,-size));
+    tp.setMaterial(tGen.getTerrainMaterial());
+    rootNode.attachChild(tp);
+
   }
   
   public void attach() {
@@ -74,17 +71,20 @@ public class HeightMapEditor {
     rootNode.removeFromParent();
     doApply();
     world.updateTerrain();
+    tp = null;
   }
 
   private void doApply() {
     
-    if(terrain == null) {
+    if(tp == null) {
       return;
     }
     
-    float[] heightData = terrain.getHeightMap();
+    //float[] heightData = terrain.getHeightMap();
+    float[] heightData = tp.getHeightMap();
     float[] result = new float[size * size];
-    
+
+    //TODO: Array copy ok now??
     //just chopping off last column and last row as
     //the terrain adds one for some reason
     int sourceIndex = 0 ;
@@ -101,9 +101,9 @@ public class HeightMapEditor {
     
     world.getTerrainGenerator().getBaseHeightMap().setHeightData(result);
   }
-
-  public TerrainQuad getTerrain() {
-    return terrain;
+  
+  public MyTerrainPatch getTerrain() {
+    return tp;
   }
 
 
